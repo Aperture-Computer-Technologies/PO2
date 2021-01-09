@@ -10,8 +10,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Process Abseil's CMake build system
 # add_subdirectory(
 #     ./src/includes/3thparty/abseil-cpp # example
-
 #                 )
+
+# check the cmake stuff at the json lib you're using for cmake help
 
 
 add_executable(hash-test 
@@ -19,6 +20,7 @@ add_executable(hash-test
                 ./test/hash-test.cpp
                 ./test/random.h
                 ./test/hash-test.h
+                ./external/json.hpp
 )
 
 # target_link_libraries(studproject 
