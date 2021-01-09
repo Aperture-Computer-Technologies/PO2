@@ -4,9 +4,6 @@
 
 #include <functional>
 
-size_t example(int key, int size){
-	return key % size;
-
-}
+size_t example(int key, int size) { return key % size; }
 
 #endif
