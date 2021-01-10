@@ -4,4 +4,8 @@
 
 #include "./hash-test.h"
 
-int main() { hash_test_suite(example, "naive_modulo"); }
+int main()
+{
+    hash_test_suite(example, "naive_modulo");
+    hash_test_suite(dumb_bitmask, "naive_bitmask");
+}

@@ -23,7 +23,7 @@
  * @return double probability that it is not random. So the closer the result is
  * to 0, the better
  */
-double chi_squared_test_rand(std::function<size_t(int, int)> hasher, int size, bool iter = false)
+inline double chi_squared_test_rand(std::function<size_t(int, int)> hasher, int size, bool iter = false)
 {
     int total_keys = 20 * size;
     std::vector<int> bins(size);
@@ -38,7 +38,7 @@ double chi_squared_test_rand(std::function<size_t(int, int)> hasher, int size, b
 
     double variance
         = std::accumulate(bins.begin(), bins.end(), 0.0, [&](auto &acc, auto i) { return ((i - 20) * (i - 20)) + acc; })
-          / 20;
+          / 20.0;
     boost::math::chi_squared chi_sq_distr(size - 1);
     double prob = boost::math::cdf(chi_sq_distr, variance);
     return prob;
@@ -51,10 +51,11 @@ double chi_squared_test_rand(std::function<size_t(int, int)> hasher, int size, b
  * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative = false
  * @return something between 0.95 and 1.05 if the hashfunction is uniform
  */
-double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int size, bool iter = false)
+inline double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int size, bool iter = false)
 {
     int total_keys = 20 * size;
     std::vector<int> bins(size);
+
     for (int i = 0; i < total_keys; i++) {
         if (iter) {
             bins[hasher(i, size)]++;
@@ -63,9 +64,14 @@ double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int size, b
             bins[hasher(gen_int(), size)]++;
         }
     }
-    double top
-        = std::accumulate(bins.begin(), bins.end(), 0, [&](auto &acc, auto i) { return (i * (i + 1) / 2.0) + acc; });
-    double bottom = (total_keys * (total_keys + 2 * size - 1)) / (2 * size);
+    // double top = 0.0;
+    // for (const auto&x : bins){
+    //     top += (x * (x+1));
+    // }
+    // top = top / 2.0;
+    double top = std::accumulate(
+        bins.begin(), bins.end(), 0.0, [&](auto &acc, const auto i) { return (i * (i + 1.0) / 2.0) + acc; });
+    double bottom = (total_keys * (total_keys + 2.0 * size - 1.0)) / (2.0 * size);
     return top / bottom;
 }
 
@@ -78,7 +84,7 @@ double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int size, b
  * = false
  * @return
  */
-std::vector<int> bit_histogram(std::function<size_t(int, int)> hasher, int size, bool iter = false)
+inline std::vector<int> bit_histogram(std::function<size_t(int, int)> hasher, int size, bool iter = false)
 {
     int total_keys = 20 * size;
     std::vector<int> count(32);
@@ -99,14 +105,14 @@ std::vector<int> bit_histogram(std::function<size_t(int, int)> hasher, int size,
 }
 /**
  * Inserts into buckets, returns a vector with the number of items in a bucket
- * this will be used for plotting purposes (skiena 6.3, etc) and others
+ * this will be used for plotting purposes (distribution plot non skiena) and others
  * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
  * = false
  * @return
  */
-std::vector<int> inserter(std::function<size_t(int, int)> hasher, int size, bool iter = false)
+inline std::vector<int> inserter(std::function<size_t(int, int)> hasher, int size, bool iter = false)
 {
-    int total_keys = 20 * size;
+    int total_keys = 100 * size;
     std::vector<int> bins(size);
     for (int i = 0; i < total_keys; i++) {
         if (iter) {
@@ -120,11 +126,27 @@ std::vector<int> inserter(std::function<size_t(int, int)> hasher, int size, bool
 }
 
 /**
+ * Inserts into buckets, returns a vector with the number of items in a bucket
+ * this will be used for plotting purposes (skiena 6.2, etc) and others
+ * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
+ * = false
+ * @return
+ */
+inline std::vector<int> skiena(std::function<size_t(int, int)> hasher, int size)
+{
+    std::vector<int> bins(size);
+    for (int i = 0; i < size; i++) {
+        bins[hasher(gen_int(), size)]++;
+    }
+    return bins;
+}
+
+/**
  * benchmarks the speed of the hashfunction
  * @param std::function<size_t(int,int)> hashfunction
  * @return double representing number of nanosecs on average
  */
-double bench(std::function<size_t(int, int)> hasher, int size)
+inline double bench(std::function<size_t(int, int)> hasher, int size)
 {
     using namespace std::chrono;
     time_point<steady_clock> start = steady_clock::now();
@@ -135,7 +157,7 @@ double bench(std::function<size_t(int, int)> hasher, int size)
     }
     time_point<steady_clock> end = steady_clock::now();
     auto duration = duration_cast<nanoseconds>(end - start);
-    return duration.count() / size;
+    return duration.count() / (size * 1.0);
 }
 
 /**
@@ -144,7 +166,7 @@ double bench(std::function<size_t(int, int)> hasher, int size)
  * @param std::function<size_t(int,int)> hashfunction, name
  * @return
  */
-void hash_test_suite(std::function<size_t(int, int)> hasher, std::string name)
+inline void hash_test_suite(std::function<size_t(int, int)> hasher, std::string name)
 {
     int prime = 1009;
     int two = 1024;
@@ -154,11 +176,12 @@ void hash_test_suite(std::function<size_t(int, int)> hasher, std::string name)
     std::cout << "benchmarking time\n";
     result["avg_time"] = bench(hasher, 50000);
 
-    std::cout << "doing chi squared tests \n";
+    std::cout << "doing chi squared tests(wiki) \n";
     result["chi_wiki_prime_iter"] = chi_squared_test_wiki(hasher, prime, true);
     result["chi_wiki_prime_rand"] = chi_squared_test_wiki(hasher, prime, false);
     result["chi_wiki_two_iter"] = chi_squared_test_wiki(hasher, two, true);
     result["chi_wiki_two_rand"] = chi_squared_test_wiki(hasher, two, false);
+    std::cout << "doing other chi squared tests \n";
     result["chi_other_prime_iter"] = chi_squared_test_rand(hasher, prime, true);
     result["chi_other_prime_rand"] = chi_squared_test_rand(hasher, prime, false);
     result["chi_other_two_iter"] = chi_squared_test_rand(hasher, two, true);
@@ -169,12 +192,16 @@ void hash_test_suite(std::function<size_t(int, int)> hasher, std::string name)
     result["bithistogram_prime_rand"] = bit_histogram(hasher, prime, false);
     result["bithistogram_two_iter"] = bit_histogram(hasher, two, true);
     result["bithistogram_two_rand"] = bit_histogram(hasher, two, false);
-    std::cout << result.dump(2);
+    std::cout << result;
     std::cout << "doing raw inserts\n";
     result["raw_prime_iter"] = inserter(hasher, prime, true);
     result["raw_prime_rand"] = inserter(hasher, prime, false);
     result["raw_two_iter"] = inserter(hasher, two, true);
     result["raw_two_rand"] = inserter(hasher, two, false);
+
+    std::cout << "doing raw inserts(skiena)\n";
+    result["skiena_prime"] = skiena(hasher, prime);
+    result["skiena_two"] = skiena(hasher, two);
     std::ofstream outputfile("./test/hashes.json", std::ios_base::app);
     outputfile << result << "\n";
 }
