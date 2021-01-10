@@ -4,8 +4,7 @@
   AlignTrailingComments: 'true'
   AllowAllParametersOfDeclarationOnNextLine: 'false'
   AlwaysBreakTemplateDeclarations: 'No'
-  BreakBeforeBraces: Attach
-  ColumnLimit: '100'
+  ColumnLimit: '120'
   ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
   IncludeBlocks: Regroup
   IndentPPDirectives: AfterHash
@@ -13,4 +12,6 @@
   NamespaceIndentation: All
   BreakBeforeBinaryOperators: All
   BreakBeforeTernaryOperators: 'true'
+  BreakBeforeBraces: Stroustrup
+  BinPackArguments: false
 ...
