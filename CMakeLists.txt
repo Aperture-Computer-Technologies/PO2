@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 project(PO2 VERSION 1.0
                   DESCRIPTION "project ontwerp 2"
                   LANGUAGES CXX)
