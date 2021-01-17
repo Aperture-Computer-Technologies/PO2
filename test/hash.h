@@ -15,5 +15,9 @@ size_t dumb_bitmask(int key, int size)
     else {
         return ans;
     }
+}// Use folding on a string, summed 4 bytes at a time
+int sfold(int s, int M) {
+ 
+ return (s * 256) % M;
 }
 #endif
