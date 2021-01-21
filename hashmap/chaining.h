@@ -51,11 +51,12 @@ void chaining::insert(std::initializer_list<int> list)
     int& x = operator[](key);
     x = val;
 }
-void chaining::erase(int key){
+void chaining::erase(int key)
+{
     size_t bucket = hasher(key);
     auto b_location = std::find(keystorage[bucket].begin(), keystorage[bucket].end(), key);
     int offset = (b_location - keystorage[bucket].begin());
-    if (b_location == keystorage[bucket].end()){
+    if (b_location == keystorage[bucket].end()) {
         return;
     }
     else {
