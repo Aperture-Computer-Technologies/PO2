@@ -41,6 +41,12 @@ add_executable(hash-test
                 ./external/json.hpp
 )
 
+add_executable(cuckoo-impl
+ ./hashmap_implement/cuckoo_hashing.h
+ ./hashmap_implement/cuckoo.cpp
+ 
+)
+
 # target_link_libraries(studproject 
 # #                         absl::hash 
 
