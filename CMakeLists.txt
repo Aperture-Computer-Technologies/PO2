@@ -39,18 +39,18 @@ set(CLANG_TIDY_SUPPRESS_CXX
 # check the cmake stuff at the json lib you're using for cmake help
 
 
-# add_executable(hash-test 
-# ./test/hash.h
-# ./test/hash-test.cpp
-# ./test/random.h
-# ./test/hash-test.h
-# ./external/json.hpp
-# )
+add_executable(hash-test 
+./test/hash.h
+./test/hash-test.cpp
+./tools/random.h
+./test/hash-test.h
+./external/json.hpp
+)
 
 
 add_executable(chaining
-${PROJECT_SOURCE_DIR}/hashmap/chaining.h
-${PROJECT_SOURCE_DIR}/hashmap/chaining.cpp
+${PROJECT_SOURCE_DIR}/chaining_hashmap/chaining.h
+${PROJECT_SOURCE_DIR}/chaining_hashmap/chaining.cpp
 )
 
 # target_link_libraries(studproject 
