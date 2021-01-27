@@ -7,14 +7,12 @@ Current sprint:
 
 
 implementeren doe je zo:
-branch van dev, creer een folder "yourhashmapname_hashmap"
+branch van dev, creer een header file met je implementatie in ./hashmap_implementations
+en modify de ./test_hashmap_test.cpp zoals het gedaan is voor chaining.
 om te builden, maak een target in cmakelists.txt
-
 ```cmake
-add_executable(exec_name
-${PROJECT_SOURCE_DIR}/yourhashmapname_hashmap/yourfilenames.h
-${PROJECT_SOURCE_DIR}/yourhashmapname_hashmap/filename.cpp
+add_executable(yourimplementation-test
+${PROJECT_SOURCE_DIR}/hashmap_implementations/yourheader.h
+${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
 )
 ```
-
-tests zijn er nog niet, maar wanneer ze er zijn, maak een target die je hashmap header en test file includen.
