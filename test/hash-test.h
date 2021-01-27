@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "../external/json.hpp"
-#include "random.h"
+#include "./../tools/random.h"
 
 /**
  * Chi squared test as described at
