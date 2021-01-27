@@ -56,7 +56,7 @@ void chaining::insert(std::initializer_list<int> list)
     int& x = operator[](key);
     x = val;
     size++;
-    if (size/buckets > max_loadfactor){
+    if (size / buckets > max_loadfactor) {
         auto_rehash();
     }
 }
@@ -94,4 +94,17 @@ void chaining::auto_rehash()
     keystore = new_keystore;
     valuestore = neW_valuestore;
     buckets = new_buckets;
+}
+
+void chaining::reserve(int n)
+{
+    int number_buckets = (n / max_loadfactor) + 1;
+    keystore = vector<vector<int>>();
+    for (auto& x : keystore) {
+        x = vector<int>(max_loadfactor);
+    }
+    valuestore = vector<vector<int>>();
+    for (auto& x : valuestore) {
+        x = vector<int>(max_loadfactor);
+    }
 }

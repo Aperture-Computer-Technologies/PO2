@@ -48,9 +48,10 @@ add_executable(hash-test
 )
 
 
-add_executable(chaining
-${PROJECT_SOURCE_DIR}/chaining_hashmap/chaining.h
-${PROJECT_SOURCE_DIR}/chaining_hashmap/chaining.cpp
+
+add_executable(chaining-test
+${PROJECT_SOURCE_DIR}/hashmap_implementations/chaining.h
+${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
 )
 
 # target_link_libraries(studproject 
