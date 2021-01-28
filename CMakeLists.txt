@@ -54,6 +54,12 @@ ${PROJECT_SOURCE_DIR}/hashmap_implementations/chaining.h
 ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
 )
 
+add_executable(cuckoo-impl
+ ./hashmap_implement/cuckoo_hashing.h
+ ./hashmap_implement/cuckoo.cpp
+ 
+)
+
 # target_link_libraries(studproject 
 # #                         absl::hash 
 
