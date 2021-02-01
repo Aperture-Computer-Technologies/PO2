@@ -35,9 +35,12 @@ chaining::chaining()
 }
 
 size_t chaining::hasher(int key) { return key % buckets; }
+
 int& chaining::operator[](const int& key)
 {
+    cout << "BBBBBB";
     size_t bucket = hasher(key);
+    cout << bucket;
     auto b_location = std::find(keystore[bucket].begin(), keystore[bucket].end(), key);
     int ofset = (b_location - keystore[bucket].begin());
     if (b_location == keystore[bucket].end()) {  // if key doesn't exist
@@ -51,14 +54,15 @@ int& chaining::operator[](const int& key)
 
 void chaining::insert(std::initializer_list<int> list)
 {
+    cout << "AAAAAAAAA";
     int key = *list.begin();
     int val = *(list.begin() + 1);
     int& x = operator[](key);
     x = val;
     size++;
-    if (size / buckets > max_loadfactor) {
-        auto_rehash();
-    }
+    // if (size / buckets > max_loadfactor) {
+    //     auto_rehash();
+    // }
 }
 void chaining::erase(int key)
 {

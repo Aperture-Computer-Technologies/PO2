@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "./../tools/random.h"
+#include "immintrin.h"  // for AVX
+#include "nmmintrin.h"  // for SSE4.2
 
 using std::cerr;
 using std::cout;

@@ -41,24 +41,41 @@ set(CLANG_TIDY_SUPPRESS_CXX
 
 add_executable(hash-test 
 ./test/hash.h
-./test/hash-test.cpp
-./tools/random.h
-./test/hash-test.h
-./external/json.hpp
-)
-
+        ./test/hash-test.cpp
+        ./tools/random.h
+        ./test/hash-test.h
+        ./external/json.hpp
+        )
 
 
 add_executable(chaining-test
-${PROJECT_SOURCE_DIR}/hashmap_implementations/chaining.h
-${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-)
+        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
+        hashmap_implementations/chaining-simd.h
+        )
+
+add_executable(snippet_test
+        ./hashmap_implementations/snippet.cpp
+        )
 
 add_executable(cuckoo-impl
- ./hashmap_implement/cuckoo_hashing.h
- ./hashmap_implement/cuckoo.cpp
- 
-)
+        ./hashmap_implement/cuckoo_hashing.h
+        ./hashmap_implement/cuckoo.cpp
+
+        )
+
+add_executable(benchmarks
+        ./benchmarks/includes/generator.h
+        ./benchmarks/generator.cpp
+        ./benchmarks/includes/tests.h
+        ./benchmarks/includes/aggregate_tests.h
+        ./benchmarks/main.cpp
+        )
+
+target_link_libraries(benchmarks
+        pthread
+        dl
+        stdc++fs
+        )
 
 # target_link_libraries(studproject 
 # #                         absl::hash 
