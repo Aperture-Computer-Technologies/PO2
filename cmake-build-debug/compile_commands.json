@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/hash-test.dir/test/hash-test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/LP-test2.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -O3 -flto=thin -march=native -g   -std=gnu++17 -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp"
+}
+]

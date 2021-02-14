@@ -1,0 +1,1 @@
+/usr/bin/clang++  -O3 -flto=thin -march=native -g   CMakeFiles/hash-test.dir/test/hash-test.cpp.o  -o hash-test 

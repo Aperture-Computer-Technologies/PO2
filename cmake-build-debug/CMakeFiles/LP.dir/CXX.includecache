@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/LPmap.cpp
+bits/stdint-intn.h
+-
+algorithm
+-
+iostream
+-
+iterator
+-
+list
+-
+vector
+-
+../tools/random.h
+/home/MassiveAtoms/Desktop/PO2/tools/random.h
+
+/home/MassiveAtoms/Desktop/PO2/tools/random.h
+random
+-
+string
+-
+

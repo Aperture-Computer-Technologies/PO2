@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp
+./cuckoo_hashing.h
+/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo_hashing.h
+
+/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo_hashing.h
+bits/stdc++.h
+-
+
