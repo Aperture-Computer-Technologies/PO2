@@ -45,6 +45,7 @@ add_executable(hash-test
 ./tools/random.h
 ./test/hash-test.h
 ./external/json.hpp
+
 )
 
 
@@ -55,8 +56,8 @@ ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
 )
 
 add_executable(cuckoo-impl
- ./hashmap_implement/cuckoo_hashing.h
- ./hashmap_implement/cuckoo.cpp
+${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
+ ./hashmap_implement/cuckoo_hashing_weis_Api.h
  
 )
 
