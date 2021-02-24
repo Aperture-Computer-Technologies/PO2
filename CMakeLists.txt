@@ -48,12 +48,12 @@ add_executable(hash-test
         )
 
 # Sagar's Linear Probing
-add_executable(LP-test
-        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/Pmap.h)
+#add_executable(LP-test2
+#        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
+#        hashmap_implementations/Pmap.h)
 
 # Sagar's Linear Probing
-add_executable(LP-test2
+add_executable(LP-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
         hashmap_implementations/LPmap.h)
 

@@ -144,17 +144,17 @@ benchmarks/fast:
 .PHONY : benchmarks/fast
 
 #=============================================================================
-# Target rules for targets named cuckoo-impl
+# Target rules for targets named hash-test
 
 # Build rule for target.
-cuckoo-impl: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuckoo-impl
-.PHONY : cuckoo-impl
+hash-test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hash-test
+.PHONY : hash-test
 
 # fast build rule for target.
-cuckoo-impl/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/build
-.PHONY : cuckoo-impl/fast
+hash-test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/build
+.PHONY : hash-test/fast
 
 #=============================================================================
 # Target rules for targets named LP-test
@@ -170,32 +170,6 @@ LP-test/fast:
 .PHONY : LP-test/fast
 
 #=============================================================================
-# Target rules for targets named hash-test
-
-# Build rule for target.
-hash-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hash-test
-.PHONY : hash-test
-
-# fast build rule for target.
-hash-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/build
-.PHONY : hash-test/fast
-
-#=============================================================================
-# Target rules for targets named LP-test2
-
-# Build rule for target.
-LP-test2: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 LP-test2
-.PHONY : LP-test2
-
-# fast build rule for target.
-LP-test2/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test2.dir/build.make CMakeFiles/LP-test2.dir/build
-.PHONY : LP-test2/fast
-
-#=============================================================================
 # Target rules for targets named snippet_test
 
 # Build rule for target.
@@ -207,6 +181,19 @@ snippet_test: cmake_check_build_system
 snippet_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet_test.dir/build.make CMakeFiles/snippet_test.dir/build
 .PHONY : snippet_test/fast
+
+#=============================================================================
+# Target rules for targets named cuckoo-impl
+
+# Build rule for target.
+cuckoo-impl: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuckoo-impl
+.PHONY : cuckoo-impl
+
+# fast build rule for target.
+cuckoo-impl/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/build
+.PHONY : cuckoo-impl/fast
 
 benchmarks/generator.o: benchmarks/generator.cpp.o
 
@@ -350,7 +337,6 @@ test/hashmap_test.o: test/hashmap_test.cpp.o
 # target to build an object file
 test/hashmap_test.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test2.dir/build.make CMakeFiles/LP-test2.dir/test/hashmap_test.cpp.o
 .PHONY : test/hashmap_test.cpp.o
 
 test/hashmap_test.i: test/hashmap_test.cpp.i
@@ -360,7 +346,6 @@ test/hashmap_test.i: test/hashmap_test.cpp.i
 # target to preprocess a source file
 test/hashmap_test.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test2.dir/build.make CMakeFiles/LP-test2.dir/test/hashmap_test.cpp.i
 .PHONY : test/hashmap_test.cpp.i
 
 test/hashmap_test.s: test/hashmap_test.cpp.s
@@ -370,7 +355,6 @@ test/hashmap_test.s: test/hashmap_test.cpp.s
 # target to generate assembly for a file
 test/hashmap_test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test2.dir/build.make CMakeFiles/LP-test2.dir/test/hashmap_test.cpp.s
 .PHONY : test/hashmap_test.cpp.s
 
 # Help Target
@@ -382,7 +366,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... LP-test"
-	@echo "... LP-test2"
 	@echo "... benchmarks"
 	@echo "... cuckoo-impl"
 	@echo "... hash-test"

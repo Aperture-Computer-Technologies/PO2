@@ -52,7 +52,7 @@ class LPmap {
   private:
     int32_t DELETED_STATE = -1;  // set hashcode to this if deleted
     int32_t EMPTY_STATE = 0;
-    int32_t myHash(const int& x) const;
+    [[nodiscard]] int32_t myHash(const int& x) const;
     void hasher_state_gen();
     int32_t calc_pos(const int& key) const;
     int32_t prober(const int& key) const;
@@ -60,13 +60,14 @@ class LPmap {
     void rehash();
     vector<size_t> hash_state;
     vector<std::pair<int, int>> array;  // hash, value
-    int currentSize;
+    int32_t currentSize;
 };
 
 // constructor
 LPmap::LPmap(int size) : array(size) {
     makeEmpty();
     hasher_state_gen();
+    currentSize = size;
 }
 
 // "deletes" all elements (lazy)
@@ -84,9 +85,15 @@ int32_t LPmap::calc_pos(const int& key) const { return myHash(key) % currentSize
 // probes where the element should be located at, with probing
 int32_t LPmap::prober(const int& key) const
 {
-    int hash = myHash(key);
-    int position = hash % currentSize;
+    int32_t hash = myHash(key);
+    cout << "probing loc for:" << key << "\n";
+    cout << "hash1: " << hash << ", currensize: " << currentSize << "\n";
+    cout << "hash2: " << myHash(key) << "\n";
+    cout << "hash3: " << myHash(key) - 200 << "\n";
+    int32_t position = hash % currentSize;
+    cout << "position: " << position << " should be: " << myHash(key) % 127<< "\n\n\n";
     int count = 0;
+
     while (array[position].first != EMPTY_STATE && array[position].first != hash) {
         position++;
         count++;
@@ -198,12 +205,12 @@ void LPmap::hasher_state_gen()
 
 // calcs hash, modulo it later
 // tabulation hash
-int LPmap::myHash(const int& key) const
+int32_t LPmap::myHash(const int& key) const
 {
     static std::hash<int> hf;
-    size_t hash = hf(key);
+    int32_t hash = hf(key);
     int32_t final_hash;
-    size_t index;
+    int32_t index;
     for (int i = 0; i < sizeof(hash); i++) {
         index += hash & 0x00000000000000ff;
         hash = hash >> 8;
