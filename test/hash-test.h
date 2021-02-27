@@ -18,7 +18,7 @@
 /**
  * Chi squared test as described at
  * http://staffwww.fullcoll.edu/aclifton/cs133/assignment5.html
- * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
+ * @param std::function<size_t(int,int)> hashfunction, int inserted, bool iterative
  * is false
  * @return double probability that it is not random. So the closer the result is
  * to 0, the better
@@ -48,7 +48,7 @@ inline double chi_squared_test_rand(std::function<size_t(int, int)> hasher, int 
  * Chi squared test as described at
  * https://en.wikipedia.org/wiki/Hash_function#Testing_and_measurement
  *
- * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative = false
+ * @param std::function<size_t(int,int)> hashfunction, int inserted, bool iterative = false
  * @return something between 0.95 and 1.05 if the hashfunction is uniform
  */
 inline double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int size, bool iter = false)
@@ -80,7 +80,7 @@ inline double chi_squared_test_wiki(std::function<size_t(int, int)> hasher, int 
  * land on one given random input. Returns a vector with the number of times it
  * has been 1. It __should__ return the chance that that number is random,
  * probably with the binominal distr but i need to check on stats stuff first
- * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
+ * @param std::function<size_t(int,int)> hashfunction, int inserted, bool iterative
  * = false
  * @return
  */
@@ -106,7 +106,7 @@ inline std::vector<int> bit_histogram(std::function<size_t(int, int)> hasher, in
 /**
  * Inserts into buckets, returns a vector with the number of items in a bucket
  * this will be used for plotting purposes (distribution plot non skiena) and others
- * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
+ * @param std::function<size_t(int,int)> hashfunction, int inserted, bool iterative
  * = false
  * @return
  */
@@ -128,7 +128,7 @@ inline std::vector<int> inserter(std::function<size_t(int, int)> hasher, int siz
 /**
  * Inserts into buckets, returns a vector with the number of items in a bucket
  * this will be used for plotting purposes (skiena 6.2, etc) and others
- * @param std::function<size_t(int,int)> hashfunction, int size, bool iterative
+ * @param std::function<size_t(int,int)> hashfunction, int inserted, bool iterative
  * = false
  * @return
  */

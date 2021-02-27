@@ -80,15 +80,15 @@ include CMakeFiles/snippet_test.dir/flags.make
 CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o: CMakeFiles/snippet_test.dir/flags.make
 CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o: ../hashmap_implementations/snippets.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp
 
 CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp > CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp > CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.i
 
 CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.s
 
 # Object files for target snippet_test
 snippet_test_OBJECTS = \

@@ -10,4 +10,6 @@ CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/includes/generato
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/includes/prepare.h
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/includes/tests.h
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/main.cpp
+CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../hashmap_implementations/LPmap.h
+CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../tools/random.h
 

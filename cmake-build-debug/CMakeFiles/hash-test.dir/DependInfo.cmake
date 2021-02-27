@@ -6,7 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp" "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles/hash-test.dir/test/hash-test.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "Clang")
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

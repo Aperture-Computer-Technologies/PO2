@@ -23,8 +23,8 @@ basic functionality is like this:
 1. we create a vector to store the times
 2. we create and populate vectors for keys that will be used for the tests
 3. create the hashmap.
-4. call prepare(hashmap, size)
-5. populate the hashmap with size - 10 k,v pairs
+4. call prepare(hashmap, inserted)
+5. populate the hashmap with inserted - 10 k,v pairs
 6. benchmark the vector access time, which will be subtracted later
 7. insert 10k keys(from insert_keys) and time it
 8. lookup 10k keys(from sample_keys) and time it

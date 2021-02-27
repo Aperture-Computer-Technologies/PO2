@@ -5,6 +5,7 @@
 #include "./../tools/random.h"
 #include "immintrin.h"  // for AVX
 #include "nmmintrin.h"  // for SSE4.2
+#include <unordered_set>
 
 using std::cerr;
 using std::cout;
@@ -33,9 +34,15 @@ template <class CustomHashmap>
 bool single_insert(CustomHashmap a)
 {
     CustomHashmap testmap;
-    int key = gen_int();
+    if (testmap.size() != 0){
+        return false;
+    }
+    int key = gen_integer();
     testmap.insert({key, key + 1});
     if (testmap[key] != key + 1) {
+        return false;
+    }
+    if (testmap.size() != 1){
         return false;
     }
     return true;
@@ -46,7 +53,7 @@ bool single_insert_with_reserve(CustomHashmap a)
 {
     CustomHashmap testmap;
     testmap.reserve(1);
-    int key = gen_int();
+    int key = gen_integer();
     testmap.insert({key, key + 1});
     if (testmap[key] != key + 1) {
         return false;
@@ -62,14 +69,23 @@ bool insert_n(CustomHashmap b, int n)
 {
     vector<int> keys(n);
     CustomHashmap testmap;
-    std::generate(keys.begin(), keys.end(), gen_int);
+    std::generate(keys.begin(), keys.end(), gen_integer);
+    std::unordered_set<int> unique{};
     for (const int &x : keys) {
         testmap.insert({x, x + 1});
+        unique.insert(x);
+
     }
     for (const int &x : keys) {
         if (testmap[x] != x + 1) {
+            cout << "buckets:" << testmap.bucket_count() << " inserted: " << testmap.size() << "\n";
+
             return false;
         }
+    }
+
+    if (testmap.size() != unique.size()){
+        return false;
     }
 
     return true;
@@ -79,16 +95,22 @@ template <class CustomHashmap>
 bool insert_n_with_reserve(CustomHashmap b, int n)
 {
     vector<int> keys(n);
+    std::unordered_set<int>unique(n);
     CustomHashmap testmap;
     testmap.reserve(n);
-    std::generate(keys.begin(), keys.end(), gen_int);
+    std::generate(keys.begin(), keys.end(), gen_integer);
     for (const int &x : keys) {
         testmap.insert({x, x + 1});
+        unique.insert(x);
     }
     for (const int &x : keys) {
         if (testmap[x] != x + 1) {
+            cout << "buckets:" << testmap.bucket_count() << " inserted: " << testmap.size() << "\n";
             return false;
         }
+    }
+    if (testmap.size() != unique.size()){
+        return false;
     }
 
     return true;
@@ -100,7 +122,7 @@ template <class CustomHashmap>
 bool insert_existing(CustomHashmap a)
 {
     CustomHashmap testmap;
-    int key = gen_int();
+    int key = gen_integer();
     testmap.insert({key, key + 1});
     testmap.insert({key, key + 2});
     if (testmap[key] != key + 1) {
@@ -116,7 +138,7 @@ template <class CustomHashmap>
 bool overwrite_existing(CustomHashmap a)
 {
     CustomHashmap testmap;
-    int key = gen_int();
+    int key = gen_integer();
     testmap.insert({key, key + 1});
     testmap[key] = key + 2;
     if (testmap[key] != key + 2) {
@@ -130,7 +152,7 @@ template <class CustomHashmap>
 bool access_nonexising(CustomHashmap h)
 {
     CustomHashmap testmap;
-    int key{gen_int()};
+    int key{gen_integer()};
     testmap.insert({key, key});
     if (testmap[key + 1] != 0) {
         return false;
@@ -141,7 +163,7 @@ template <class CustomHashmap>
 bool single_delete(CustomHashmap h)
 {
     CustomHashmap testmap;
-    int key{gen_int()};
+    int key{gen_integer()};
     testmap.insert({key, key});
     testmap.erase(key);
     if (testmap[key] != 0) {
@@ -155,13 +177,21 @@ bool delete_n(CustomHashmap b, int n)
 {
     vector<int> keys(n);
     CustomHashmap testmap;
-    std::generate(keys.begin(), keys.end(), gen_int);
+    std::unordered_set<int> unique(n);
+    std::generate(keys.begin(), keys.end(), gen_integer);
     for (const int &x : keys) {
         testmap.insert({x, x + 1});
+        unique.insert(x);
     }
-    std::shuffle(keys.begin(), keys.end(), generator);
+    if (testmap.size() != unique.size()){
+        return false;
+    }
+    std::shuffle(keys.begin(), keys.end(), gener);
     for (const int &x : keys) {
         testmap.erase(x);
+    }
+    if (testmap.size() != 0){
+        return false;
     }
     for (const int &x : keys) {
         if (testmap[x] != 0) {
@@ -177,11 +207,11 @@ bool delete_n_with_reserve(CustomHashmap b, int n)
     vector<int> keys(n);
     CustomHashmap testmap;
     testmap.reserve(n);
-    std::generate(keys.begin(), keys.end(), gen_int);
+    std::generate(keys.begin(), keys.end(), gen_integer);
     for (const int &x : keys) {
         testmap.insert({x, x + 1});
     }
-    std::shuffle(keys.begin(), keys.end(), generator);
+    std::shuffle(keys.begin(), keys.end(), gener);
     for (const int &x : keys) {
         testmap.erase(x);
     }
@@ -200,91 +230,91 @@ void hashmap_test_suite(CustomHashmap h)
         std::cout << "creation Passed\n";
     }
     else {
-        cerr << "creation Failed!\n";
+        std::cout << "\t\tcreation Failed!\n";
     }
 
     if (creation_reserve(h)) {
         std::cout << "Creation with reserve Passed\n";
     }
     else {
-        cerr << "Creation with reserve  Failed!\n";
+        std::cout  << "\t\tCreation with reserve  Failed!\n";
     }
     if (single_insert(h)) {
         std::cout << "Single insert Passed\n";
     }
     else {
-        cerr << "Single insert Failed!\n";
+        std::cout  << "\t\tSingle insert Failed!\n";
     }
     if (single_insert_with_reserve(h)) {
         std::cout << "Single insert with reserve Passed\n";
     }
     else {
-        cerr << "Single insert with reserve Failed!\n";
+        std::cout  << "\t\tSingle insert with reserve Failed!\n";
     }
     if (insert_n(h, 10)) {
         std::cout << "inserting 10 keys Passed\n";
     }
     else {
-        cerr << "inserting 10 keys  Failed!\n";
+        std::cout  << "\t\tinserting 10 keys  Failed!\n";
     }
     if (insert_n(h, 1000)) {
         std::cout << "inserting 1000 keys Passed\n";
     }
     else {
-        cerr << "inserting 1000 keys  Failed!\n";
+        std::cout  << "\t\tinserting 1000 keys  Failed!\n";
     }
     if (insert_n_with_reserve(h, 10)) {
         std::cout << "Inserting 10 with reserve Passed\n";
     }
     else {
-        cerr << "Inserting 10 with reserve  Failed!\n";
+        std::cout  << "\t\tInserting 10 with reserve  Failed!\n";
     }
     if (insert_n_with_reserve(h, 1000)) {
         std::cout << "Inserting 1000 with reserve Passed\n";
     }
     else {
-        cerr << "Inserting 1000 with reserve  Failed!\n";
+        std::cout  << "\t\tInserting 1000 with reserve  Failed!\n";
     }
     if (insert_existing(h)) {
         std::cout << "Inserting existing key Passed\n";
     }
     else {
-        cerr << "Inserting existing key Failed!\n";
+        std::cout  << "\t\tInserting existing key Failed!\n";
     }
     if (overwrite_existing(h)) {
         std::cout << "Overwriting existing Passed\n";
     }
     else {
-        cerr << "Overwriting existing Failed!, but that's ok for now.\n";
+        std::cout  << "\t\tOverwriting existing Failed!, but that's ok for now.\n";
     }
     if (access_nonexising(h)) {
         std::cout << "Access nonexisting Passed\n";
     }
     else {
-        cerr << "Access nonexisting Failed!\n";
+        std::cout  << "\t\tAccess nonexisting Failed!\n";
     }
     if (single_delete(h)) {
         std::cout << "Single Delete Passed\n";
     }
     else {
-        cerr << "Single Delete Failed!\n";
+        std::cout  << "\t\tSingle Delete Failed!\n";
     }
     if (delete_n(h, 10)) {
         std::cout << "Delete 10 keys Passed\n";
     }
     else {
-        cerr << "Delete 10 keys  Failed!\n";
+        std::cout  << "\t\tDelete 10 keys  Failed!\n";
     }
     if (delete_n(h, 1000)) {
         std::cout << "Delete 1000 keys Passed\n";
     }
     else {
-        cerr << "Delete 1000 keys  Failed!\n";
+        std::cout  << "\t\tDelete 1000 keys  Failed!\n";
     }
     if (delete_n_with_reserve(h, 10)) {
         std::cout << "reserve+Delete Passed\n";
     }
     else {
-        cerr << "Reserve+Delete Failed!\n";
+        std::cout  << "\t\tReserve+Delete Failed!\n";
     }
 }

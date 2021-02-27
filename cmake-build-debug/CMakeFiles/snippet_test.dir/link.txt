@@ -1,1 +1,1 @@
-/usr/bin/clang++  -O3 -flto=thin -march=native -g   CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o  -o snippet_test 
+/usr/bin/g++  -o3  -march=native -g   CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o  -o snippet_test 

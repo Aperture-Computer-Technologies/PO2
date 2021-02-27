@@ -9,7 +9,7 @@ project(PO2 VERSION 1.0
                   LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-O3 -flto=thin -march=native")
+set(CMAKE_CXX_FLAGS "-o3  -march=native")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CLANG_TIDY_CXX -checks=-*,

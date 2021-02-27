@@ -3,7 +3,7 @@
 
 // generates string to be used as a key
 std::string gen_string()
-{  // 90^size posibilities
+{  // 90^inserted posibilities
     std::string randomstring;
     for (int i = 0; i < 5; ++i) {
         randomstring += singlechar(generator);
@@ -12,7 +12,7 @@ std::string gen_string()
 }
 // gen strings that dont exist in the hashmap
 std::string gen_unsuccesfull_string()
-{  // 90^size posibilities
+{  // 90^inserted posibilities
     std::string randomstring;
     for (int i = 0; i < 4; ++i) {
         randomstring += singlechar(generator);  //

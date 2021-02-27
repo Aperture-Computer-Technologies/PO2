@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "./includes/3thparty/CLI11.hpp"
+#include "./../hashmap_implementations/LPmap.h"
 #include "./includes/aggregate_tests.h"
 // include your implementations
 
@@ -11,7 +12,7 @@ string choicetext
       "2. boost::unordered\n";
 
 // default arguments
-vector<int> hashmaps = {1, 2};
+vector<int> hashmaps = {1, 2,3};
 int runs = 1;
 int maxsize = 5000000;
 
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
     CLI::App app{"Hashmap benchmarks"};
     app.add_option("-i,--implementation", hashmaps, choicetext)->delimiter(',');
     app.add_option("-r,--runs", runs, "total runs for each map, default is 1");
-    app.add_option("-m, --maxsize", maxsize, "The max size of the hashmaps to test for. Default is 50 million.");
+    app.add_option("-m, --maxsize", maxsize, "The max inserted of the hashmaps to test for. Default is 50 million.");
     CLI11_PARSE(app, argc, argv);
     time_point<steady_clock> start_test = steady_clock::now();
     // calls int_test_aggregate and it's string version for different hashmaps
@@ -37,13 +38,16 @@ int main(int argc, char **argv)
         switch (i) {
             case 1: {
                 int_test_aggregate(std::unordered_map<int, int>{}, runs, maxsize);
-                string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize);
+//                string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize); // TODO: renable
                 break;
             }
             case 2: {
                 int_test_aggregate(boost::unordered_map<int, int>{}, runs, maxsize);
-                string_test_aggregate(boost::unordered_map<string, string>{}, runs, maxsize);
+//                string_test_aggregate(boost::unordered_map<string, string>{}, runs, maxsize); // TODO: reenable
                 break;
+            }
+            case 3: {
+                int_test_aggregate(LPmap{}, runs, maxsize);
             }
         }
 

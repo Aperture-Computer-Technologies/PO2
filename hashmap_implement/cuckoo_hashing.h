@@ -93,7 +93,7 @@ void printTable()
   
 /* function for Cuckoo-hashing keys 
  * keys[]: input array of keys 
- * n: size of input array */
+ * n: inserted of input array */
 void cuckoo(int keys[], int n) 
 { 
     // initialize hash tables to a dummy value (INT-MIN) 

@@ -5,8 +5,6 @@
 #ifndef PO2_CHAINING_SIMD_H
 #define PO2_CHAINING_SIMD_H
 
-#include <bits/stdint-intn.h>
-
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -38,36 +36,39 @@ class LPmap {
   public:
     explicit LPmap(int size = 101);
     ~LPmap(){};
-    void reserve(int size);                             // set size of the array
-    void insert(std::initializer_list<int> init_list);  // insert
+    void reserve(int size);                             // set inserted of the array
+    void insert(std::pair<int,int> init_list);  // insert
     int& operator[](const int& k);                      // lookup and if you can, insert
     int& operator[](int&& k);                           // lookup and if you can, insert
     void erase(int key);
-    int size;
-    double max_load = 0.5;
 
+
+    double max_load = 0.5;
+    void clear();
+    int32_t bucket_count(){return buckets;};
+    int32_t size(){return inserted;};
     bool contains(const int& key) const;
     void makeEmpty();
 
   private:
+    int32_t buckets; // buckets, regardless if it's empty
+    int32_t inserted; // actual inserted items
     int32_t DELETED_STATE = -1;  // set hashcode to this if deleted
     int32_t EMPTY_STATE = 0;
-    [[nodiscard]] int32_t myHash(const int& x) const;
+    int32_t myHash(const int& x) const; // movre bacvk to private
     void hasher_state_gen();
-    int32_t calc_pos(const int& key) const;
     int32_t prober(const int& key) const;
     void rehash(int size);
     void rehash();
     vector<size_t> hash_state;
     vector<std::pair<int, int>> array;  // hash, value
-    int32_t currentSize;
+    
 };
 
 // constructor
-LPmap::LPmap(int size) : array(size) {
+LPmap::LPmap(int size) : array(size), buckets{size}, inserted{0} {
     makeEmpty();
     hasher_state_gen();
-    currentSize = size;
 }
 
 // "deletes" all elements (lazy)
@@ -76,22 +77,18 @@ void LPmap::makeEmpty()
     for (auto& x : array) {
         x.first = EMPTY_STATE;
     }
+    inserted = 0;
 }
 
-// dont know if i need it
-// but calculates the position it should be inserted in without probing
-int32_t LPmap::calc_pos(const int& key) const { return myHash(key) % currentSize; }
+void LPmap::clear(){
+    makeEmpty();
+}
 
 // probes where the element should be located at, with probing
 int32_t LPmap::prober(const int& key) const
 {
     int32_t hash = myHash(key);
-    cout << "probing loc for:" << key << "\n";
-    cout << "hash1: " << hash << ", currensize: " << currentSize << "\n";
-    cout << "hash2: " << myHash(key) << "\n";
-    cout << "hash3: " << myHash(key) - 200 << "\n";
-    int32_t position = hash % currentSize;
-    cout << "position: " << position << " should be: " << myHash(key) % 127<< "\n\n\n";
+    int32_t position = hash % buckets;
     int count = 0;
 
     while (array[position].first != EMPTY_STATE && array[position].first != hash) {
@@ -112,19 +109,20 @@ bool LPmap::contains(const int& key) const
 }
 
 // insert
-void LPmap::insert(std::initializer_list<int> init_list)
+void LPmap::insert(std::pair<int,int> init_list) // key, val
 {
-    if (max_load < (size + 1) / currentSize) {
+    if (((inserted + 1) / (float)buckets) > max_load) {
         rehash();
     }
-    vector<int> access = {init_list}; // key, value = 0, 1
-    if (!contains(access[0])) {
-        auto pos = prober(access[0]);
-        if (pos - calc_pos(access[0]) > 10){
+    int32_t pos = prober(init_list.first);
+    if ( array[pos].first != myHash(init_list.first)) {
+
+        if (pos - (myHash(init_list.first) % buckets) > 10){
             rehash();
-            pos = prober(access[0]);
+            pos = prober(init_list.first);
         }
-        array[pos] = std::pair<int, int>{myHash(access[0]), access[1]};
+        array[pos] = std::pair<int, int>{myHash(init_list.first), init_list.second};
+        inserted++;
     }
 }
 
@@ -156,6 +154,7 @@ void LPmap::erase(int key)
 {
     auto loc = prober(key);
     array[loc].first = DELETED_STATE;
+    inserted--;
 }
 
 void LPmap::rehash(int size)
@@ -181,12 +180,12 @@ void LPmap::rehash(int size)
         }
     }
     array = new_arr;
-    currentSize = size;
+    buckets = size;
 }
 
 void LPmap::rehash()
 {
-    int size = helper::next_prime(currentSize);
+    int size = helper::next_prime(buckets);
     rehash(size);
 }
 
@@ -198,8 +197,8 @@ void LPmap::reserve(int size) { rehash(size); }
  */
 void LPmap::hasher_state_gen()
 {
-    std::vector<size_t> state(127);
-    std::generate(state.begin(), state.end(), gen_int);
+    std::vector<size_t> state(259);
+    std::generate(state.begin(), state.end(), gen_integer);
     hash_state = state;
 }
 
@@ -209,13 +208,14 @@ int32_t LPmap::myHash(const int& key) const
 {
     static std::hash<int> hf;
     int32_t hash = hf(key);
-    int32_t final_hash;
-    int32_t index;
+    int32_t final_hash = 0;
+    int32_t index =0;
     for (int i = 0; i < sizeof(hash); i++) {
-        index += hash & 0x00000000000000ff;
+        index = hash & 0x00000000000000ff;
         hash = hash >> 8;
         final_hash = final_hash ^ hash_state[index + i];
     }
+    if (final_hash < 0) {final_hash = final_hash * -1;}
     return final_hash;
 }
 

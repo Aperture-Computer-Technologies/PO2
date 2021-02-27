@@ -15,3 +15,39 @@ string_insert, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>
 string_succ_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>, boost::hash<std::string>, std::equal_to<std::__cxx11::basic_string<char>>, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>>>>', 220, 270, 317, 361, 355, 285, 319, 385, 366, 359, 442, 261, 457, 352, 525, 495, 598, 450
 string_nosucc_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>, boost::hash<std::string>, std::equal_to<std::__cxx11::basic_string<char>>, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>>>>', 333, 321, 289, 459, 401, 303, 589, 367, 384, 457, 518, 2438, 677, 413, 631, 599, 1067, 412
 string_delete, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>, boost::hash<std::string>, std::equal_to<std::__cxx11::basic_string<char>>, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char>>>>', 270, 394, 374, 502, 455, 418, 406, 430, 440, 515, 643, 1633, 597, 513, 587, 663, 762, 599
+int_insert, 'std::unordered_map<int, int>', 857, 1974, 1443, 1886, 744, 752, 1000, 819, 954
+int_succ_lookup, 'std::unordered_map<int, int>', 656, 563, 708, 767, 522, 458, 513, 505, 614
+int_nosucc_lookup, 'std::unordered_map<int, int>', 2468, 8158, 9103, 6672, 6291, 816, 7996, 856, 1028
+int_delete, 'std::unordered_map<int, int>', 824, 1344, 708, 1000, 650, 724, 720, 925, 980
+string_insert, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 917, 742, 781, 833, 906, 892, 842, 879, 940
+string_succ_lookup, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 712, 557, 558, 576, 715, 572, 638, 572, 574
+string_nosucc_lookup, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1835, 2183, 3082, 3646, 5737, 866, 6458, 848, 903
+string_delete, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 834, 711, 751, 1088, 844, 775, 976, 825, 914
+int_insert, 'boost::unordered::unordered_map<int, int>', 516, 682, 873, 882, 2164, 880, 1015, 805, 829
+int_succ_lookup, 'boost::unordered::unordered_map<int, int>', 275, 442, 469, 467, 571, 509, 577, 476, 499
+int_nosucc_lookup, 'boost::unordered::unordered_map<int, int>', 624, 750, 1030, 877, 1558, 977, 1064, 921, 989
+int_delete, 'boost::unordered::unordered_map<int, int>', 498, 472, 700, 917, 1126, 1017, 774, 783, 825
+string_insert, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1475, 1535, 1471, 1511, 1890, 1832, 3170, 1366, 1227
+string_succ_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1048, 1076, 1112, 1235, 1154, 1030, 1815, 801, 866
+string_nosucc_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1448, 1584, 1566, 2293, 1643, 1504, 1944, 1260, 1246
+string_delete, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1455, 2113, 1522, 2676, 1557, 1497, 1541, 1223, 1157
+int_insert, 'LPmap', 6903, 369, 404, 1361, 546, 444, 341, -497, 49658
+int_succ_lookup, 'LPmap', 415, 281, 307, 342, 415, 354, 258, -616, 314
+int_nosucc_lookup, 'LPmap', 721, 551, 20324, 1131, 1561, 1370, 517, 766, 720
+int_delete, 'LPmap', 202, 153, 198, 227, 283, 206, 169, -785, 186
+int_insert, 'std::unordered_map<int, int>', 820, 930, 1151, 994, 969, 905, 729, 719, 728
+int_succ_lookup, 'std::unordered_map<int, int>', 512, 565, 585, 587, 599, 532, 460, 447, 460
+int_nosucc_lookup, 'std::unordered_map<int, int>', 2311, 3574, 8251, 6125, 7478, 957, 7829, 822, 751
+int_delete, 'std::unordered_map<int, int>', 664, 1186, 863, 877, 850, 973, 704, 759, 737
+string_insert, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 645, 1005, 720, 832, 970, 813, 835, 866, 904
+string_succ_lookup, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 423, 730, 584, 548, 723, 571, 607, 575, 585
+string_nosucc_lookup, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 1376, 2936, 4354, 3636, 4664, 819, 6023, 851, 958
+string_delete, 'std::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 665, 707, 996, 781, 768, 796, 824, 795, 1167
+int_insert, 'boost::unordered::unordered_map<int, int>', 528, 609, 645, 726, 823, 724, 679, 581, 597
+int_succ_lookup, 'boost::unordered::unordered_map<int, int>', 310, 387, 444, 496, 476, 512, 426, 411, 424
+int_nosucc_lookup, 'boost::unordered::unordered_map<int, int>', 646, 743, 866, 857, 1006, 855, 794, 684, 755
+int_delete, 'boost::unordered::unordered_map<int, int>', 431, 541, 599, 696, 693, 785, 682, 568, 655
+string_insert, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 911, 961, 935, 956, 1065, 1219, 978, 1010, 1058
+string_succ_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 646, 726, 766, 789, 770, 907, 768, 758, 809
+string_nosucc_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 948, 984, 901, 980, 995, 1285, 934, 962, 1002
+string_delete, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 921, 889, 944, 1008, 986, 1066, 965, 998, 1031

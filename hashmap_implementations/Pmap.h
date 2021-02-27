@@ -39,7 +39,7 @@ class Pmap {
   public:
     explicit Pmap(int size = 101);
     ~Pmap(){};
-    void reserve(int size);                             // set size of the array
+    void reserve(int size);                             // set inserted of the array
     void insert(std::pair<int,int> init_list);  // insert
     int& operator[](const int& k);                      // lookup and if you can, insert
     int& operator[](int&& k);                           // lookup and if you can, insert
