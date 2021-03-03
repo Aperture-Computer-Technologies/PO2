@@ -1,1 +1,0 @@
-/usr/bin/g++  -o3  -march=native -g   CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o  -o snippet_test 

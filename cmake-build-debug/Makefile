@@ -76,17 +76,6 @@ CMAKE_BINARY_DIR = /home/MassiveAtoms/Desktop/PO2/cmake-build-debug
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
-
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -97,6 +86,17 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -131,32 +131,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named benchmarks
-
-# Build rule for target.
-benchmarks: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmarks
-.PHONY : benchmarks
-
-# fast build rule for target.
-benchmarks/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/build
-.PHONY : benchmarks/fast
-
-#=============================================================================
-# Target rules for targets named hash-test
-
-# Build rule for target.
-hash-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hash-test
-.PHONY : hash-test
-
-# fast build rule for target.
-hash-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/build
-.PHONY : hash-test/fast
-
-#=============================================================================
 # Target rules for targets named LP-test
 
 # Build rule for target.
@@ -170,17 +144,43 @@ LP-test/fast:
 .PHONY : LP-test/fast
 
 #=============================================================================
-# Target rules for targets named snippet_test
+# Target rules for targets named node-test
 
 # Build rule for target.
-snippet_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippet_test
-.PHONY : snippet_test
+node-test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 node-test
+.PHONY : node-test
 
 # fast build rule for target.
-snippet_test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet_test.dir/build.make CMakeFiles/snippet_test.dir/build
-.PHONY : snippet_test/fast
+node-test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/build
+.PHONY : node-test/fast
+
+#=============================================================================
+# Target rules for targets named benchmarks
+
+# Build rule for target.
+benchmarks: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmarks
+.PHONY : benchmarks
+
+# fast build rule for target.
+benchmarks/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/build
+.PHONY : benchmarks/fast
+
+#=============================================================================
+# Target rules for targets named node-build
+
+# Build rule for target.
+node-build: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 node-build
+.PHONY : node-build
+
+# fast build rule for target.
+node-build/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/build
+.PHONY : node-build/fast
 
 #=============================================================================
 # Target rules for targets named cuckoo-impl
@@ -276,59 +276,32 @@ hashmap_implement/cuckoo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
 .PHONY : hashmap_implement/cuckoo.cpp.s
 
-hashmap_implementations/snippets.o: hashmap_implementations/snippets.cpp.o
+hashmap_implementations/test.o: hashmap_implementations/test.cpp.o
 
-.PHONY : hashmap_implementations/snippets.o
-
-# target to build an object file
-hashmap_implementations/snippets.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet_test.dir/build.make CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o
-.PHONY : hashmap_implementations/snippets.cpp.o
-
-hashmap_implementations/snippets.i: hashmap_implementations/snippets.cpp.i
-
-.PHONY : hashmap_implementations/snippets.i
-
-# target to preprocess a source file
-hashmap_implementations/snippets.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet_test.dir/build.make CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.i
-.PHONY : hashmap_implementations/snippets.cpp.i
-
-hashmap_implementations/snippets.s: hashmap_implementations/snippets.cpp.s
-
-.PHONY : hashmap_implementations/snippets.s
-
-# target to generate assembly for a file
-hashmap_implementations/snippets.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet_test.dir/build.make CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.s
-.PHONY : hashmap_implementations/snippets.cpp.s
-
-test/hash-test.o: test/hash-test.cpp.o
-
-.PHONY : test/hash-test.o
+.PHONY : hashmap_implementations/test.o
 
 # target to build an object file
-test/hash-test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/test/hash-test.cpp.o
-.PHONY : test/hash-test.cpp.o
+hashmap_implementations/test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.o
+.PHONY : hashmap_implementations/test.cpp.o
 
-test/hash-test.i: test/hash-test.cpp.i
+hashmap_implementations/test.i: hashmap_implementations/test.cpp.i
 
-.PHONY : test/hash-test.i
+.PHONY : hashmap_implementations/test.i
 
 # target to preprocess a source file
-test/hash-test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/test/hash-test.cpp.i
-.PHONY : test/hash-test.cpp.i
+hashmap_implementations/test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.i
+.PHONY : hashmap_implementations/test.cpp.i
 
-test/hash-test.s: test/hash-test.cpp.s
+hashmap_implementations/test.s: hashmap_implementations/test.cpp.s
 
-.PHONY : test/hash-test.s
+.PHONY : hashmap_implementations/test.s
 
 # target to generate assembly for a file
-test/hash-test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hash-test.dir/build.make CMakeFiles/hash-test.dir/test/hash-test.cpp.s
-.PHONY : test/hash-test.cpp.s
+hashmap_implementations/test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.s
+.PHONY : hashmap_implementations/test.cpp.s
 
 test/hashmap_test.o: test/hashmap_test.cpp.o
 
@@ -337,6 +310,7 @@ test/hashmap_test.o: test/hashmap_test.cpp.o
 # target to build an object file
 test/hashmap_test.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.o
 .PHONY : test/hashmap_test.cpp.o
 
 test/hashmap_test.i: test/hashmap_test.cpp.i
@@ -346,6 +320,7 @@ test/hashmap_test.i: test/hashmap_test.cpp.i
 # target to preprocess a source file
 test/hashmap_test.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.i
 .PHONY : test/hashmap_test.cpp.i
 
 test/hashmap_test.s: test/hashmap_test.cpp.s
@@ -355,6 +330,7 @@ test/hashmap_test.s: test/hashmap_test.cpp.s
 # target to generate assembly for a file
 test/hashmap_test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.s
 .PHONY : test/hashmap_test.cpp.s
 
 # Help Target
@@ -368,8 +344,8 @@ help:
 	@echo "... LP-test"
 	@echo "... benchmarks"
 	@echo "... cuckoo-impl"
-	@echo "... hash-test"
-	@echo "... snippet_test"
+	@echo "... node-build"
+	@echo "... node-test"
 	@echo "... benchmarks/generator.o"
 	@echo "... benchmarks/generator.i"
 	@echo "... benchmarks/generator.s"
@@ -379,12 +355,9 @@ help:
 	@echo "... hashmap_implement/cuckoo.o"
 	@echo "... hashmap_implement/cuckoo.i"
 	@echo "... hashmap_implement/cuckoo.s"
-	@echo "... hashmap_implementations/snippets.o"
-	@echo "... hashmap_implementations/snippets.i"
-	@echo "... hashmap_implementations/snippets.s"
-	@echo "... test/hash-test.o"
-	@echo "... test/hash-test.i"
-	@echo "... test/hash-test.s"
+	@echo "... hashmap_implementations/test.o"
+	@echo "... hashmap_implementations/test.i"
+	@echo "... hashmap_implementations/test.s"
 	@echo "... test/hashmap_test.o"
 	@echo "... test/hashmap_test.i"
 	@echo "... test/hashmap_test.s"

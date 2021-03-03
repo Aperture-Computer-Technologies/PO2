@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="PO2"/>
 		<Option makefile_is_custom="1"/>
-		<Option compiler="gcc"/>
+		<Option compiler="clang"/>
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
@@ -12,142 +12,6 @@
 				<Option type="4"/>
 				<MakeCommands>
 					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="edit_cache">
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="benchmarks">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/benchmarks" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 benchmarks"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="benchmarks/fast">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/benchmarks" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 benchmarks/fast"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="hash-test">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/hash-test" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 hash-test"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="hash-test/fast">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/hash-test" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 hash-test/fast"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="LP-test">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/LP-test" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 LP-test"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="LP-test/fast">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/LP-test" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 LP-test/fast"/>
 					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
@@ -163,43 +27,179 @@
 					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="snippet_test">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/snippet_test" prefix_auto="0" extension_auto="0"/>
+			<Target title="edit_cache">
 				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
+				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 snippet_test"/>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
 					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="snippet_test/fast">
-				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/snippet_test" prefix_auto="0" extension_auto="0"/>
+			<Target title="LP-test">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/LP-test" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
-				<Option compiler="gcc"/>
+				<Option compiler="clang"/>
 				<Compiler>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 snippet_test/fast"/>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 LP-test"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="LP-test/fast">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/LP-test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 LP-test/fast"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="node-test">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/node-test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 node-test"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="node-test/fast">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/node-test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 node-test/fast"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="benchmarks">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/benchmarks" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 benchmarks"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="benchmarks/fast">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/benchmarks" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 benchmarks/fast"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="node-build">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/node-build" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 node-build"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="node-build/fast">
+				<Option output="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/node-build" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 node-build/fast"/>
 					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
@@ -210,13 +210,13 @@
 				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
-				<Option compiler="gcc"/>
+				<Option compiler="clang"/>
 				<Compiler>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
@@ -231,13 +231,13 @@
 				<Option working_dir="/home/MassiveAtoms/Desktop/PO2/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
-				<Option compiler="gcc"/>
+				<Option compiler="clang"/>
 				<Compiler>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/x86_64-redhat-linux"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/../../../../include/c++/10/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/10/include"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib64/clang/11.0.0/include"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
@@ -263,9 +263,6 @@
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp">
 			<Option target="benchmarks"/>
 		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/external/json.hpp">
-			<Option target="hash-test"/>
-		</Unit>
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp">
 			<Option target="cuckoo-impl"/>
 		</Unit>
@@ -275,29 +272,20 @@
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/LPmap.h">
 			<Option target="LP-test"/>
 		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/Pmap.h">
-			<Option target="snippet_test"/>
+		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/nodemap.h">
+			<Option target="node-test"/>
+			<Option target="node-build"/>
 		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp">
-			<Option target="snippet_test"/>
-		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp">
-			<Option target="hash-test"/>
-		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hash-test.h">
-			<Option target="hash-test"/>
-		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hash.h">
-			<Option target="hash-test"/>
+		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/test.cpp">
+			<Option target="node-build"/>
 		</Unit>
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp">
 			<Option target="LP-test"/>
+			<Option target="node-test"/>
 		</Unit>
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.h">
 			<Option target="LP-test"/>
-		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/tools/random.h">
-			<Option target="hash-test"/>
+			<Option target="node-test"/>
 		</Unit>
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

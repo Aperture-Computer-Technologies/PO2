@@ -38,31 +38,21 @@ set(CLANG_TIDY_SUPPRESS_CXX
 
 # check the cmake stuff at the json lib you're using for cmake help
 
-# for testing hash functions
-add_executable(hash-test 
-./test/hash.h
-        ./test/hash-test.cpp
-        ./tools/random.h
-        ./test/hash-test.h
-        ./external/json.hpp
-        )
-
-# Sagar's Linear Probing
-#add_executable(LP-test2
-#        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-#        hashmap_implementations/Pmap.h)
 
 # Sagar's Linear Probing
 add_executable(LP-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
         hashmap_implementations/LPmap.h)
 
+# Sagar's nodemap
 
-# compile quick snippets
-add_executable(snippet_test
-        ./hashmap_implementations/snippets.cpp
-        hashmap_implementations/Pmap.h)
+add_executable(node-test
+        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
+        hashmap_implementations/nodemap.h)
 
+        add_executable(node-build
+        ${PROJECT_SOURCE_DIR}/hashmap_implementations/test.cpp
+        hashmap_implementations/nodemap.h)
 # cuckoo hashing implementation, rajeev 
 add_executable(cuckoo-impl
         ./hashmap_implement/cuckoo_hashing.h

@@ -1,32 +1,32 @@
 [
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp"
-},
-{
-  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp"
-},
-{
-  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/hash-test.dir/test/hash-test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/test/hash-test.cpp"
-},
-{
-  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
   "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
 },
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/snippet_test.dir/hashmap_implementations/snippets.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippets.cpp"
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/node-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
 },
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/test.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/test.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp",
   "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp"
 }
 ]

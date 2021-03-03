@@ -6,7 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp" "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "GNU")
+set(CMAKE_CXX_COMPILER_ID "Clang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

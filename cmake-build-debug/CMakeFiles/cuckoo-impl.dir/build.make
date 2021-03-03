@@ -80,15 +80,15 @@ include CMakeFiles/cuckoo-impl.dir/flags.make
 CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o: CMakeFiles/cuckoo-impl.dir/flags.make
 CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o: ../hashmap_implement/cuckoo.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp
+	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp
 
 CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp > CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp > CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.i
 
 CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
 
 # Object files for target cuckoo-impl
 cuckoo__impl_OBJECTS = \
