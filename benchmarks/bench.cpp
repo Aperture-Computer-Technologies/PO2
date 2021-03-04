@@ -2,6 +2,8 @@
 
 #include "./includes/3thparty/CLI11.hpp"
 #include "./../hashmap_implementations/LPmap.h"
+#include "./../hashmap_implementations/nodemap.h"
+#include "./../hashmap_implementations/nodemap2.h"
 #include "./includes/aggregate_tests.h"
 // include your implementations
 
@@ -12,9 +14,11 @@ string choicetext
       "2. boost::unordered\n";
 
 // default arguments
-vector<int> hashmaps = {1, 2,3};
+//vector<int> hashmaps = {1, 2,3,4, 5};
+//vector<int> hashmaps = {4, 5};
+vector<int> hashmaps = {4};
 int runs = 1;
-int maxsize = 5000000;
+int maxsize = 500000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps
@@ -48,6 +52,15 @@ int main(int argc, char **argv)
             }
             case 3: {
                 int_test_aggregate(LPmap{}, runs, maxsize);
+                break;
+            }
+            case 4: {
+                int_test_aggregate(Nodemap<int,int>{}, runs, maxsize);
+                break;
+            }
+            case 5: {
+                int_test_aggregate(Nodemap2<int,int>{}, runs, maxsize);
+                break;
             }
         }
 

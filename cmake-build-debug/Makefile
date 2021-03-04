@@ -131,43 +131,30 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named LP-test
+# Target rules for targets named sagar-test
 
 # Build rule for target.
-LP-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 LP-test
-.PHONY : LP-test
+sagar-test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sagar-test
+.PHONY : sagar-test
 
 # fast build rule for target.
-LP-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/build
-.PHONY : LP-test/fast
+sagar-test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sagar-test.dir/build.make CMakeFiles/sagar-test.dir/build
+.PHONY : sagar-test/fast
 
 #=============================================================================
-# Target rules for targets named node-test
+# Target rules for targets named cuckoo-impl
 
 # Build rule for target.
-node-test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 node-test
-.PHONY : node-test
+cuckoo-impl: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuckoo-impl
+.PHONY : cuckoo-impl
 
 # fast build rule for target.
-node-test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/build
-.PHONY : node-test/fast
-
-#=============================================================================
-# Target rules for targets named benchmarks
-
-# Build rule for target.
-benchmarks: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmarks
-.PHONY : benchmarks
-
-# fast build rule for target.
-benchmarks/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/build
-.PHONY : benchmarks/fast
+cuckoo-impl/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/build
+.PHONY : cuckoo-impl/fast
 
 #=============================================================================
 # Target rules for targets named node-build
@@ -183,17 +170,44 @@ node-build/fast:
 .PHONY : node-build/fast
 
 #=============================================================================
-# Target rules for targets named cuckoo-impl
+# Target rules for targets named benchmarks
 
 # Build rule for target.
-cuckoo-impl: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuckoo-impl
-.PHONY : cuckoo-impl
+benchmarks: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmarks
+.PHONY : benchmarks
 
 # fast build rule for target.
-cuckoo-impl/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/build
-.PHONY : cuckoo-impl/fast
+benchmarks/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/build
+.PHONY : benchmarks/fast
+
+benchmarks/bench.o: benchmarks/bench.cpp.o
+
+.PHONY : benchmarks/bench.o
+
+# target to build an object file
+benchmarks/bench.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o
+.PHONY : benchmarks/bench.cpp.o
+
+benchmarks/bench.i: benchmarks/bench.cpp.i
+
+.PHONY : benchmarks/bench.i
+
+# target to preprocess a source file
+benchmarks/bench.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.i
+.PHONY : benchmarks/bench.cpp.i
+
+benchmarks/bench.s: benchmarks/bench.cpp.s
+
+.PHONY : benchmarks/bench.s
+
+# target to generate assembly for a file
+benchmarks/bench.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.s
+.PHONY : benchmarks/bench.cpp.s
 
 benchmarks/generator.o: benchmarks/generator.cpp.o
 
@@ -221,33 +235,6 @@ benchmarks/generator.s: benchmarks/generator.cpp.s
 benchmarks/generator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s
 .PHONY : benchmarks/generator.cpp.s
-
-benchmarks/main.o: benchmarks/main.cpp.o
-
-.PHONY : benchmarks/main.o
-
-# target to build an object file
-benchmarks/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o
-.PHONY : benchmarks/main.cpp.o
-
-benchmarks/main.i: benchmarks/main.cpp.i
-
-.PHONY : benchmarks/main.i
-
-# target to preprocess a source file
-benchmarks/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i
-.PHONY : benchmarks/main.cpp.i
-
-benchmarks/main.s: benchmarks/main.cpp.s
-
-.PHONY : benchmarks/main.s
-
-# target to generate assembly for a file
-benchmarks/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/benchmarks.dir/build.make CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s
-.PHONY : benchmarks/main.cpp.s
 
 hashmap_implement/cuckoo.o: hashmap_implement/cuckoo.cpp.o
 
@@ -309,8 +296,7 @@ test/hashmap_test.o: test/hashmap_test.cpp.o
 
 # target to build an object file
 test/hashmap_test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sagar-test.dir/build.make CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.o
 .PHONY : test/hashmap_test.cpp.o
 
 test/hashmap_test.i: test/hashmap_test.cpp.i
@@ -319,8 +305,7 @@ test/hashmap_test.i: test/hashmap_test.cpp.i
 
 # target to preprocess a source file
 test/hashmap_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sagar-test.dir/build.make CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.i
 .PHONY : test/hashmap_test.cpp.i
 
 test/hashmap_test.s: test/hashmap_test.cpp.s
@@ -329,8 +314,7 @@ test/hashmap_test.s: test/hashmap_test.cpp.s
 
 # target to generate assembly for a file
 test/hashmap_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LP-test.dir/build.make CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-test.dir/build.make CMakeFiles/node-test.dir/test/hashmap_test.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sagar-test.dir/build.make CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.s
 .PHONY : test/hashmap_test.cpp.s
 
 # Help Target
@@ -341,17 +325,16 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... LP-test"
 	@echo "... benchmarks"
 	@echo "... cuckoo-impl"
 	@echo "... node-build"
-	@echo "... node-test"
+	@echo "... sagar-test"
+	@echo "... benchmarks/bench.o"
+	@echo "... benchmarks/bench.i"
+	@echo "... benchmarks/bench.s"
 	@echo "... benchmarks/generator.o"
 	@echo "... benchmarks/generator.i"
 	@echo "... benchmarks/generator.s"
-	@echo "... benchmarks/main.o"
-	@echo "... benchmarks/main.i"
-	@echo "... benchmarks/main.s"
 	@echo "... hashmap_implement/cuckoo.o"
 	@echo "... hashmap_implement/cuckoo.i"
 	@echo "... hashmap_implement/cuckoo.s"

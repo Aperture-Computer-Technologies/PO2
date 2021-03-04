@@ -90,29 +90,29 @@ CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s
 
-CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: CMakeFiles/benchmarks.dir/flags.make
-CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp
+CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o: CMakeFiles/benchmarks.dir/flags.make
+CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o: ../benchmarks/bench.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o"
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/bench.cpp
 
-CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp > CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i
+CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.i"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/bench.cpp > CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.i
 
-CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s
+CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.s"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/bench.cpp -o CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.s
 
 # Object files for target benchmarks
 benchmarks_OBJECTS = \
 "CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o" \
-"CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o"
+"CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o"
 
 # External object files for target benchmarks
 benchmarks_EXTERNAL_OBJECTS =
 
 benchmarks: CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o
-benchmarks: CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o
+benchmarks: CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o
 benchmarks: CMakeFiles/benchmarks.dir/build.make
 benchmarks: CMakeFiles/benchmarks.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable benchmarks"

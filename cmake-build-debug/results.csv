@@ -51,3 +51,19 @@ string_insert, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>
 string_succ_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 646, 726, 766, 789, 770, 907, 768, 758, 809
 string_nosucc_lookup, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 948, 984, 901, 980, 995, 1285, 934, 962, 1002
 string_delete, 'boost::unordered::unordered_map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >', 921, 889, 944, 1008, 986, 1066, 965, 998, 1031
+int_insert, 'std::unordered_map<int, int>', 566, 734, 653, 667, 673, 702, 700, 680, 689
+int_succ_lookup, 'std::unordered_map<int, int>', 296, 382, 390, 418, 415, 434, 439, 443, 432
+int_nosucc_lookup, 'std::unordered_map<int, int>', 1273, 2462, 3480, 4297, 5439, 752, 7443, 729, 750
+int_delete, 'std::unordered_map<int, int>', 480, 544, 577, 617, 632, 716, 646, 714, 704
+int_insert, 'boost::unordered::unordered_map<int, int>', 483, 525, 602, 570, 605, 605, 643, 570, 593
+int_succ_lookup, 'boost::unordered::unordered_map<int, int>', 286, 310, 366, 360, 399, 404, 395, 374, 388
+int_nosucc_lookup, 'boost::unordered::unordered_map<int, int>', 595, 617, 666, 633, 676, 699, 708, 646, 692
+int_delete, 'boost::unordered::unordered_map<int, int>', 406, 437, 520, 507, 547, 564, 562, 535, 570
+int_insert, 'LPmap', 4796, 326, 332, 325, 329, 332, 321, 322, 318
+int_succ_lookup, 'LPmap', 238, 266, 261, 257, 264, 264, 268, 264, 276
+int_nosucc_lookup, 'LPmap', 475, 498, 499, 502, 531, 498, 505, 510, 505
+int_delete, 'LPmap', 133, 147, 152, 149, 154, 155, 154, 156, 163
+int_insert, 'std::unordered_map<int, int>', 887, 958, 882, 935, 678, 856, 742, 777, 1067
+int_succ_lookup, 'std::unordered_map<int, int>', 1012, 531, 531, 536, 431, 538, 437, 484, 641
+int_nosucc_lookup, 'std::unordered_map<int, int>', 2052, 3836, 4428, 5669, 5566, 1003, 8420, 798, 1014
+int_delete, 'std::unordered_map<int, int>', 734, 798, 757, 805, 619, 986, 895, 763, 1024

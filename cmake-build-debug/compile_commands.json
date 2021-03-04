@@ -1,23 +1,13 @@
 [
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
+  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
   "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
 },
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/node-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
-},
-{
-  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp"
-},
-{
-  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp"
+  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp"
 },
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
@@ -26,7 +16,12 @@
 },
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
-  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp",
-  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo.cpp"
+  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/g++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/bench.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/benchmarks/bench.cpp"
 }
 ]

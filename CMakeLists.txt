@@ -40,19 +40,18 @@ set(CLANG_TIDY_SUPPRESS_CXX
 
 
 # Sagar's Linear Probing
-add_executable(LP-test
+add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/LPmap.h)
+        hashmap_implementations/LPmap.h
+        hashmap_implementations/nodemap.h
 
-# Sagar's nodemap
+        )
 
-add_executable(node-test
-        ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/nodemap.h)
-
-        add_executable(node-build
+add_executable(node-build
         ${PROJECT_SOURCE_DIR}/hashmap_implementations/test.cpp
         hashmap_implementations/nodemap.h)
+
+
 # cuckoo hashing implementation, rajeev 
 add_executable(cuckoo-impl
         ./hashmap_implement/cuckoo_hashing.h
@@ -65,7 +64,7 @@ add_executable(benchmarks
         ./benchmarks/generator.cpp
         ./benchmarks/includes/tests.h
         ./benchmarks/includes/aggregate_tests.h
-        ./benchmarks/main.cpp
+        ./benchmarks/bench.cpp
         )
 
 # target_link_libraries(benchmarks

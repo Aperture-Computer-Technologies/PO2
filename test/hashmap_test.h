@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <iostream>
+#include <unordered_set>
 #include <vector>
 
 #include "./../tools/random.h"
 #include "immintrin.h"  // for AVX
 #include "nmmintrin.h"  // for SSE4.2
-#include <unordered_set>
 
 using std::cerr;
 using std::cout;
@@ -34,7 +34,7 @@ template <class CustomHashmap>
 bool single_insert(CustomHashmap a)
 {
     CustomHashmap testmap;
-    if (testmap.size() != 0){
+    if (testmap.size() != 0) {
         return false;
     }
     int key = gen_integer();
@@ -42,7 +42,7 @@ bool single_insert(CustomHashmap a)
     if (testmap[key] != key + 1) {
         return false;
     }
-    if (testmap.size() != 1){
+    if (testmap.size() != 1) {
         return false;
     }
     return true;
@@ -74,7 +74,6 @@ bool insert_n(CustomHashmap b, int n)
     for (const int &x : keys) {
         testmap.insert({x, x + 1});
         unique.insert(x);
-
     }
     for (const int &x : unique) {
         if (testmap[x] != x + 1) {
@@ -84,7 +83,7 @@ bool insert_n(CustomHashmap b, int n)
         }
     }
 
-    if (testmap.size() != unique.size()){
+    if (testmap.size() != unique.size()) {
         return false;
     }
 
@@ -95,7 +94,7 @@ template <class CustomHashmap>
 bool insert_n_with_reserve(CustomHashmap b, int n)
 {
     vector<int> keys(n);
-    std::unordered_set<int>unique(n);
+    std::unordered_set<int> unique(n);
     CustomHashmap testmap;
     testmap.reserve(n);
     std::generate(keys.begin(), keys.end(), gen_integer);
@@ -109,7 +108,7 @@ bool insert_n_with_reserve(CustomHashmap b, int n)
             return false;
         }
     }
-    if (testmap.size() != unique.size()){
+    if (testmap.size() != unique.size()) {
         return false;
     }
 
@@ -183,14 +182,14 @@ bool delete_n(CustomHashmap b, int n)
         testmap.insert({x, x + 1});
         unique.insert(x);
     }
-    if (testmap.size() != unique.size()){
+    if (testmap.size() != unique.size()) {
         return false;
     }
     std::shuffle(keys.begin(), keys.end(), gener);
     for (const int &x : keys) {
         testmap.erase(x);
     }
-    if (testmap.size() != 0){
+    if (testmap.size() != 0) {
         return false;
     }
     for (const int &x : keys) {
@@ -237,95 +236,96 @@ void hashmap_test_suite(CustomHashmap h)
         std::cout << "Creation with reserve Passed\n";
     }
     else {
-        std::cout  << "\t\tCreation with reserve  Failed!\n";
+        std::cout << "\t\tCreation with reserve  Failed!\n";
     }
     if (single_insert(h)) {
         std::cout << "Single insert Passed\n";
     }
     else {
-        std::cout  << "\t\tSingle insert Failed!\n";
+        std::cout << "\t\tSingle insert Failed!\n";
     }
     if (single_insert_with_reserve(h)) {
         std::cout << "Single insert with reserve Passed\n";
     }
     else {
-        std::cout  << "\t\tSingle insert with reserve Failed!\n";
+        std::cout << "\t\tSingle insert with reserve Failed!\n";
     }
     if (insert_n(h, 10)) {
         std::cout << "inserting 10 keys Passed\n";
     }
     else {
-        std::cout  << "\t\tinserting 10 keys  Failed!\n";
+        std::cout << "\t\tinserting 10 keys  Failed!\n";
     }
     if (insert_n(h, 1000)) {
         std::cout << "inserting 1000 keys Passed\n";
     }
     else {
-        std::cout  << "\t\tinserting 1000 keys  Failed!\n";
+        std::cout << "\t\tinserting 1000 keys  Failed!\n";
     }
     if (insert_n_with_reserve(h, 10)) {
         std::cout << "Inserting 10 with reserve Passed\n";
     }
     else {
-        std::cout  << "\t\tInserting 10 with reserve  Failed!\n";
+        std::cout << "\t\tInserting 10 with reserve  Failed!\n";
     }
     if (insert_n_with_reserve(h, 1000)) {
         std::cout << "Inserting 1000 with reserve Passed\n";
     }
     else {
-        std::cout  << "\t\tInserting 1000 with reserve  Failed!\n";
+        std::cout << "\t\tInserting 1000 with reserve  Failed!\n";
     }
     if (insert_existing(h)) {
         std::cout << "Inserting existing key Passed\n";
     }
     else {
-        std::cout  << "\t\tInserting existing key Failed!\n";
+        std::cout << "\t\tInserting existing key Failed!\n";
     }
     if (overwrite_existing(h)) {
         std::cout << "Overwriting existing Passed\n";
     }
     else {
-        std::cout  << "\t\tOverwriting existing Failed!, but that's ok for now.\n";
+        std::cout << "\t\tOverwriting existing Failed!, but that's ok for now.\n";
     }
     if (access_nonexising(h)) {
         std::cout << "Access nonexisting Passed\n";
     }
     else {
-        std::cout  << "\t\tAccess nonexisting Failed!\n";
-    }    if (single_delete(h)) {
-        std::cout << "Single Delete Passed\n";
-    }
-    else {
-        std::cout  << "\t\tSingle Delete Failed!\n";
-    }
-    if (delete_n(h, 10)) {
-        std::cout << "Delete 10 keys Passed\n";
-    }
-    else {
-        std::cout  << "\t\tDelete 10 keys  Failed!\n";
+        std::cout << "\t\tAccess nonexisting Failed!\n";
     }
     if (single_delete(h)) {
         std::cout << "Single Delete Passed\n";
     }
     else {
-        std::cout  << "\t\tSingle Delete Failed!\n";
+        std::cout << "\t\tSingle Delete Failed!\n";
     }
     if (delete_n(h, 10)) {
         std::cout << "Delete 10 keys Passed\n";
     }
     else {
-        std::cout  << "\t\tDelete 10 keys  Failed!\n";
+        std::cout << "\t\tDelete 10 keys  Failed!\n";
     }
-    if (delete_n(h, 100)) { // 48 min
+    if (single_delete(h)) {
+        std::cout << "Single Delete Passed\n";
+    }
+    else {
+        std::cout << "\t\tSingle Delete Failed!\n";
+    }
+    if (delete_n(h, 10)) {
+        std::cout << "Delete 10 keys Passed\n";
+    }
+    else {
+        std::cout << "\t\tDelete 10 keys  Failed!\n";
+    }
+    if (delete_n(h, 100)) {  // 48 min
         std::cout << "Delete 1000 keys Passed\n";
     }
     else {
-        std::cout  << "\t\tDelete 1000 keys  Failed!\n";
+        std::cout << "\t\tDelete 1000 keys  Failed!\n";
     }
     if (delete_n_with_reserve(h, 10)) {
         std::cout << "reserve+Delete Passed\n";
     }
     else {
-        std::cout  << "\t\tReserve+Delete Failed!\n";
+        std::cout << "\t\tReserve+Delete Failed!\n";
     }
 }
