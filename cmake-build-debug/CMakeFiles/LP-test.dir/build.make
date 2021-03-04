@@ -54,10 +54,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /var/lib/snapd/snap/clion/139/bin/cmake/linux/bin/cmake
 
 # The command to remove a file.
-RM = /home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake -E rm -f
+RM = /var/lib/snapd/snap/clion/139/bin/cmake/linux/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -80,15 +80,15 @@ include CMakeFiles/LP-test.dir/flags.make
 CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o: CMakeFiles/LP-test.dir/flags.make
 CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o: ../test/hashmap_test.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp
 
 CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp > CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp > CMakeFiles/LP-test.dir/test/hashmap_test.cpp.i
 
 CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp -o CMakeFiles/LP-test.dir/test/hashmap_test.cpp.s
 
 # Object files for target LP-test
 LP__test_OBJECTS = \

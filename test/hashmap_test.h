@@ -76,7 +76,7 @@ bool insert_n(CustomHashmap b, int n)
         unique.insert(x);
 
     }
-    for (const int &x : keys) {
+    for (const int &x : unique) {
         if (testmap[x] != x + 1) {
             cout << "buckets:" << testmap.bucket_count() << " inserted: " << testmap.size() << "\n";
 
@@ -292,6 +292,17 @@ void hashmap_test_suite(CustomHashmap h)
     }
     else {
         std::cout  << "\t\tAccess nonexisting Failed!\n";
+    }    if (single_delete(h)) {
+        std::cout << "Single Delete Passed\n";
+    }
+    else {
+        std::cout  << "\t\tSingle Delete Failed!\n";
+    }
+    if (delete_n(h, 10)) {
+        std::cout << "Delete 10 keys Passed\n";
+    }
+    else {
+        std::cout  << "\t\tDelete 10 keys  Failed!\n";
     }
     if (single_delete(h)) {
         std::cout << "Single Delete Passed\n";
@@ -305,7 +316,7 @@ void hashmap_test_suite(CustomHashmap h)
     else {
         std::cout  << "\t\tDelete 10 keys  Failed!\n";
     }
-    if (delete_n(h, 1000)) {
+    if (delete_n(h, 100)) { // 48 min
         std::cout << "Delete 1000 keys Passed\n";
     }
     else {

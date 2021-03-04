@@ -54,10 +54,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /var/lib/snapd/snap/clion/139/bin/cmake/linux/bin/cmake
 
 # The command to remove a file.
-RM = /home/MassiveAtoms/Desktop/clion-2020.3.1/bin/cmake/linux/bin/cmake -E rm -f
+RM = /var/lib/snapd/snap/clion/139/bin/cmake/linux/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -80,28 +80,28 @@ include CMakeFiles/benchmarks.dir/flags.make
 CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o: CMakeFiles/benchmarks.dir/flags.make
 CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o: ../benchmarks/generator.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp
 
 CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp > CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp > CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.i
 
 CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/generator.cpp -o CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.s
 
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: CMakeFiles/benchmarks.dir/flags.make
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o: ../benchmarks/main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o"
-	/usr/bin/clang++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.o -c /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp
 
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp > CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp > CMakeFiles/benchmarks.dir/benchmarks/main.cpp.i
 
 CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/MassiveAtoms/Desktop/PO2/benchmarks/main.cpp -o CMakeFiles/benchmarks.dir/benchmarks/main.cpp.s
 
 # Object files for target benchmarks
 benchmarks_OBJECTS = \

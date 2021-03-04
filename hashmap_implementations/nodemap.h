@@ -4,24 +4,26 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
+
+#include "../tools/random.h"
 using std::vector;
 
 constexpr int INT_MAX = 2147483647;
 namespace helper2 {
     std::vector<int> prime_sizes
-        = {127,    251,    479,     911,     1733,    3299,    6269,     11923,    22669,    43093,    81883,   155579,
+        = {251,    479,    911,     1733,    3299,    6269,    11923,    22669,    43093,    81883,    155579,
            295601, 561667, 1067179, 2027659, 3852553, 7319857, 13907737, 26424707, 50206957, 95393219, 18124717};
 
-    size_t next_prime(const int& n)
+    int32_t next_prime(const int& n)
     {
         for (const int x : prime_sizes) {
             if (x > n) {
-                size_t t = x;
+                int32_t t = x;
                 return t;
             }
         }
     }
-}  // namespace helper
+}  // namespace helper2
 
 /*
  * specialized, don't use for anything outside of this hashmap
@@ -32,43 +34,42 @@ class Cont {
     typedef T ValueType;
     Cont();
     Cont(int siz);
-    T* insert(T elem);
+    T* insert(T& elem);
     void remove(T* elem);
+    void reserve(int size);
 
   private:
     T* empty_slot_selector();
     int n_empty;
     vector<vector<T>*> store = vector<vector<T>*>(1);
     vector<vector<T*>> empty_slots;
-    vector<T> segment_ends;
+    vector<int> segment_ends;
     vector<int> actual_store_sizes;
-
 };
 
-
 template <typename T>
-Cont<T>::Cont(int size): store{new vector<T>{}}, empty_slots{{}}, segment_ends{size}, n_empty{0}, actual_store_sizes{{0}}
+Cont<T>::Cont(int size)
+    : store{new vector<T>{}}, empty_slots{{}}, segment_ends{size}, n_empty{0}, actual_store_sizes{{0}}
 {
     store.back()->reserve(size);
-
 }
 template <typename T>
-Cont<T>::Cont(): Cont{Cont<T>(251)}
+Cont<T>::Cont() : Cont{Cont<T>(251)}
 {
 }
 
 template <typename T>
-T* Cont<T>::insert(T elem)
+T* Cont<T>::insert(T& elem)
 {
     T* adress;
-    if (n_empty){
+    if (n_empty) {
         adress = empty_slot_selector();
         *adress = elem;
         return adress;
     }
     // check if vector is in danger of reallocation
     bool is_full = (store.back()->size() == segment_ends.back());
-    if (is_full){
+    if (is_full) {
         int size = std::accumulate(segment_ends.begin(), segment_ends.end(), 0);
         store.push_back(new vector<T>{});
         store.back()->reserve(size);
@@ -84,19 +85,19 @@ T* Cont<T>::insert(T elem)
 template <typename T>
 void Cont<T>::remove(T* elem)
 {
-    for (int i = 0; i < store.size(); i++){
+    for (int i = 0; i < store.size(); i++) {
         T* begin = store[i]->data();
-        if (elem >= begin && elem <= begin + store[i]->size()){
+        if (elem >= begin && elem <= begin + store[i]->size()) {
             empty_slots[i].push_back(elem);
             n_empty++;
             actual_store_sizes[i]--;
-            if (!actual_store_sizes[i]){
+            if (!actual_store_sizes[i] && actual_store_sizes.size() > 1) {
                 actual_store_sizes.erase(actual_store_sizes.begin() + i);
+                delete store[i];
                 store.erase(store.begin() + i);
                 n_empty -= empty_slots[i].size();
                 empty_slots.erase(empty_slots.begin() + i);
                 segment_ends.erase(segment_ends.begin() + i);
-
             }
             return;
         }
@@ -107,11 +108,11 @@ T* Cont<T>::empty_slot_selector()
 {
     int index = 0;
     int max = 0;
-    for (int i = 0; i < actual_store_sizes.size(); i++){
-        if (empty_slots[i].empty()){
+    for (int i = 0; i < actual_store_sizes.size(); i++) {
+        if (empty_slots[i].empty()) {
             continue;
         }
-        if (actual_store_sizes[i] > max){
+        if (actual_store_sizes[i] > max) {
             index = i;
             max = actual_store_sizes[i];
         }
@@ -119,8 +120,213 @@ T* Cont<T>::empty_slot_selector()
     T* empty = empty_slots[index].back();
     empty_slots[index].pop_back();
     n_empty--;
-    actual_store_sizes[index]+= 1;
+    actual_store_sizes[index] += 1;
     return empty;
+}
+template <typename T>
+void Cont<T>::reserve(int size)
+{
+    int current = std::accumulate(segment_ends.begin(), segment_ends.end(), 0);
+    if (size <= current) {
+        return;
+    }
+    store.push_back(new vector<T>{});
+    store.back()->reserve(size - current);
+    actual_store_sizes.push_back(0);
+    empty_slots.push_back({});
+    segment_ends.push_back(size - current);
+}
+
+template <typename K, typename V>
+class Nodemap {
+  public:
+    Nodemap();
+    explicit Nodemap(int size);
+
+    void insert(const std::pair<K, V> kv);
+    bool contains(const K& key) const;
+
+    V& operator[](const K& k);
+    void clear();
+    int32_t bucket_count() { return bucket_arr.size(); };
+    int32_t size() { return inserted_n; };
+    void reserve(int size);
+    void erase(const K& key);
+    void rehash();
+    //    V& operator[](V&& k);
+
+  private:
+
+    int32_t DELETED = -1;
+    struct Element {
+        Element(K key_,const V val_, int32_t hash_) : hash{hash_}, key{key_}, val{val_} {};
+        int32_t hash;
+        K key;
+        V val;
+    };
+    Cont<Element> store_elem;
+    vector<Element*> bucket_arr;
+    vector<int32_t> hash_state;
+    int inserted_n;
+    float lf_max;
+    int32_t hasher(const K& key) const;
+    void hasher_state_gen();
+    int32_t prober(const K& key) const;
+    void rehash(int size);
+};
+
+template <typename K, typename V>
+Nodemap<K, V>::Nodemap() : Nodemap{Nodemap<K, V>(251)}
+{
+}
+template <typename K, typename V>
+Nodemap<K, V>::Nodemap(int size)
+    : store_elem{Cont<Element>(size)}, bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
+{
+    hasher_state_gen();
+}
+template <typename K, typename V>
+int32_t Nodemap<K, V>::hasher(const K& key) const
+{
+    static std::hash<K> hf;
+    int32_t hash = hf(key);
+    int32_t final_hash = 0;
+    int32_t index = 0;
+    for (int i = 0; i < sizeof(hash); i++) {
+        index = hash & 0x00000000000000ff;
+        hash = hash >> 8;
+        final_hash = final_hash ^ hash_state[index + i];
+    }
+    if (final_hash < 0) {
+        final_hash = final_hash * -1;
+    }
+    return final_hash;
+}
+
+template <typename K, typename V>
+void Nodemap<K, V>::hasher_state_gen()
+{
+    std::vector<int32_t> state(259);
+    std::generate(state.begin(), state.end(), gen_integer);
+    hash_state = state;
+}
+
+template <typename K, typename V>
+int32_t Nodemap<K, V>::prober(const K& key) const
+{
+    int32_t hash = hasher(key);
+    int32_t index = hash % bucket_arr.size();
+//    while (bucket_arr[index] && bucket_arr[index]->hash != hash && bucket_arr[index]->key != key) {
+    while (bucket_arr[index] && ( bucket_arr[index]->hash != hash || (bucket_arr[index]->hash == hash && bucket_arr[index]->key != key))) {
+        index++;
+        if (index >= bucket_arr.size()) {
+            index -= bucket_arr.size();
+        }
+    }
+    return index;
+}
+
+template <typename K, typename V>
+void Nodemap<K, V>::insert(const std::pair<K, V> kv)
+{
+        if (((inserted_n + 1) / (float) bucket_arr.size()) > lf_max) {
+            rehash();
+        }
+    int32_t index = prober(kv.first);
+    int32_t hash = hasher(kv.first); // TODO: yet another place that shows that contains is inadequate
+    if (bucket_arr[index] && bucket_arr[index]->hash == hash && bucket_arr[index]->key == kv.first){
+        return;
+    }
+    Element el{kv.first, kv.second, hash};
+    bucket_arr[index] = store_elem.insert(el);
+    inserted_n++;
+}
+template <typename K, typename V>
+bool Nodemap<K, V>::contains(const K& key) const
+{
+    int pos = prober(key);
+    int32_t hash = hasher(key);
+    if (!bucket_arr[pos]){
+        return false;
+    }
+    return (bucket_arr[pos]->hash == hash && bucket_arr[pos]->key == key);
+}
+template <typename K, typename V>
+V& Nodemap<K, V>::operator[](const K& k)
+{
+    if (contains(k)) {
+        return bucket_arr[prober(k)]->val;
+    }
+    else {
+        insert({k, 0});
+        return bucket_arr[prober(k)]->val;
+    }
+}
+
+template <typename K, typename V>
+void Nodemap<K, V>::clear()
+{
+    for (auto& x : bucket_arr) {
+        store_elem.remove(x);
+        x = nullptr;
+    }
+    inserted_n = 0;
+}
+template <typename K, typename V>
+void Nodemap<K, V>::rehash(int size)
+{
+    vector<Element*> arr_new(size);
+    for (const auto& x : bucket_arr) {
+        if (!x) {
+            continue;
+        }
+        int32_t loc = x->hash % size;
+        while (arr_new[loc]) {
+            loc++;
+            if (loc >= size) {
+                loc -= size;
+            }
+        }
+        arr_new[loc] = x;
+    }
+    bucket_arr = arr_new;
+}
+template <typename K, typename V>
+void Nodemap<K, V>::rehash()
+{
+    int size = helper2::next_prime(bucket_arr.size());
+    rehash(size);
+}
+
+ template <typename K, typename V>
+ void Nodemap<K, V>::reserve(int size)
+{
+    if (size < bucket_arr.size()){
+        return;
+    }
+    rehash(size);
+
+}
+
+template <typename K, typename V>
+void Nodemap<K, V>::erase(const K& key){
+    int32_t pos = prober(key);
+    int32_t hash = hasher(key);
+
+    if (!bucket_arr[pos]){
+        return;
+    }
+    // TODO: yet another case where contains isn't
+    // TODO: CRITICAl: DON'T check for nullpointer on prober, check if hash = -1
+    if (bucket_arr[pos]->hash == hash && bucket_arr[pos]->key == key){
+        store_elem.remove(bucket_arr[pos]);
+        bucket_arr[pos]->hash = -1;
+        bucket_arr[pos] = nullptr;
+        inserted_n--;
+
+    }
+
+
 }
 
 #endif
