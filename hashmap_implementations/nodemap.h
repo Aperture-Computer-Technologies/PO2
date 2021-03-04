@@ -172,6 +172,7 @@ class Nodemap {
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
     int32_t prober(const K& key) const;
+    int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
@@ -225,14 +226,29 @@ int32_t Nodemap<K, V>::prober(const K& key) const
     }
     return pos;
 }
+
+template <typename K, typename V>
+int32_t Nodemap<K, V>::prober(const K& key, const int32_t& hash) const
+{
+    int32_t pos = hash % bucket_arr.size();
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        pos++;
+        if (pos >= bucket_arr.size()) {
+            pos -= bucket_arr.size();
+        }
+    }
+    return pos;
+}
+
 /*
  * returns bool, index, hash
  */
 template <typename K, typename V>
 std::tuple<bool, int32_t, int> Nodemap<K, V>::contains_key(const K& key) const
 {
-    int pos = prober(key);
-    int32_t hash = hasher(key); // TODO: ineff
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
     if (!bucket_arr[pos]) {
         return {false, pos, hash};
     }
@@ -242,8 +258,9 @@ std::tuple<bool, int32_t, int> Nodemap<K, V>::contains_key(const K& key) const
 template <typename K, typename V>
 bool Nodemap<K, V>::contains(const K& key) const
 {
-    int pos = prober(key);
-    int32_t hash = hasher(key); // ineff
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
     if (!bucket_arr[pos]) {
         return false;
     }
