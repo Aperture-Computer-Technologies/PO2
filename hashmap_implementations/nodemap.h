@@ -107,21 +107,21 @@ void Cont<T>::remove(T* elem)
 template <typename T>
 T* Cont<T>::empty_slot_selector()
 {
-    int index = 0;
+    int pos = 0;
     int max = 0;
     for (int i = 0; i < actual_store_sizes.size(); i++) {
         if (empty_slots[i].empty()) {
             continue;
         }
         if (actual_store_sizes[i] > max) {
-            index = i;
+            pos = i;
             max = actual_store_sizes[i];
         }
     }
-    T* empty = empty_slots[index].back();
-    empty_slots[index].pop_back();
+    T* empty = empty_slots[pos].back();
+    empty_slots[pos].pop_back();
     n_empty--;
-    actual_store_sizes[index] += 1;
+    actual_store_sizes[pos] += 1;
     return empty;
 }
 template <typename T>
@@ -192,11 +192,11 @@ int32_t Nodemap<K, V>::hasher(const K& key) const
     static std::hash<K> hf;
     int32_t hash = hf(key);
     int32_t final_hash = 0;
-    int32_t index = 0;
+    int32_t pos = 0;
     for (int i = 0; i < sizeof(hash); i++) {
-        index = hash & 0x00000000000000ff;
+        pos = hash & 0x00000000000000ff;
         hash = hash >> 8;
-        final_hash = final_hash ^ hash_state[index + i];
+        final_hash = final_hash ^ hash_state[pos + i];
     }
     if (final_hash < 0) {
         final_hash = final_hash * -1;
@@ -216,9 +216,9 @@ template <typename K, typename V>
 int32_t Nodemap<K, V>::prober(const K& key) const
 {
     int32_t hash = hasher(key);
-    int32_t index = hash % bucket_arr.size();
-    //    while (bucket_arr[index] && bucket_arr[index]->hash != hash && bucket_arr[index]->key != key) {
-    while (bucket_arr[index] && (bucket_arr[index]->hash != hash  || bucket_arr[index]->hash == -1) && bucket_arr[index]->key != key) {
+    int32_t pos = hash % bucket_arr.size();
+    //    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash && bucket_arr[pos]->key != key) {
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
         /* null, stop
          * not null, same hash, same key, stop
          *
@@ -228,12 +228,12 @@ int32_t Nodemap<K, V>::prober(const K& key) const
          *
          * not null, diff hash, same key, impossible
          */
-        index++;
-        if (index >= bucket_arr.size()) {
-            index -= bucket_arr.size();
+        pos++;
+        if (pos >= bucket_arr.size()) {
+            pos -= bucket_arr.size();
         }
     }
-    return index;
+    return pos;
 }
 /*
  * returns bool, index, hash
@@ -275,7 +275,7 @@ void Nodemap<K, V>::insert(const std::pair<K, V> kv)
 template <typename K, typename V>
 V& Nodemap<K, V>::operator[](const K& k)
 {
-    if (contains(k)) {
+    if (contains(k)) { // TODO: remove inefficiency
         return bucket_arr[prober(k)]->val;
     }
     else {
