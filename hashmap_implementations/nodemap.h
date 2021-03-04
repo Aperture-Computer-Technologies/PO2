@@ -217,17 +217,7 @@ int32_t Nodemap<K, V>::prober(const K& key) const
 {
     int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
-    //    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash && bucket_arr[pos]->key != key) {
     while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
-        /* null, stop
-         * not null, same hash, same key, stop
-         *
-         * !null && diff hash or same hash
-         * not null, diff hash, diff key, verder
-         * not null, same hash, diff key, verder
-         *
-         * not null, diff hash, same key, impossible
-         */
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
@@ -242,19 +232,22 @@ template <typename K, typename V>
 std::tuple<bool, int32_t, int> Nodemap<K, V>::contains_key(const K& key) const
 {
     int pos = prober(key);
-    int32_t hash = hasher(key);
+    int32_t hash = hasher(key); // TODO: ineff
     if (!bucket_arr[pos]) {
         return {false, pos, hash};
     }
-//    bool partial = (bucket_arr[pos]->hash == hash && bucket_arr[pos]->key == key);
-//    return {partial, pos, hash};
     return {true, pos, hash};
 }
 
 template <typename K, typename V>
 bool Nodemap<K, V>::contains(const K& key) const
 {
-    return std::get<0>(contains_key(key));
+    int pos = prober(key);
+    int32_t hash = hasher(key); // ineff
+    if (!bucket_arr[pos]) {
+        return false;
+    }
+    return true;
 }
 template <typename K, typename V>
 void Nodemap<K, V>::insert(const std::pair<K, V> kv)
@@ -275,12 +268,16 @@ void Nodemap<K, V>::insert(const std::pair<K, V> kv)
 template <typename K, typename V>
 V& Nodemap<K, V>::operator[](const K& k)
 {
-    if (contains(k)) { // TODO: remove inefficiency
-        return bucket_arr[prober(k)]->val;
+    auto pos_info = contains_key(k);
+    if (std::get<0>(pos_info)){
+        return bucket_arr[std::get<1>(pos_info)]->val;
     }
+
     else {
-        insert({k, 0});
-        return bucket_arr[prober(k)]->val;
+        auto pos = std::get<1>(pos_info);
+        Element el{k, 0, std::get<2>(pos_info)};
+        bucket_arr[pos] = store_elem.insert(el);
+        return bucket_arr[pos]->val;
     }
 }
 
@@ -299,6 +296,9 @@ void Nodemap<K, V>::rehash(int size)
     vector<Element*> arr_new(size);
     for (const auto& x : bucket_arr) {
         if (!x) {
+            continue;
+        }
+        if (x->hash == -1){
             continue;
         }
         int32_t loc = x->hash % size;
