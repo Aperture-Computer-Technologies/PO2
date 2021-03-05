@@ -6,25 +6,37 @@
 #include <tuple>
 #include <vector>
 
-#include "../tools/random.h"
+#include "helpers.h"
 using std::vector;
 
-constexpr int INT_MAX = 2147483647;
-namespace helper2 {
-    std::vector<int> prime_sizes
-        = {251,    479,    911,     1733,    3299,    6269,    11923,    22669,    43093,    81883,    155579,
-           295601, 561667, 1067179, 2027659, 3852553, 7319857, 13907737, 26424707, 50206957, 95393219, 18124717};
-
-    int32_t next_prime(const int& n)
-    {
-        for (const int x : prime_sizes) {
-            if (x > n) {
-                int32_t t = x;
-                return t;
-            }
-        }
-    }
-}  // namespace helper2
+/* This is linear probing, but ""special""
+ * it's an attempt to adress the problem LPmap2 has, namely to prevent rehashes from
+ * invalidating pointers to values.
+ * https://en.wikipedia.org/wiki/Fundamental_theorem_of_software_engineering strikes again
+ * the k,v and hash(k) are stored in a specialized construct.
+ * this specialized construct does the following:
+ * 1. it doesn't reallocate anything, even if it's size increases.
+ * 2. be a mostly continuous memory region, to have better cache locality
+ * than just allocating space in the heap ans storing their pointers.
+ * My reasoning is that if i just do new KVpair and store it's pointers, KVpairs will be spread
+ * all over the heap, meaning worse cache locality.
+ *
+ * As a test, there's nodemap2, wich just allocates randomly on the heap when needed.
+ * nodemap is faster than it, but not significantly faster.
+ * but on the plus side, i haven't spent time optimizing the specialized container yet.
+ *
+ * pros of this hashmap:
+ * 1. faster than nodemap2 and standard implementation
+ * 2. better memory usage than normal linear probing. well, theoretically, and only kinda.
+ * cons:
+ * 1. complex
+ * 2. having trouble using implementing semantics, which we need for operator[const K&& key]
+ *
+ * ISSUES: Nodemap<string,string> doesn't work. I assume my map doesn't work for any nontrivial
+ * k,v datapair.
+ * FIX in next sprint.
+ *
+ */
 
 /*
  * specialized, don't use for anything outside of this hashmap
@@ -218,7 +230,11 @@ int32_t Nodemap<K, V>::prober(const K& key) const
 {
     int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
-    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
+           && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        // TODO: verify ASAP that the line ^ is slower for other types than int. for now, uncommented is used.
+        //    As soon as Cont is fixed to work with non int objects, check it.
+        //    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
@@ -231,7 +247,10 @@ template <typename K, typename V>
 int32_t Nodemap<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
-    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key ||
+        bucket_arr[pos]->hash == -1)) {
+//    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
+        //        TODO: see todo in other prober
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
@@ -273,7 +292,7 @@ void Nodemap<K, V>::insert(const std::pair<K, V> kv)
         rehash();
     }
     auto pos_info = contains_key(kv.first);
-    if (std::get<0>(pos_info)){
+    if (std::get<0>(pos_info)) {
         return;
     }
 
@@ -286,13 +305,13 @@ template <typename K, typename V>
 V& Nodemap<K, V>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
-    if (std::get<0>(pos_info)){
+    if (std::get<0>(pos_info)) {
         return bucket_arr[std::get<1>(pos_info)]->val;
     }
 
     else {
         auto pos = std::get<1>(pos_info);
-        Element el{k, 0, std::get<2>(pos_info)};
+        Element el{k, V{}, std::get<2>(pos_info)};
         bucket_arr[pos] = store_elem.insert(el);
         return bucket_arr[pos]->val;
     }
@@ -315,12 +334,12 @@ void Nodemap<K, V>::rehash(int size)
         if (!x) {
             continue;
         }
-        if (x->hash == -1){
+        if (x->hash == -1) {
             continue;
         }
         int32_t loc = x->hash % size;
-        while (arr_new[loc] && arr_new[loc]->key != x->key) { // TODO: think if this is the correct thing
-//        while (arr_new[loc]() { // TODO: replaace if eronious
+//        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
+                    while (arr_new[loc]) { // TODO: replaace if eronious
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -333,7 +352,7 @@ void Nodemap<K, V>::rehash(int size)
 template <typename K, typename V>
 void Nodemap<K, V>::rehash()
 {
-    int size = helper2::next_prime(bucket_arr.size());
+    int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
@@ -350,16 +369,14 @@ template <typename K, typename V>
 void Nodemap<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
-    if (!std::get<0>(pos_data)){
+    if (!std::get<0>(pos_data)) {
         return;
     }
     auto pos = std::get<1>(pos_data);
     store_elem.remove(bucket_arr[pos]);
 
-
-        bucket_arr[pos]->hash = -1;
-        inserted_n--;
-
+    bucket_arr[pos]->hash = -1;
+    inserted_n--;
 }
 
 #endif

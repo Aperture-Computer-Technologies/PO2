@@ -1,224 +1,254 @@
-//
-// Created by MassiveAtoms on 1/31/21.
-//
-
-#ifndef PO2_CHAINING_SIMD_H
-#define PO2_CHAINING_SIMD_H
+#ifndef LP_H
+#define LP_H
 
 #include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <list>
+#include <numeric>
+#include <tuple>
 #include <vector>
 
-#include "../tools/random.h"
-
-using std::cout;
+#include "helpers.h"
 using std::vector;
 
-namespace helper {
-    vector<int> prime_sizes
-        = {127,    251,    479,     911,     1733,    3299,    6269,     11923,    22669,    43093,    81883,   155579,
-           295601, 561667, 1067179, 2027659, 3852553, 7319857, 13907737, 26424707, 50206957, 95393219, 18124717};
+/*
+ * standard linear probing map.
+ * It's significantly faster than std. but it won't meet some requirements of STL.
+ * https://eel.is/c++draft/unord.req
+ * 'The elements of an unordered associative container are organized into buckets.
+ * Keys with the same hash code appear in the same bucket. Rehashing invalidates iterators,
+ * changes ordering between elements, and changes which buckets elements appear in,
+ * but does not invalidate pointers or references to elements.'
+ * pros:
+ * 1. fastest out of everything i've coded.
+ * 2. simple to implement.
+ * cons:
+ * 1. no pointer stability
+ * 2. worse memory usage than nodemaps.
+ *
+ */
 
-    size_t next_prime(const int& n)
-    {
-        for (const int x : prime_sizes) {
-            if (x > n) {
-                size_t t = x;
-                return t;
-            }
-        }
-    }
-}  // namespace helper
-
-class LPmap {
+template <typename K, typename V>
+class LP {
   public:
-    explicit LPmap(int size = 101);
-    ~LPmap(){};
-    void reserve(int size);                             // set inserted of the array
-    void insert(std::pair<int,int> init_list);  // insert
-    int& operator[](const int& k);                      // lookup and if you can, insert
-    int& operator[](int&& k);                           // lookup and if you can, insert
-    void erase(int key);
-
-
-    double max_load = 0.5;
+    LP();
+    explicit LP(int size);
+    void insert(const std::pair<K, V> kv);
+    bool contains(const K& key) const;
+    V& operator[](const K& k);
     void clear();
-    int32_t bucket_count(){return buckets;};
-    int32_t size(){return inserted;};
-    bool contains(const int& key) const;
-    void makeEmpty();
+    int32_t bucket_count() { return bucket_arr.size(); };
+    int32_t size() { return inserted_n; };
+    void reserve(int size);
+    void erase(const K& key);
+    void rehash();
+    //    V& operator[](V&& k);
 
   private:
-    int32_t buckets; // buckets, regardless if it's empty
-    int32_t inserted; // actual inserted items
-    int32_t DELETED_STATE = -1;  // set hashcode to this if deleted
-    int32_t EMPTY_STATE = 0;
-    int32_t myHash(const int& x) const; // movre bacvk to private
+    int32_t DELETED = -1;
+    int32_t EMPTY = -2;
+    struct Element {
+        Element(K key_, const V val_, int32_t hash_) : hash{hash_}, key{key_}, val{new V{val_}} {};
+        Element() : key{0}, val{0}, hash{-2} {};  // fix this, or no magic. is empty
+        int32_t hash;
+        K key;
+        V* val;
+    };
+    vector<Element> bucket_arr;
+    vector<int32_t> hash_state;
+    int inserted_n;
+    float lf_max;
+    int32_t hasher(const K& key) const;
     void hasher_state_gen();
-    int32_t prober(const int& key) const;
+    int32_t prober(const K& key) const;
+    int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
-    void rehash();
-    vector<size_t> hash_state;
-    vector<std::pair<int, int>> array;  // hash, value
-    
+    std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
-// constructor
-LPmap::LPmap(int size) : array(size), buckets{size}, inserted{0} {
-    makeEmpty();
+template <typename K, typename V>
+LP<K, V>::LP() : LP{LP<K, V>(251)}
+{
+}
+template <typename K, typename V>
+LP<K, V>::LP(int size) : bucket_arr{vector<Element>(size)}, inserted_n{0}, lf_max{0.5}
+{
     hasher_state_gen();
 }
-
-// "deletes" all elements (lazy)
-void LPmap::makeEmpty()
+template <typename K, typename V>
+int32_t LP<K, V>::hasher(const K& key) const
 {
-    for (auto& x : array) {
-        x.first = EMPTY_STATE;
+    static std::hash<K> hf;
+    int32_t hash = hf(key);
+    int32_t final_hash = 0;
+    int32_t pos = 0;
+    for (int i = 0; i < sizeof(hash); i++) {
+        pos = hash & 0x00000000000000ff;
+        hash = hash >> 8;
+        final_hash = final_hash ^ hash_state[pos + i];
     }
-    inserted = 0;
+    if (final_hash < 0) {
+        final_hash = final_hash * -1;
+    }
+    return final_hash;
 }
 
-void LPmap::clear(){
-    makeEmpty();
-}
-
-// probes where the element should be located at, with probing
-int32_t LPmap::prober(const int& key) const
+template <typename K, typename V>
+void LP<K, V>::hasher_state_gen()
 {
-    int32_t hash = myHash(key);
-    int32_t position = hash % buckets;
-    int count = 0;
+    std::vector<int32_t> state(259);
+    std::generate(state.begin(), state.end(), gen_integer);
+    hash_state = state;
+}
 
-    while (array[position].first != EMPTY_STATE && array[position].first != hash) {
-        position++;
-        count++;
-        if (position >= array.size()) {
-            position -= array.size();
+template <typename K, typename V>
+int32_t LP<K, V>::prober(const K& key) const
+{
+    int32_t hash = hasher(key);
+    int32_t pos = hash % bucket_arr.size();
+    while (bucket_arr[pos].hash != EMPTY && bucket_arr[pos].hash != hash
+           && (bucket_arr[pos].hash == -1 || bucket_arr[pos].key != key)) {
+        pos++;
+        if (pos >= bucket_arr.size()) {
+            pos -= bucket_arr.size();
         }
     }
-    return position;
+    return pos;
 }
 
-// check if key exists (technically, if object with same hash exists in correct location)
-bool LPmap::contains(const int& key) const
+template <typename K, typename V>
+int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
 {
-    auto pos = prober(key);
-    return array[pos].first == myHash(key);
+    int32_t pos = hash % bucket_arr.size();
+    while (bucket_arr[pos].hash != EMPTY && bucket_arr[pos].hash != hash
+           && (bucket_arr[pos].key != key || bucket_arr[pos].hash == -1)) {
+        pos++;
+        if (pos >= bucket_arr.size()) {
+            pos -= bucket_arr.size();
+        }
+    }
+    return pos;
 }
 
-// insert
-void LPmap::insert(std::pair<int,int> init_list) // key, val
+/*
+ * returns bool, index, hash
+ */
+template <typename K, typename V>
+std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 {
-    if (((inserted + 1) / (float)buckets) > max_load) {
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
+    if (bucket_arr[pos].hash == EMPTY || bucket_arr[pos].hash == DELETED) {
+        return {false, pos, hash};
+    }
+    return {true, pos, hash};
+}
+
+template <typename K, typename V>
+bool LP<K, V>::contains(const K& key) const
+{
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
+    if (bucket_arr[pos].hash == EMPTY || bucket_arr[pos] == DELETED) {
+        return false;
+    }
+    return true;
+}
+template <typename K, typename V>
+void LP<K, V>::insert(const std::pair<K, V> kv)
+{
+    if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
     }
-    int32_t pos = prober(init_list.first);
-    if ( array[pos].first != myHash(init_list.first)) {
-
-        if (pos - (myHash(init_list.first) % buckets) > 10){
-            rehash();
-            pos = prober(init_list.first);
-        }
-        array[pos] = std::pair<int, int>{myHash(init_list.first), init_list.second};
-        inserted++;
+    auto pos_info = contains_key(kv.first);
+    if (std::get<0>(pos_info)) {
+        return;
     }
+
+    bucket_arr[std::get<1>(pos_info)] = Element{kv.first, kv.second, std::get<2>(pos_info)};
+    ;
+    inserted_n++;
 }
 
-// lookup, insert on nonexistence
-int& LPmap::operator[](const int& k)
+template <typename K, typename V>
+V& LP<K, V>::operator[](const K& k)
 {
-    if (contains(k)) {
-        return array[prober(k)].second;
+    auto pos_info = contains_key(k);
+    if (std::get<0>(pos_info)) {
+        return *bucket_arr[std::get<1>(pos_info)].val;
     }
+
     else {
-        insert({k, 0});
-        return array[prober(k)].second;
-    }
-}
-// second one
-int& LPmap::operator[](int&& k)
-{
-    if (contains(k)) {
-        return array[prober(k)].second;
-    }
-    else {
-        insert({k, 0});
-        return array[prober(k)].second;
+        auto pos = std::get<1>(pos_info);
+        bucket_arr[pos] = Element{k, V{}, std::get<2>(pos_info)};
+
+        return *bucket_arr[pos].val;
     }
 }
 
-// erase
-void LPmap::erase(int key)
+template <typename K, typename V>
+void LP<K, V>::clear()
 {
-    auto loc = prober(key);
-    array[loc].first = DELETED_STATE;
-    inserted--;
-}
-
-void LPmap::rehash(int size)
-{
-    vector<std::pair<int, int>> new_arr(size);
-    for (const auto& x : array) {
-        if (x.first == DELETED_STATE) {
+    for (auto& x : bucket_arr) {
+        if (!x.val || x.hash == DELETED){
             continue;
         }
-        int loc = x.first % size;
-        int value = x.second;
-        while (new_arr[loc].first != EMPTY_STATE) {
+        x.hash = DELETED;
+        delete x.val;
+    }
+    inserted_n = 0;
+}
+template <typename K, typename V>
+void LP<K, V>::rehash(int size)
+{
+    vector<Element> arr_new(size);
+    for (const auto& x : bucket_arr) {
+        if (x.hash == EMPTY) {
+            continue;
+        }
+        if (x.hash == DELETED){
+            continue;
+        }
+        int32_t loc = x.hash % size;
+        while (arr_new[loc].hash != EMPTY && arr_new[loc].key != x.key) {  // TODO: think if this is the correct thing
             loc++;
             if (loc >= size) {
                 loc -= size;
             }
         }
-        new_arr[loc] = {x.first, x.second};
+        arr_new[loc] = x;
     }
-    for (auto& x: new_arr){
-        if (!x.first){
-            x.first = EMPTY_STATE;
-        }
-    }
-    array = new_arr;
-    buckets = size;
+    bucket_arr = arr_new;
 }
-
-void LPmap::rehash()
+template <typename K, typename V>
+void LP<K, V>::rehash()
 {
-    int size = helper::next_prime(buckets);
+    int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
-void LPmap::reserve(int size) { rehash(size); }
-
-/*
- * this changes the state for rehashes and init.
- *
- */
-void LPmap::hasher_state_gen()
+template <typename K, typename V>
+void LP<K, V>::reserve(int size)
 {
-    std::vector<size_t> state(259);
-    std::generate(state.begin(), state.end(), gen_integer);
-    hash_state = state;
-}
-
-// calcs hash, modulo it later
-// tabulation hash
-int32_t LPmap::myHash(const int& key) const
-{
-    static std::hash<int> hf;
-    int32_t hash = hf(key);
-    int32_t final_hash = 0;
-    int32_t index =0;
-    for (int i = 0; i < sizeof(hash); i++) {
-        index = hash & 0x00000000000000ff;
-        hash = hash >> 8;
-        final_hash = final_hash ^ hash_state[index + i];
+    if (size < bucket_arr.size()) {
+        return;
     }
-    if (final_hash < 0) {final_hash = final_hash * -1;}
-    return final_hash;
+    rehash(size);
 }
 
-// _mm_cmpeq_epi64,
-//
-#endif  // PO2_CHAINING_SIMD_H
+template <typename K, typename V>
+void LP<K, V>::erase(const K& key)
+{
+    auto pos_data = contains_key(key);
+    if (!std::get<0>(pos_data)) {
+        return;
+    }
+    auto pos = std::get<1>(pos_data);
+    // TODO: maybe delete here instead of when rehashing
+    bucket_arr[pos].hash = DELETED;
+    delete bucket_arr[pos].val;
+
+    inserted_n--;
+}
+
+#endif

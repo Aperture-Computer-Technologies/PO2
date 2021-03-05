@@ -42,7 +42,6 @@ set(CLANG_TIDY_SUPPRESS_CXX
 # Sagar's Linear Probing
 add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/LPmap.h
         hashmap_implementations/nodemap.h
 
         )

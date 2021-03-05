@@ -1,38 +1,25 @@
-#ifndef NODEMAP2_H
-#define NODEMAP2_H
+#ifndef NODEMAP1B_H
+#define NODEMAP1B_H
 
 #include <algorithm>
 #include <numeric>
 #include <tuple>
 #include <vector>
 
-#include "../tools/random.h"
+#include "helpers.h"
+#include "nodemap.h"
 using std::vector;
+
 /*
- * basically a test to check if my intuition is correct.
- * checking to see if my special data structure was indeed justified.
- * it is, for <int,int>, and on my machine, for my compiler, with my compiler flags.
- *
- * this is basically basic linear probing, but instead of storing the KVpair in a vector,
- * I'm storing a vector of KVpair pointers.
- * the difference between this and nodemap is that when i insert, i just use
- * new KVpair{} and store it's pointer, while nodemap inserts it in specialized datastruct,
- * which is a lot more continuous.
- * pros:
- * 1. simpler than nodemap
- * 2. faster than std map
- * cons:
- * 2. slower than nodemap, with no obvious places where i can optimize
- *
- *
+ * same as nodemap, this is for comparing performance improvements of features.
  *
  */
 
 template <typename K, typename V>
-class Nodemap2 {
+class Nodemap1b {
   public:
-    Nodemap2();
-    explicit Nodemap2(int size);
+    Nodemap1b();
+    explicit Nodemap1b(int size);
 
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
@@ -54,30 +41,31 @@ class Nodemap2 {
         K key;
         V val;
     };
+    Cont<Element> store_elem;
     vector<Element*> bucket_arr;
     vector<int32_t> hash_state;
     int inserted_n;
     float lf_max;
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
-    int32_t prober(const K& key) const;
+    int32_t insert_prober(const K& key, const int32_t& hash) const;
     int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
 template <typename K, typename V>
-Nodemap2<K, V>::Nodemap2() : Nodemap2{Nodemap2<K, V>(251)}
+Nodemap1b<K, V>::Nodemap1b() : Nodemap1b{Nodemap1b<K, V>(251)}
 {
 }
 template <typename K, typename V>
-Nodemap2<K, V>::Nodemap2(int size)
-    : bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
+Nodemap1b<K, V>::Nodemap1b(int size)
+    : store_elem{Cont<Element>(size)}, bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
 {
     hasher_state_gen();
 }
 template <typename K, typename V>
-int32_t Nodemap2<K, V>::hasher(const K& key) const
+int32_t Nodemap1b<K, V>::hasher(const K& key) const
 {
     static std::hash<K> hf;
     int32_t hash = hf(key);
@@ -95,7 +83,7 @@ int32_t Nodemap2<K, V>::hasher(const K& key) const
 }
 
 template <typename K, typename V>
-void Nodemap2<K, V>::hasher_state_gen()
+void Nodemap1b<K, V>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
@@ -103,24 +91,29 @@ void Nodemap2<K, V>::hasher_state_gen()
 }
 
 template <typename K, typename V>
-int32_t Nodemap2<K, V>::prober(const K& key) const
+int32_t Nodemap1b<K, V>::insert_prober(const K& key, const int32_t& hash) const
 {
-    int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
-    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->hash == -1 ||bucket_arr[pos]->key != key)) {
+    while (bucket_arr[pos] && (bucket_arr[pos]->hash != DELETED || bucket_arr[pos]->key != key)) {
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
         }
     }
+    if (bucket_arr[pos] && bucket_arr[pos]->hash == DELETED){
+        delete bucket_arr[pos];
+    }
+
     return pos;
 }
 
 template <typename K, typename V>
-int32_t Nodemap2<K, V>::prober(const K& key, const int32_t& hash) const
+int32_t Nodemap1b<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
-    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+    //    while (bucket_arr[pos] && bucket_arr[pos]->key != key )
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
+           && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
@@ -133,7 +126,7 @@ int32_t Nodemap2<K, V>::prober(const K& key, const int32_t& hash) const
  * returns bool, index, hash
  */
 template <typename K, typename V>
-std::tuple<bool, int32_t, int> Nodemap2<K, V>::contains_key(const K& key) const
+std::tuple<bool, int32_t, int> Nodemap1b<K, V>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -145,7 +138,7 @@ std::tuple<bool, int32_t, int> Nodemap2<K, V>::contains_key(const K& key) const
 }
 
 template <typename K, typename V>
-bool Nodemap2<K, V>::contains(const K& key) const
+bool Nodemap1b<K, V>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -156,60 +149,61 @@ bool Nodemap2<K, V>::contains(const K& key) const
     return true;
 }
 template <typename K, typename V>
-void Nodemap2<K, V>::insert(const std::pair<K, V> kv)
+void Nodemap1b<K, V>::insert(const std::pair<K, V> kv)
 {
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
     }
-    auto pos_info = contains_key(kv.first);
-    if (std::get<0>(pos_info)){
+    auto hash = hasher(kv.first);
+    auto pos = insert_prober(kv.first, hash);
+    if (bucket_arr[pos] && bucket_arr[pos]->key == kv.first) {
         return;
     }
-
-
-    bucket_arr[std::get<1>(pos_info)] = new Element {kv.first, kv.second, std::get<2>(pos_info)};;
+    Element el{kv.first, kv.second, hash};
+    bucket_arr[pos] = store_elem.insert(el);
     inserted_n++;
 }
 
 template <typename K, typename V>
-V& Nodemap2<K, V>::operator[](const K& k)
+V& Nodemap1b<K, V>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
-    if (std::get<0>(pos_info)){
+    if (std::get<0>(pos_info)) {
         return bucket_arr[std::get<1>(pos_info)]->val;
     }
 
     else {
         auto pos = std::get<1>(pos_info);
-        bucket_arr[pos] = new Element{k, V{}, std::get<2>(pos_info)};
-
+        Element el{k, V{}, std::get<2>(pos_info)};
+        bucket_arr[pos] = store_elem.insert(el);
         return bucket_arr[pos]->val;
     }
 }
 
 template <typename K, typename V>
-void Nodemap2<K, V>::clear()
+void Nodemap1b<K, V>::clear()
 {
     for (auto& x : bucket_arr) {
-        delete x;
+        store_elem.remove(x);
+//        delete x;
         x = nullptr;
     }
     inserted_n = 0;
 }
 template <typename K, typename V>
-void Nodemap2<K, V>::rehash(int size)
+void Nodemap1b<K, V>::rehash(int size)
 {
     vector<Element*> arr_new(size);
     for (const auto& x : bucket_arr) {
         if (!x) {
             continue;
         }
-        if (x->hash == -1){
-            delete x;
+        if (x->hash == -1) {
+            continue;
         }
         int32_t loc = x->hash % size;
-        while (arr_new[loc] && arr_new[loc]->key != x->key) { // TODO: think if this is the correct thing
-//        while (arr_new[loc]() { // TODO: replaace if eronious
+        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
+            //        while (arr_new[loc]() { // TODO: replaace if eronious
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -220,14 +214,14 @@ void Nodemap2<K, V>::rehash(int size)
     bucket_arr = arr_new;
 }
 template <typename K, typename V>
-void Nodemap2<K, V>::rehash()
+void Nodemap1b<K, V>::rehash()
 {
     int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
 template <typename K, typename V>
-void Nodemap2<K, V>::reserve(int size)
+void Nodemap1b<K, V>::reserve(int size)
 {
     if (size < bucket_arr.size()) {
         return;
@@ -236,17 +230,16 @@ void Nodemap2<K, V>::reserve(int size)
 }
 
 template <typename K, typename V>
-void Nodemap2<K, V>::erase(const K& key)
+void Nodemap1b<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
-    if (!std::get<0>(pos_data)){
+    if (!std::get<0>(pos_data)) {
         return;
     }
     auto pos = std::get<1>(pos_data);
-    //TODO: maybe delete here instead of when rehashing
-        bucket_arr[pos]->hash = -1;
-        inserted_n--;
-
+    store_elem.remove(bucket_arr[pos]);
+    bucket_arr[pos]->hash = -1;
+    inserted_n--;
 }
 
 #endif
