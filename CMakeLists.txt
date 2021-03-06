@@ -9,8 +9,17 @@ project(PO2 VERSION 1.0
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-# add "-fsanitize=address -fno-omit-frame-pointer" to detect memory errors. remove after use, since it slows down program significantly
-set(CMAKE_CXX_FLAGS "-o3  -march=native -fsanitize=address -fno-omit-frame-pointer")
+# add "-fsanitize=address -fno-omit-frame-pointer"
+# to detect memory errors (leaks, double deletes, etc)
+
+# "-fsanitize=memory -fPIE -pie -fsanitize-memory-track-origins -fno-omit-frame-pointer "
+#to check if you're reading uninitialized memory
+
+# "-fsanitize=undefined -fno-omit-frame-pointer"
+# checks if anything you wrote relies on undefined behaviour
+# which means that your program prolly won't behave exactly as you want on a different compiler
+
+set(CMAKE_CXX_FLAGS "-o3  -march=native")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CLANG_TIDY_CXX -checks=-*,
