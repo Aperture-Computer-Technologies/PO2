@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "helpers.h"
-#include "nodemap.h"
+#include "specialsauce_cont.h"
 using std::vector;
 
 /*

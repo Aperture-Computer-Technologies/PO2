@@ -2,11 +2,13 @@
 #define NODEMAP_H
 
 #include <algorithm>
+#include <memory>
 #include <numeric>
 #include <tuple>
 #include <vector>
 
 #include "helpers.h"
+#include "specialsauce_cont.h"
 using std::vector;
 
 /* This is linear probing, but ""special""
@@ -32,8 +34,7 @@ using std::vector;
  * 1. complex
  * 2. having trouble using implementing semantics, which we need for operator[const K&& key]
  *
- * ISSUES: Nodemap<string,string> doesn't work. I assume my map doesn't work for any nontrivial
- * k,v datapair.
+ * ISSUES: Nodemap<string,string> fails sometimes.
  * FIX in next sprint.
  *
  */
@@ -41,114 +42,7 @@ using std::vector;
 /*
  * specialized, don't use for anything outside of this hashmap
  */
-template <typename T>
-class Cont {
-  public:
-    typedef T ValueType;
-    Cont();
-    Cont(int siz);
-    T* insert(T& elem);
-    void remove(T* elem);
-    void reserve(int size);
 
-  private:
-    T* empty_slot_selector();
-    int n_empty;
-    vector<vector<T>*> store = vector<vector<T>*>(1);
-    vector<vector<T*>> empty_slots;
-    vector<int> segment_ends;
-    vector<int> actual_store_sizes;
-};
-
-template <typename T>
-Cont<T>::Cont(int size)
-    : store{new vector<T>{}}, empty_slots{{}}, segment_ends{size}, n_empty{0}, actual_store_sizes{{0}}
-{
-    store.back()->reserve(size);
-}
-template <typename T>
-Cont<T>::Cont() : Cont{Cont<T>(251)}
-{
-}
-
-template <typename T>
-T* Cont<T>::insert(T& elem)
-{
-    T* adress;
-    if (n_empty) {
-        adress = empty_slot_selector();
-        *adress = elem;
-        return adress;
-    }
-    // check if vector is in danger of reallocation
-    bool is_full = (store.back()->size() == segment_ends.back());
-    if (is_full) {
-        int size = std::accumulate(segment_ends.begin(), segment_ends.end(), 0);
-        store.push_back(new vector<T>{});
-        store.back()->reserve(size);
-        actual_store_sizes.push_back(0);
-        empty_slots.push_back({});
-        segment_ends.push_back(size);
-    }
-    actual_store_sizes.back()++;
-    // no danger of reallocation
-    store.back()->push_back(elem);
-    return &(store.back()->back());
-}
-template <typename T>
-void Cont<T>::remove(T* elem)
-{
-    for (int i = 0; i < store.size(); i++) {
-        T* begin = store[i]->data();
-        if (elem >= begin && elem <= begin + store[i]->size()) {
-            empty_slots[i].push_back(elem);
-            n_empty++;
-            actual_store_sizes[i]--;
-            if (!actual_store_sizes[i] && actual_store_sizes.size() > 1) {
-                actual_store_sizes.erase(actual_store_sizes.begin() + i);
-                delete store[i];
-                store.erase(store.begin() + i);
-                n_empty -= empty_slots[i].size();
-                empty_slots.erase(empty_slots.begin() + i);
-                segment_ends.erase(segment_ends.begin() + i);
-            }
-            return;
-        }
-    }
-}
-template <typename T>
-T* Cont<T>::empty_slot_selector()
-{
-    int pos = 0;
-    int max = 0;
-    for (int i = 0; i < actual_store_sizes.size(); i++) {
-        if (empty_slots[i].empty()) {
-            continue;
-        }
-        if (actual_store_sizes[i] > max) {
-            pos = i;
-            max = actual_store_sizes[i];
-        }
-    }
-    T* empty = empty_slots[pos].back();
-    empty_slots[pos].pop_back();
-    n_empty--;
-    actual_store_sizes[pos] += 1;
-    return empty;
-}
-template <typename T>
-void Cont<T>::reserve(int size)
-{
-    int current = std::accumulate(segment_ends.begin(), segment_ends.end(), 0);
-    if (size <= current) {
-        return;
-    }
-    store.push_back(new vector<T>{});
-    store.back()->reserve(size - current);
-    actual_store_sizes.push_back(0);
-    empty_slots.push_back({});
-    segment_ends.push_back(size - current);
-}
 
 template <typename K, typename V>
 class Nodemap {
@@ -194,9 +88,9 @@ Nodemap<K, V>::Nodemap() : Nodemap{Nodemap<K, V>(251)}
 {
 }
 template <typename K, typename V>
-Nodemap<K, V>::Nodemap(int size)
-    : store_elem{Cont<Element>(size)}, bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
+Nodemap<K, V>::Nodemap(int size) : bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
 {
+    store_elem = {};
     hasher_state_gen();
 }
 template <typename K, typename V>
@@ -247,9 +141,9 @@ template <typename K, typename V>
 int32_t Nodemap<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
-        while (bucket_arr[pos] && bucket_arr[pos]->hash != hash  && (bucket_arr[pos]->key != key ||
-        bucket_arr[pos]->hash == -1)) {
-//    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
+           && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        //    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
         //        TODO: see todo in other prober
         pos++;
         if (pos >= bucket_arr.size()) {
@@ -338,8 +232,8 @@ void Nodemap<K, V>::rehash(int size)
             continue;
         }
         int32_t loc = x->hash % size;
-//        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
-                    while (arr_new[loc]) { // TODO: replaace if eronious
+        //        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
+        while (arr_new[loc]) {  // TODO: replaace if eronious
             loc++;
             if (loc >= size) {
                 loc -= size;

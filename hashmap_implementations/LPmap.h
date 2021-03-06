@@ -31,6 +31,7 @@ class LP {
   public:
     LP();
     explicit LP(int size);
+    ~LP() { clear(); };
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
     V& operator[](const K& k);
@@ -46,8 +47,10 @@ class LP {
     int32_t DELETED = -1;
     int32_t EMPTY = -2;
     struct Element {
-        Element(K key_, const V val_, int32_t hash_) : hash{hash_}, key{key_}, val{new V{val_}} {};
+        Element(K key_, V* val_, int32_t hash_) : hash{hash_}, key{key_}, val{val_} {};
         Element() : key{0}, val{0}, hash{-2} {};  // fix this, or no magic. is empty
+        Element(const Element& e) : hash{e.hash}, key{e.key}, val{e.val} {};
+        //        ~Element(){if (val){delete val;}};
         int32_t hash;
         K key;
         V* val;
@@ -164,8 +167,8 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
     if (std::get<0>(pos_info)) {
         return;
     }
-
-    bucket_arr[std::get<1>(pos_info)] = Element{kv.first, kv.second, std::get<2>(pos_info)};
+    V* val = new V{kv.second};
+    bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val, std::get<2>(pos_info)});
     ;
     inserted_n++;
 }
@@ -180,7 +183,7 @@ V& LP<K, V>::operator[](const K& k)
 
     else {
         auto pos = std::get<1>(pos_info);
-        bucket_arr[pos] = Element{k, V{}, std::get<2>(pos_info)};
+        bucket_arr[pos] = {k, new V{}, std::get<2>(pos_info)};
 
         return *bucket_arr[pos].val;
     }
@@ -190,11 +193,12 @@ template <typename K, typename V>
 void LP<K, V>::clear()
 {
     for (auto& x : bucket_arr) {
-        if (!x.val || x.hash == DELETED){
+        if (!x.val) {
             continue;
         }
         x.hash = DELETED;
         delete x.val;
+        x.val = nullptr;
     }
     inserted_n = 0;
 }
@@ -247,7 +251,8 @@ void LP<K, V>::erase(const K& key)
     // TODO: maybe delete here instead of when rehashing
     bucket_arr[pos].hash = DELETED;
     delete bucket_arr[pos].val;
-
+    bucket_arr[pos].val = nullptr;
+    bucket_arr[pos].key = K{};
     inserted_n--;
 }
 

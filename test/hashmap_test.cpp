@@ -9,7 +9,7 @@
 #include "./../hashmap_implementations/nodemap2.h"
 
 int main(){
-//    hashmap_test_suite(std::unordered_map<int, int> {});
+    hashmap_test_suite(std::unordered_map<int, int>{});
     cout << "--------Sagar's LP map\n";
     hashmap_test_suite(LP<int,int>{});
     cout << "--------Sagar's LP2 map\n";

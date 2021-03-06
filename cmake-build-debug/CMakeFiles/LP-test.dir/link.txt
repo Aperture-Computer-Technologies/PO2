@@ -1,1 +1,0 @@
-/usr/bin/g++  -o3  -march=native -g   CMakeFiles/LP-test.dir/test/hashmap_test.cpp.o  -o LP-test 

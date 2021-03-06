@@ -24,8 +24,6 @@ using std::vector;
  * cons:
  * 2. slower than nodemap, with no obvious places where i can optimize
  *
- *
- *
  */
 
 template <typename K, typename V>
@@ -33,6 +31,7 @@ class Nodemap2 {
   public:
     Nodemap2();
     explicit Nodemap2(int size);
+    ~Nodemap2();
 
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
@@ -166,7 +165,6 @@ void Nodemap2<K, V>::insert(const std::pair<K, V> kv)
         return;
     }
 
-
     bucket_arr[std::get<1>(pos_info)] = new Element {kv.first, kv.second, std::get<2>(pos_info)};;
     inserted_n++;
 }
@@ -239,14 +237,23 @@ template <typename K, typename V>
 void Nodemap2<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
-    if (!std::get<0>(pos_data)){
+    if (!std::get<0>(pos_data)) {
         return;
     }
     auto pos = std::get<1>(pos_data);
-    //TODO: maybe delete here instead of when rehashing
-        bucket_arr[pos]->hash = -1;
-        inserted_n--;
-
+    // TODO: maybe delete here instead of when rehashing
+    bucket_arr[pos]->hash = -1;
+    bucket_arr[pos]->val = V{};
+    inserted_n--;
+}
+template <typename K, typename V>
+Nodemap2<K, V>::~Nodemap2()
+{
+    for (auto& x : bucket_arr) {
+        if (x) {
+            delete x;
+        }
+    }
 }
 
 #endif

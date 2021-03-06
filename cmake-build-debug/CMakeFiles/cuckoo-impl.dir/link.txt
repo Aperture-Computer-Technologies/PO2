@@ -1,1 +1,1 @@
-/usr/bin/g++  -o3  -march=native -g   CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o  -o cuckoo-impl 
+/usr/bin/clang++  -o3  -march=native -fsanitize=address -fno-omit-frame-pointer -g   CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o  -o cuckoo-impl 
