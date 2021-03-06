@@ -1,4 +1,5 @@
 /build*
+/cmake-build-*
 /.cache*
 /.vscode
 .DS_Store
