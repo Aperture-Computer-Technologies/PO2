@@ -17,16 +17,17 @@ string choicetext
       "3. nodemap (sagar)\n"
       "4. nodemap2 (sagar)\n"
       "5.LPmap2 (sagar)\n"
-      "6. nodemap1b (sagar)"
+      "6. LPmap (sagar)\n"
+      "7. Nodemap1b (sagar)"
 
     ;
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5};
 // vector<int> hashmaps = {3,5, 6};
-vector<int> hashmaps = {1,3,4,5,6,7};
+vector<int> hashmaps = {6, 7, 3};
 int runs = 1;
-int maxsize = 3000000;
+int maxsize = 1000000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps
