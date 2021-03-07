@@ -2,6 +2,7 @@
 #define NODEMAP1B_H
 
 #include <algorithm>
+#include <deque>
 #include <numeric>
 #include <tuple>
 #include <vector>
@@ -11,8 +12,11 @@
 using std::vector;
 
 /*
- * same as nodemap, this is for comparing performance improvements of features.
- *
+ * Let this be a lesson to us all, especially me.
+ * Look first if something already exists for what you need.
+ * deque exists, does mostly what i want and probably does it better.
+ * I AM PLEASED to say that deque is slightly vaster than my own container.
+ * If we'll be choosing any Nodemap containers, it'll probably be this one
  */
 
 template <typename K, typename V>
@@ -41,14 +45,15 @@ class Nodemap1b {
         K key;
         V val;
     };
-    Cont<Element> store_elem;
-    vector<Element*> bucket_arr;
-    vector<int32_t> hash_state;
     int inserted_n;
     float lf_max;
+    std::deque<Element> store_elem;
+    vector<Element*> bucket_arr;
+    vector<int32_t> hash_state;
+    vector<Element*> open_slots;
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
-    int32_t insert_prober(const K& key, const int32_t& hash) const;
+    int32_t prober(const K& key) const;
     int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
@@ -60,7 +65,7 @@ Nodemap1b<K, V>::Nodemap1b() : Nodemap1b{Nodemap1b<K, V>(251)}
 }
 template <typename K, typename V>
 Nodemap1b<K, V>::Nodemap1b(int size)
-    : store_elem{Cont<Element>(size)}, bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}
+    : bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}, store_elem{}, open_slots{}
 {
     hasher_state_gen();
 }
@@ -91,19 +96,20 @@ void Nodemap1b<K, V>::hasher_state_gen()
 }
 
 template <typename K, typename V>
-int32_t Nodemap1b<K, V>::insert_prober(const K& key, const int32_t& hash) const
+int32_t Nodemap1b<K, V>::prober(const K& key) const
 {
+    int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
-    while (bucket_arr[pos] && (bucket_arr[pos]->hash != DELETED || bucket_arr[pos]->key != key)) {
+    while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
+           && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        // TODO: verify ASAP that the line ^ is slower for other types than int. for now, uncommented is used.
+        //    As soon as Cont is fixed to work with non int objects, check it.
+        //    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
         }
     }
-    if (bucket_arr[pos] && bucket_arr[pos]->hash == DELETED){
-        delete bucket_arr[pos];
-    }
-
     return pos;
 }
 
@@ -111,9 +117,10 @@ template <typename K, typename V>
 int32_t Nodemap1b<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
-    //    while (bucket_arr[pos] && bucket_arr[pos]->key != key )
     while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
            && (bucket_arr[pos]->key != key || bucket_arr[pos]->hash == -1)) {
+        //    while (bucket_arr[pos] && bucket_arr[pos]->key != key) {
+        //        TODO: see todo in other prober
         pos++;
         if (pos >= bucket_arr.size()) {
             pos -= bucket_arr.size();
@@ -154,13 +161,21 @@ void Nodemap1b<K, V>::insert(const std::pair<K, V> kv)
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
     }
-    auto hash = hasher(kv.first);
-    auto pos = insert_prober(kv.first, hash);
-    if (bucket_arr[pos] && bucket_arr[pos]->key == kv.first) {
+    auto pos_info = contains_key(kv.first);
+    auto pos = std::get<1>(pos_info);
+    if (std::get<0>(pos_info)) {
         return;
     }
-    Element el{kv.first, kv.second, hash};
-    bucket_arr[pos] = store_elem.insert(el);
+    if (open_slots.size()) {
+        auto elem_ptr = open_slots.back();
+        open_slots.pop_back();
+        bucket_arr[pos] = elem_ptr;
+        *elem_ptr = Element{kv.first, kv.second, std::get<2>(pos_info)};
+    }
+    else {
+        store_elem.emplace_back(Element{kv.first, kv.second, std::get<2>(pos_info)});
+        bucket_arr[pos] = &store_elem.back();
+    }
     inserted_n++;
 }
 
@@ -174,8 +189,8 @@ V& Nodemap1b<K, V>::operator[](const K& k)
 
     else {
         auto pos = std::get<1>(pos_info);
-        Element el{k, V{}, std::get<2>(pos_info)};
-        bucket_arr[pos] = store_elem.insert(el);
+        store_elem.emplace_back(Element{k, V{}, std::get<2>(pos_info)});
+        bucket_arr[pos] = &store_elem.back();
         return bucket_arr[pos]->val;
     }
 }
@@ -183,11 +198,9 @@ V& Nodemap1b<K, V>::operator[](const K& k)
 template <typename K, typename V>
 void Nodemap1b<K, V>::clear()
 {
-    for (auto& x : bucket_arr) {
-        store_elem.remove(x);
-//        delete x;
-        x = nullptr;
-    }
+    store_elem.clear();
+    bucket_arr.clear();
+    open_slots.clear();
     inserted_n = 0;
 }
 template <typename K, typename V>
@@ -202,8 +215,8 @@ void Nodemap1b<K, V>::rehash(int size)
             continue;
         }
         int32_t loc = x->hash % size;
-        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
-            //        while (arr_new[loc]() { // TODO: replaace if eronious
+        //        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
+        while (arr_new[loc]) {  // TODO: replaace if eronious
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -237,7 +250,7 @@ void Nodemap1b<K, V>::erase(const K& key)
         return;
     }
     auto pos = std::get<1>(pos_data);
-    store_elem.remove(bucket_arr[pos]);
+    open_slots.push_back(bucket_arr[pos]);
     bucket_arr[pos]->hash = -1;
     inserted_n--;
 }
