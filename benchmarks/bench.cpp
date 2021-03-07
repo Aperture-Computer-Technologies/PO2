@@ -1,10 +1,11 @@
 #include <iostream>
 
-#include "./../hashmap_implementations/LPmap2.h"
+#include "../hashmap_implementations/deprecated/LPmap2.h"
+#include "../hashmap_implementations/deprecated/nodemap.h"
+#include "../hashmap_implementations/deprecated/nodemap2.h"
 #include "./../hashmap_implementations/LPmap.h"
-#include "./../hashmap_implementations/nodemap.h"
+#include "./../hashmap_implementations/LPmap3.h"
 #include "./../hashmap_implementations/nodemap1b.h"
-#include "./../hashmap_implementations/nodemap2.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
 // include your implementations
@@ -19,14 +20,14 @@ string choicetext
       "5.LPmap2 (sagar)\n"
       "6. LPmap (sagar)\n"
       "7. Nodemap1b (sagar)"
+      "8. LP3"
 
     ;
 
 // default arguments
-// vector<int> hashmaps = {1, 2,3,4, 5};
-// vector<int> hashmaps = {3,5, 6};
-vector<int> hashmaps = {6, 7, 3};
-int runs = 1;
+// vector<int> hashmaps = {1, 2,3,4, 5,6,7};
+vector<int> hashmaps = {1, 7, 8, 1, 7, 8, 1, 7, 8};
+int runs = 30;
 int maxsize = 1000000;
 
 /*
@@ -77,12 +78,17 @@ int main(int argc, char **argv)
             }
             case 6: {
                 int_test_aggregate(LP<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP<string,string>{}, runs, maxsize);
+                string_test_aggregate(LP<string, string>{}, runs, maxsize);
                 break;
             }
             case 7: {
                 int_test_aggregate(Nodemap1b<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap1b<string,string>{}, runs, maxsize);
+                string_test_aggregate(Nodemap1b<string, string>{}, runs, maxsize);
+                break;
+            }
+            case 8: {
+                int_test_aggregate(LP3<int, int>{}, runs, maxsize);
+                string_test_aggregate(LP3<string, string>{}, runs, maxsize);
                 break;
             }
         }

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "./nodemap.h"
+#include "deprecated/nodemap.h"
 
 using namespace std;
 int main()
