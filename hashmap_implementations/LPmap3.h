@@ -1,7 +1,8 @@
-#ifndef LP_H
-#define LP_H
+#ifndef LP3_H
+#define LP3_H
 
 #include <algorithm>
+#include <deque>
 #include <numeric>
 #include <tuple>
 #include <vector>
@@ -27,11 +28,11 @@ using std::vector;
  */
 
 template <typename K, typename V>
-class LP {
+class LP3 {
   public:
-    LP();
-    explicit LP(int size);
-    ~LP() { clear(); };
+    LP3();
+    explicit LP3(int size);
+    ~LP3() { clear(); };
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
     V& operator[](const K& k);
@@ -55,10 +56,13 @@ class LP {
         K key;
         V* val;
     };
-    vector<Element> bucket_arr;
-    vector<int32_t> hash_state;
     int inserted_n;
     float lf_max;
+    vector<Element> bucket_arr;
+    vector<int32_t> hash_state;
+    std::deque<V> valuestore;
+    vector<V*> open_slots;
+
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
     int32_t prober(const K& key) const;
@@ -68,16 +72,16 @@ class LP {
 };
 
 template <typename K, typename V>
-LP<K, V>::LP() : LP{LP<K, V>(251)}
+LP3<K, V>::LP3() : LP3{LP3<K, V>(251)}
 {
 }
 template <typename K, typename V>
-LP<K, V>::LP(int size) : bucket_arr{vector<Element>(size)}, inserted_n{0}, lf_max{0.5}
+LP3<K, V>::LP3(int size) : bucket_arr{vector<Element>(size)}, inserted_n{0}, lf_max{0.5}, valuestore{}, open_slots{}
 {
     hasher_state_gen();
 }
 template <typename K, typename V>
-int32_t LP<K, V>::hasher(const K& key) const
+int32_t LP3<K, V>::hasher(const K& key) const
 {
     static std::hash<K> hf;
     int32_t hash = hf(key);
@@ -95,7 +99,7 @@ int32_t LP<K, V>::hasher(const K& key) const
 }
 
 template <typename K, typename V>
-void LP<K, V>::hasher_state_gen()
+void LP3<K, V>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
@@ -103,7 +107,7 @@ void LP<K, V>::hasher_state_gen()
 }
 
 template <typename K, typename V>
-int32_t LP<K, V>::prober(const K& key) const
+int32_t LP3<K, V>::prober(const K& key) const
 {
     int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
@@ -118,7 +122,7 @@ int32_t LP<K, V>::prober(const K& key) const
 }
 
 template <typename K, typename V>
-int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
+int32_t LP3<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
     while (bucket_arr[pos].hash != EMPTY && bucket_arr[pos].hash != hash
@@ -135,7 +139,7 @@ int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
  * returns bool, index, hash
  */
 template <typename K, typename V>
-std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
+std::tuple<bool, int32_t, int> LP3<K, V>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -147,7 +151,7 @@ std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 }
 
 template <typename K, typename V>
-bool LP<K, V>::contains(const K& key) const
+bool LP3<K, V>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -158,7 +162,7 @@ bool LP<K, V>::contains(const K& key) const
     return true;
 }
 template <typename K, typename V>
-void LP<K, V>::insert(const std::pair<K, V> kv)
+void LP3<K, V>::insert(const std::pair<K, V> kv)
 {
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
@@ -167,14 +171,21 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
     if (std::get<0>(pos_info)) {
         return;
     }
-    V* val = new V{kv.second};
-    bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val, std::get<2>(pos_info)});
-    ;
+    V* val_ptr;
+    if (open_slots.size()) {
+        val_ptr = open_slots.back();
+        open_slots.pop_back();
+    }
+    else {
+        valuestore.emplace_back(kv.second);
+        val_ptr = &valuestore.back();
+    }
+    bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val_ptr, std::get<2>(pos_info)});
     inserted_n++;
 }
 
 template <typename K, typename V>
-V& LP<K, V>::operator[](const K& k)
+V& LP3<K, V>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (std::get<0>(pos_info)) {
@@ -182,35 +193,39 @@ V& LP<K, V>::operator[](const K& k)
     }
 
     else {
+        V* val_ptr;
+        if (open_slots.size()) {
+            val_ptr = open_slots.back();
+            open_slots.pop_back();
+        }
+        else {
+            valuestore.emplace_back(V{});
+            val_ptr = &valuestore.back();
+        }
         auto pos = std::get<1>(pos_info);
-        bucket_arr[pos] = {k, new V{}, std::get<2>(pos_info)};
+        bucket_arr[pos] = {k, val_ptr, std::get<2>(pos_info)};
 
         return *bucket_arr[pos].val;
     }
 }
 
 template <typename K, typename V>
-void LP<K, V>::clear()
+void LP3<K, V>::clear()
 {
-    for (auto& x : bucket_arr) {
-        if (!x.val) {
-            continue;
-        }
-        x.hash = DELETED;
-        delete x.val;
-        x.val = nullptr;
-    }
+    open_slots.clear();
+    valuestore.clear();
+    bucket_arr.clear();
     inserted_n = 0;
 }
 template <typename K, typename V>
-void LP<K, V>::rehash(int size)
+void LP3<K, V>::rehash(int size)
 {
     vector<Element> arr_new(size);
     for (const auto& x : bucket_arr) {
         if (x.hash == EMPTY) {
             continue;
         }
-        if (x.hash == DELETED){
+        if (x.hash == DELETED) {
             continue;
         }
         int32_t loc = x.hash % size;
@@ -225,14 +240,14 @@ void LP<K, V>::rehash(int size)
     bucket_arr = arr_new;
 }
 template <typename K, typename V>
-void LP<K, V>::rehash()
+void LP3<K, V>::rehash()
 {
     int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
 template <typename K, typename V>
-void LP<K, V>::reserve(int size)
+void LP3<K, V>::reserve(int size)
 {
     if (size < bucket_arr.size()) {
         return;
@@ -241,16 +256,16 @@ void LP<K, V>::reserve(int size)
 }
 
 template <typename K, typename V>
-void LP<K, V>::erase(const K& key)
+void LP3<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
     if (!std::get<0>(pos_data)) {
         return;
     }
     auto pos = std::get<1>(pos_data);
-    // TODO: maybe delete here instead of when rehashing
     bucket_arr[pos].hash = DELETED;
-    delete bucket_arr[pos].val;
+    open_slots.push_back(bucket_arr[pos].val);
+    *bucket_arr[pos].val = V{};
     bucket_arr[pos].val = nullptr;
     bucket_arr[pos].key = K{};
     inserted_n--;

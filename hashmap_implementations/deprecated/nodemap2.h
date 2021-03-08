@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "../tools/random.h"
+#include "../../tools/random.h"
 using std::vector;
 /*
  * basically a test to check if my intuition is correct.

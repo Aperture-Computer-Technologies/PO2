@@ -7,8 +7,8 @@
 #include <tuple>
 #include <vector>
 
-#include "helpers.h"
-#include "specialsauce_cont.h"
+#include "../helpers.h"
+#include "../specialsauce_cont.h"
 using std::vector;
 
 /* This is linear probing, but ""special""
