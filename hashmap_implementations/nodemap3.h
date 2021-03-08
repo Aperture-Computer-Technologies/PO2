@@ -19,11 +19,10 @@ using std::vector;
  * If we'll be choosing any Nodemap containers, it'll probably be this one
  */
 
-template <typename K, typename V>
-class Nodemap1b {
+template <typename K, typename V> class Nodemap3 {
   public:
-    Nodemap1b();
-    explicit Nodemap1b(int size);
+    Nodemap3();
+    explicit Nodemap3(int size);
 
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
@@ -59,18 +58,13 @@ class Nodemap1b {
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
-template <typename K, typename V>
-Nodemap1b<K, V>::Nodemap1b() : Nodemap1b{Nodemap1b<K, V>(251)}
-{
-}
-template <typename K, typename V>
-Nodemap1b<K, V>::Nodemap1b(int size)
+template <typename K, typename V> Nodemap3<K, V>::Nodemap3() : Nodemap3{Nodemap3<K, V>(251)} {}
+template <typename K, typename V> Nodemap3<K, V>::Nodemap3(int size)
     : bucket_arr{vector<Element*>(size)}, inserted_n{0}, lf_max{0.5}, store_elem{}, open_slots{}
 {
     hasher_state_gen();
 }
-template <typename K, typename V>
-int32_t Nodemap1b<K, V>::hasher(const K& key) const
+template <typename K, typename V> int32_t Nodemap3<K, V>::hasher(const K& key) const
 {
     static std::hash<K> hf;
     int32_t hash = hf(key);
@@ -87,16 +81,14 @@ int32_t Nodemap1b<K, V>::hasher(const K& key) const
     return final_hash;
 }
 
-template <typename K, typename V>
-void Nodemap1b<K, V>::hasher_state_gen()
+template <typename K, typename V> void Nodemap3<K, V>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
     hash_state = state;
 }
 
-template <typename K, typename V>
-int32_t Nodemap1b<K, V>::prober(const K& key) const
+template <typename K, typename V> int32_t Nodemap3<K, V>::prober(const K& key) const
 {
     int32_t hash = hasher(key);
     int32_t pos = hash % bucket_arr.size();
@@ -113,8 +105,7 @@ int32_t Nodemap1b<K, V>::prober(const K& key) const
     return pos;
 }
 
-template <typename K, typename V>
-int32_t Nodemap1b<K, V>::prober(const K& key, const int32_t& hash) const
+template <typename K, typename V> int32_t Nodemap3<K, V>::prober(const K& key, const int32_t& hash) const
 {
     int32_t pos = hash % bucket_arr.size();
     while (bucket_arr[pos] && bucket_arr[pos]->hash != hash
@@ -132,8 +123,7 @@ int32_t Nodemap1b<K, V>::prober(const K& key, const int32_t& hash) const
 /*
  * returns bool, index, hash
  */
-template <typename K, typename V>
-std::tuple<bool, int32_t, int> Nodemap1b<K, V>::contains_key(const K& key) const
+template <typename K, typename V> std::tuple<bool, int32_t, int> Nodemap3<K, V>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -144,8 +134,7 @@ std::tuple<bool, int32_t, int> Nodemap1b<K, V>::contains_key(const K& key) const
     return {true, pos, hash};
 }
 
-template <typename K, typename V>
-bool Nodemap1b<K, V>::contains(const K& key) const
+template <typename K, typename V> bool Nodemap3<K, V>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -155,8 +144,7 @@ bool Nodemap1b<K, V>::contains(const K& key) const
     }
     return true;
 }
-template <typename K, typename V>
-void Nodemap1b<K, V>::insert(const std::pair<K, V> kv)
+template <typename K, typename V> void Nodemap3<K, V>::insert(const std::pair<K, V> kv)
 {
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
@@ -179,8 +167,7 @@ void Nodemap1b<K, V>::insert(const std::pair<K, V> kv)
     inserted_n++;
 }
 
-template <typename K, typename V>
-V& Nodemap1b<K, V>::operator[](const K& k)
+template <typename K, typename V> V& Nodemap3<K, V>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (std::get<0>(pos_info)) {
@@ -195,16 +182,14 @@ V& Nodemap1b<K, V>::operator[](const K& k)
     }
 }
 
-template <typename K, typename V>
-void Nodemap1b<K, V>::clear()
+template <typename K, typename V> void Nodemap3<K, V>::clear()
 {
     store_elem.clear();
     bucket_arr.clear();
     open_slots.clear();
     inserted_n = 0;
 }
-template <typename K, typename V>
-void Nodemap1b<K, V>::rehash(int size)
+template <typename K, typename V> void Nodemap3<K, V>::rehash(int size)
 {
     vector<Element*> arr_new(size);
     for (const auto& x : bucket_arr) {
@@ -226,15 +211,13 @@ void Nodemap1b<K, V>::rehash(int size)
     }
     bucket_arr = arr_new;
 }
-template <typename K, typename V>
-void Nodemap1b<K, V>::rehash()
+template <typename K, typename V> void Nodemap3<K, V>::rehash()
 {
     int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
-template <typename K, typename V>
-void Nodemap1b<K, V>::reserve(int size)
+template <typename K, typename V> void Nodemap3<K, V>::reserve(int size)
 {
     if (size < bucket_arr.size()) {
         return;
@@ -242,8 +225,7 @@ void Nodemap1b<K, V>::reserve(int size)
     rehash(size);
 }
 
-template <typename K, typename V>
-void Nodemap1b<K, V>::erase(const K& key)
+template <typename K, typename V> void Nodemap3<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
     if (!std::get<0>(pos_data)) {

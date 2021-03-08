@@ -1,11 +1,11 @@
 #include <iostream>
 
+#include "../hashmap_implementations/deprecated/LPmap.h"
 #include "../hashmap_implementations/deprecated/LPmap2.h"
 #include "../hashmap_implementations/deprecated/nodemap.h"
 #include "../hashmap_implementations/deprecated/nodemap2.h"
-#include "./../hashmap_implementations/LPmap.h"
 #include "./../hashmap_implementations/LPmap3.h"
-#include "./../hashmap_implementations/nodemap1b.h"
+#include "./../hashmap_implementations/nodemap3.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
 // include your implementations
@@ -19,7 +19,7 @@ string choicetext
       "4. nodemap2 (sagar)\n"
       "5.LPmap2 (sagar)\n"
       "6. LPmap (sagar)\n"
-      "7. Nodemap1b (sagar)"
+      "7. Nodemap3 (sagar)"
       "8. LP3"
 
     ;
@@ -82,8 +82,8 @@ int main(int argc, char **argv)
                 break;
             }
             case 7: {
-                int_test_aggregate(Nodemap1b<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap1b<string, string>{}, runs, maxsize);
+                int_test_aggregate(Nodemap3<int, int>{}, runs, maxsize);
+                string_test_aggregate(Nodemap3<string, string>{}, runs, maxsize);
                 break;
             }
             case 8: {
