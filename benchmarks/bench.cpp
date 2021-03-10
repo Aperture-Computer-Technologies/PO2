@@ -1,11 +1,7 @@
 #include <iostream>
 
-#include "../hashmap_implementations/deprecated/LPmap.h"
-#include "../hashmap_implementations/deprecated/LPmap2.h"
-#include "../hashmap_implementations/deprecated/nodemap.h"
-#include "../hashmap_implementations/deprecated/nodemap2.h"
-#include "./../hashmap_implementations/LPmap3.h"
-#include "./../hashmap_implementations/nodemap3.h"
+#include "./../hashmap_implementations/LPmap.h"
+#include "./../hashmap_implementations/Nodemap.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
 // include your implementations
@@ -15,19 +11,17 @@ string choicetext
       "1,2,3'. Default is all  \n"
       "1. std::unordered_hashmap(1) \n"
       "2. boost::unordered\n"
-      "3. nodemap (sagar)\n"
-      "4. nodemap2 (sagar)\n"
-      "5.LPmap2 (sagar)\n"
-      "6. LPmap (sagar)\n"
-      "7. Nodemap3 (sagar)"
-      "8. LP3"
+      "3. LP maps (sagar)\n"
+      "4. NM maps (sagar)\n"
+
+
 
     ;
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5,6,7};
-vector<int> hashmaps = {1, 7, 8, 1, 7, 8, 1, 7, 8};
-int runs = 30;
+vector<int> hashmaps = {3};
+int runs = 3;
 int maxsize = 1000000;
 
 /*
@@ -61,34 +55,18 @@ int main(int argc, char **argv)
                 break;
             }
             case 3: {
-                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap<string,string>{}, runs, maxsize);
+
+                int_test_aggregate(LP<int, int>{}, runs, maxsize);
+                string_test_aggregate(LP<string,string>{}, runs, maxsize);
                 break;
             }
             case 4: {
-                int_test_aggregate(Nodemap2<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap2<string, string>{}, runs, maxsize);
-
+                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
+                string_test_aggregate(Nodemap<string, string>{}, runs, maxsize);
                 break;
             }
             case 5: {
-                int_test_aggregate(LP2<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP2<string,string>{}, runs, maxsize);
-                break;
-            }
-            case 6: {
-                int_test_aggregate(LP<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP<string, string>{}, runs, maxsize);
-                break;
-            }
-            case 7: {
-                int_test_aggregate(Nodemap3<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap3<string, string>{}, runs, maxsize);
-                break;
-            }
-            case 8: {
-                int_test_aggregate(LP3<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP3<string, string>{}, runs, maxsize);
+
                 break;
             }
         }

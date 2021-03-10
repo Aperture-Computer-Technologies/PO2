@@ -64,15 +64,15 @@ void int_test_aggregate(T map, int runs, int maxsize = 20000000)
 {
     std::ofstream output{"results.csv", std::ios_base::app};
     for (int i = 0; i < runs; ++i) {
-        string insert = "\nint_insert, '";
-        string succ_lookup = "\nint_succ_lookup, '";
-        string nosucc_lookup = "\nint_nosucc_lookup, '";
-        string delet = "\nint_delete, '";
+        string insert = "\nint_insert, \"";
+        string succ_lookup = "\nint_succ_lookup, \"";
+        string nosucc_lookup = "\nint_nosucc_lookup, \"";
+        string delet = "\nint_delete, \"";
 
-        insert += string{name(map)} + "'";
-        succ_lookup += string{name(map)} + "'";
-        nosucc_lookup += string{name(map)} + "'";
-        delet += string{name(map)} + "'";
+        insert += string{name(map)} + "\"";
+        succ_lookup += string{name(map)} + "\"";
+        nosucc_lookup += string{name(map)} + "\"";
+        delet += string{name(map)} + "\"";
         for (auto size : sizes) {
             if (size > maxsize) {
                 break;
@@ -98,15 +98,15 @@ void string_test_aggregate(T map, int runs, int maxsize = 20000000)
 {
     std::ofstream output{"results.csv", std::ios_base::app};
     for (int i = 0; i < runs; ++i) {
-        string insert = "\nstring_insert, '";
-        string succ_lookup = "\nstring_succ_lookup, '";
-        string nosucc_lookup = "\nstring_nosucc_lookup, '";
-        string delet = "\nstring_delete, '";
+        string insert = "\nstring_insert, \"";
+        string succ_lookup = "\nstring_succ_lookup, \"";
+        string nosucc_lookup = "\nstring_nosucc_lookup, \"";
+        string delet = "\nstring_delete, \"";
 
-        insert += string{name(map)} + "'";
-        succ_lookup += string{name(map)} + "'";
-        nosucc_lookup += string{name(map)} + "'";
-        delet += string{name(map)} + "'";
+        insert += string{name(map)} + "\"";
+        succ_lookup += string{name(map)} + "\"";
+        nosucc_lookup += string{name(map)} + "\"";
+        delet += string{name(map)} + "\"";
         for (auto size : sizes) {
             if (size > maxsize) {
                 break;

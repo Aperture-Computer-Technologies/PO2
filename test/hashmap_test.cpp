@@ -3,26 +3,21 @@
 #include <deque>
 #include <unordered_map>
 
-#include "../hashmap_implementations/deprecated/LPmap.h"
-#include "../hashmap_implementations/deprecated/LPmap2.h"
-#include "../hashmap_implementations/deprecated/nodemap.h"
-#include "../hashmap_implementations/deprecated/nodemap2.h"
-#include "./../hashmap_implementations/LPmap3.h"
-#include "./../hashmap_implementations/nodemap3.h"
+#include "./../hashmap_implementations/LPmap.h"
+
+#include "./../hashmap_implementations/Nodemap.h"
+
+/*
+ * hashmap test suite targets.
+ * Just add your header, and add the lines below for your test
+ */
 
 int main()
 {
-    //    hashmap_test_suite(std::unordered_map<int, int>{});
-    cout << "--------Sagar's LP map\n";
-    hashmap_test_suite(LP<int, int>{});
-    cout << "--------Sagar's LP2 map\n";
-    hashmap_test_suite(LP2<int, int>{});
-    cout << "--------Sagar's LP3 map\n";
-    hashmap_test_suite(LP3<int, int>{});
-    cout << "--------Sagar's nodemap\n";
-    hashmap_test_suite(Nodemap<int, int>{});
-    cout << "--------Sagar's node1b map\n";
-    hashmap_test_suite(Nodemap3<int, int>{});
-    cout << "--------Sagar's node2 map\n";
-    hashmap_test_suite(Nodemap2<int, int>{});
+//        hashmap_test_suite(std::unordered_map<int, int>{});
+//
+//        cout << "--------Sagar's node3 map\n";
+//        hashmap_test_suite(Nodemap<int, int>{});
+        cout << "--------Sagar's LP map\n";
+        hashmap_test_suite(LP<int, int>{});
 }

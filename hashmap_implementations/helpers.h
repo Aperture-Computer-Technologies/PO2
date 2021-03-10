@@ -5,7 +5,10 @@
 #ifndef PO2_HELPERS_H
 #define PO2_HELPERS_H
 #include <vector>
-
+/*
+ * just a quick way to get the next prime size that's almost double, added to a namespace
+ * so i'm not poluting my environment.
+ */
 using std::vector;
 #include "../tools/random.h"
 namespace helper {
