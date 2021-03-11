@@ -52,13 +52,11 @@ set(CLANG_TIDY_SUPPRESS_CXX
 # Sagar's Linear Probing
 add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/nodemap.h
-
         )
 
-add_executable(node-build
-        ${PROJECT_SOURCE_DIR}/hashmap_implementations/test.cpp
-        hashmap_implementations/nodemap.h)
+add_executable(rehash_bench
+        test/rehash_bench.cpp
+        )
 
 
 # cuckoo hashing implementation, rajeev 

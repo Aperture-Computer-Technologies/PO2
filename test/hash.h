@@ -2,6 +2,9 @@
 #ifndef HASH_H
 #define HASH_H
 
+/*
+ * Ignore, there are hash test suites out there
+ */
 #include <cstddef>
 #include <functional>
 #include <iostream>

@@ -227,11 +227,11 @@
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implement/cuckoo_hashing.h">
 			<Option target="cuckoo-impl"/>
 		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/nodemap.h">
+		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/deprecated/nodemap.h">
 			<Option target="sagar-test"/>
 			<Option target="node-build"/>
 		</Unit>
-		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/test.cpp">
+		<Unit filename="/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/profiling.cpp">
 			<Option target="node-build"/>
 		</Unit>
 		<Unit filename="/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp">

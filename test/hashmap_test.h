@@ -20,6 +20,9 @@ bool creation(CustomHashmap h)
     return true;
 }
 
+/*
+ * Should be able to reserve
+ */
 template <class CustomHashmap>
 bool creation_reserve(CustomHashmap h)
 {
@@ -47,7 +50,9 @@ bool single_insert(CustomHashmap a)
     }
     return true;
 }
-
+/*
+ * same as above, but with reserve thrown in
+ */
 template <class CustomHashmap>
 bool single_insert_with_reserve(CustomHashmap a)
 {
@@ -63,7 +68,7 @@ bool single_insert_with_reserve(CustomHashmap a)
 
 // technically, we're also testing access
 // if insert and access happen to be wrong in just the right ways
-// this test may be able to pass
+// this test may be able to pass. same as insert, but now more than 1
 template <class CustomHashmap>
 bool insert_n(CustomHashmap b, int n)
 {
@@ -90,6 +95,9 @@ bool insert_n(CustomHashmap b, int n)
     return true;
 }
 
+/*
+ * same as above
+ */
 template <class CustomHashmap>
 bool insert_n_with_reserve(CustomHashmap b, int n)
 {
@@ -170,7 +178,10 @@ bool single_delete(CustomHashmap h)
     }
     return true;
 }
-
+/*
+ * checking to ssee if size changes upon deletion
+ * and if they're actually deleted. or changed such that you can't return the old value.
+ */
 template <class CustomHashmap>
 bool delete_n(CustomHashmap b, int n)
 {
@@ -222,6 +233,9 @@ bool delete_n_with_reserve(CustomHashmap b, int n)
     return true;
 }
 
+/*
+ * all tests incorporated
+ */
 template <class CustomHashmap>
 void hashmap_test_suite(CustomHashmap h)
 {
