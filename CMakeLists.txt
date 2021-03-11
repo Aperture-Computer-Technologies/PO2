@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 # checks if anything you wrote relies on undefined behaviour
 # which means that your program prolly won't behave exactly as you want on a different compiler
 
-set(CMAKE_CXX_FLAGS "-o3   -march=native")
+set(CMAKE_CXX_FLAGS "-o3  -march=native")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CLANG_TIDY_CXX -checks=-*,
@@ -52,12 +52,11 @@ set(CLANG_TIDY_SUPPRESS_CXX
 # Sagar's Linear Probing
 add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
-        hashmap_implementations/deprecated/nodemap.h
-
         )
 
-add_executable(node-build
-        hashmap_implementations/deprecated/nodemap.h hashmap_implementations/profiling.cpp)
+add_executable(rehash_bench
+        test/rehash_bench.cpp
+        )
 
 
 # cuckoo hashing implementation, rajeev 

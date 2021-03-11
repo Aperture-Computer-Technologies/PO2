@@ -263,32 +263,32 @@ hashmap_implement/cuckoo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
 .PHONY : hashmap_implement/cuckoo.cpp.s
 
-hashmap_implementations/test.o: hashmap_implementations/test.cpp.o
+hashmap_implementations/profiling.o: hashmap_implementations/profiling.cpp.o
 
-.PHONY : hashmap_implementations/test.o
+.PHONY : hashmap_implementations/profiling.o
 
 # target to build an object file
-hashmap_implementations/test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.o
-.PHONY : hashmap_implementations/test.cpp.o
+hashmap_implementations/profiling.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.o
+.PHONY : hashmap_implementations/profiling.cpp.o
 
-hashmap_implementations/test.i: hashmap_implementations/test.cpp.i
+hashmap_implementations/profiling.i: hashmap_implementations/profiling.cpp.i
 
-.PHONY : hashmap_implementations/test.i
+.PHONY : hashmap_implementations/profiling.i
 
 # target to preprocess a source file
-hashmap_implementations/test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.i
-.PHONY : hashmap_implementations/test.cpp.i
+hashmap_implementations/profiling.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.i
+.PHONY : hashmap_implementations/profiling.cpp.i
 
-hashmap_implementations/test.s: hashmap_implementations/test.cpp.s
+hashmap_implementations/profiling.s: hashmap_implementations/profiling.cpp.s
 
-.PHONY : hashmap_implementations/test.s
+.PHONY : hashmap_implementations/profiling.s
 
 # target to generate assembly for a file
-hashmap_implementations/test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/test.cpp.s
-.PHONY : hashmap_implementations/test.cpp.s
+hashmap_implementations/profiling.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.s
+.PHONY : hashmap_implementations/profiling.cpp.s
 
 test/hashmap_test.o: test/hashmap_test.cpp.o
 
@@ -338,9 +338,9 @@ help:
 	@echo "... hashmap_implement/cuckoo.o"
 	@echo "... hashmap_implement/cuckoo.i"
 	@echo "... hashmap_implement/cuckoo.s"
-	@echo "... hashmap_implementations/test.o"
-	@echo "... hashmap_implementations/test.i"
-	@echo "... hashmap_implementations/test.s"
+	@echo "... hashmap_implementations/profiling.o"
+	@echo "... hashmap_implementations/profiling.i"
+	@echo "... hashmap_implementations/profiling.s"
 	@echo "... test/hashmap_test.o"
 	@echo "... test/hashmap_test.i"
 	@echo "... test/hashmap_test.s"
