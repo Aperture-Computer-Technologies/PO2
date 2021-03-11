@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "./../hashmap_implementations/LPmap.h"
-
+//#include "./../hashmap_implementations/LPmap2.h"
 #include "./../hashmap_implementations/Nodemap.h"
 
 /*
@@ -18,6 +18,8 @@ int main()
 //
 //        cout << "--------Sagar's node3 map\n";
 //        hashmap_test_suite(Nodemap<int, int>{});
-        cout << "--------Sagar's LP map\n";
-        hashmap_test_suite(LP<int, int>{});
+//        cout << "--------Sagar's LP map\n";
+//        hashmap_test_suite(LP<int, int>{});
+    cout << "--------Sagar's LP2 map\n";
+//    hashmap_test_suite(LP2<int, int>{});
 }

@@ -1,88 +1,207 @@
-/**
-* Fair maps to intervals without division.
-* Reference : http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-*
-* (c) Daniel Lemire
-* Apache License 2.0
-*/
-#ifndef INCLUDE_FASTRANGE_H
-#define INCLUDE_FASTRANGE_H
-#include <iso646.h> // mostly for Microsoft compilers
-#include <stdint.h> // part of Visual Studio 2010 and better
-#include <stddef.h> // for size_t in C
-#include <limits.h> // for size_t in C
+#ifndef FASTMOD_H
+#define FASTMOD_H
 
-/**
-* Given a value "word", produces an integer in [0,p) without division.
-* The function is as fair as possible in the sense that if you iterate
-* through all possible values of "word", then you will generate all
-* possible outputs as uniformly as possible.
-*/
-static inline uint32_t fastrange32(uint32_t word, uint32_t p) {
-    return (uint32_t)(((uint64_t)word * (uint64_t)p) >> 32);
-}
-
-#if defined(_MSC_VER) && defined (_WIN64)
-#include <intrin.h>// should be part of all recent Visual Studio
-#pragma intrinsic(_umul128)
-#endif // defined(_MSC_VER) && defined (_WIN64)
-
-
-/**
-* Given a value "word", produces an integer in [0,p) without division.
-* The function is as fair as possible in the sense that if you iterate
-* through all possible values of "word", then you will generate all
-* possible outputs as uniformly as possible.
-*/
-static inline uint64_t fastrange64(uint64_t word, uint64_t p) {
-#ifdef __SIZEOF_INT128__ // then we know we have a 128-bit int
-    return (uint64_t)(((__uint128_t)word * (__uint128_t)p) >> 64);
-#elif defined(_MSC_VER) && defined(_WIN64)
-    // supported in Visual Studio 2005 and better
-	uint64_t highProduct;
-	_umul128(word, p, &highProduct); // ignore output
-	return highProduct;
-	unsigned __int64 _umul128(
-		unsigned __int64 Multiplier,
-		unsigned __int64 Multiplicand,
-		unsigned __int64 *HighProduct
-	);
+#ifndef __cplusplus
+#include <stdbool.h>
+#include <stdint.h>
 #else
-	return word % p; // fallback
-#endif // __SIZEOF_INT128__
+// In C++ <cstdbool>/<stdbool.h> are irelevant as bool is already a type
+#include <cstdint>
+#endif
+
+#ifndef __cplusplus
+#define FASTMOD_API static inline
+#else
+// In C++ we mark all the functions inline.
+// If C++14 relaxed constexpr is supported we use constexpr so functions
+// can be used at compile-time.
+#if __cpp_constexpr >= 201304 && !defined(_MSC_VER)
+// visual studio does not like constexpr
+#define FASTMOD_API constexpr
+#define FASTMOD_CONSTEXPR constexpr
+#else
+#define FASTMOD_API inline
+#define FASTMOD_CONSTEXPR
+#endif
+#endif
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
+#ifdef __cplusplus
+namespace fastmod {
+#endif
+
+#ifdef _MSC_VER
+
+    // __umulh is only available in x64 mode under Visual Studio: don't compile to 32-bit!
+FASTMOD_API uint64_t mul128_u32(uint64_t lowbits, uint32_t d) {
+  return __umulh(lowbits, d);
 }
 
+#else // _MSC_VER NOT defined
 
-#ifndef UINT32_MAX
-#define UINT32_MAX  (0xffffffff)
-#endif // UINT32_MAX
+    FASTMOD_API uint64_t mul128_u32(uint64_t lowbits, uint32_t d) {
+        return ((__uint128_t)lowbits * d) >> 64;
+    }
+
+    FASTMOD_API uint64_t mul128_s32(uint64_t lowbits, int32_t d) {
+        return ((__int128_t)lowbits * d) >> 64;
+    }
+
+// This is for the 64-bit functions.
+    FASTMOD_API uint64_t mul128_u64(__uint128_t lowbits, uint64_t d) {
+        __uint128_t bottom_half = (lowbits & UINT64_C(0xFFFFFFFFFFFFFFFF)) * d; // Won't overflow
+        bottom_half >>= 64;  // Only need the top 64 bits, as we'll shift the lower half away;
+        __uint128_t top_half = (lowbits >> 64) * d;
+        __uint128_t both_halves = bottom_half + top_half; // Both halves are already shifted down by 64
+        both_halves >>= 64; // Get top half of both_halves
+        return (uint64_t)both_halves;
+    }
+
+#endif // _MSC_VER
 
 /**
-* Given a value "word", produces an integer in [0,p) without division.
-* The function is as fair as possible in the sense that if you iterate
-* through all possible values of "word", then you will generate all
-* possible outputs as uniformly as possible.
-*/
-static inline size_t fastrangesize(size_t word, size_t p) {
-#if (SIZE_MAX == UINT32_MAX)
-    return (size_t)fastrange32(word, p);
-#else // assume 64-bit
-    return (size_t)fastrange64(word, p);
-#endif // SIZE_MAX == UINT32_MAX
-}
+ * Unsigned integers.
+ * Usage:
+ *  uint32_t d = ... ; // divisor, should be non-zero
+ *  uint64_t M = computeM_u32(d); // do once
+ *  fastmod_u32(a,M,d) is a % d for all 32-bit a.
+ *
+ **/
+
+
+// M = ceil( (1<<64) / d ), d > 0
+    FASTMOD_API uint64_t computeM_u32(uint32_t d) {
+        return UINT64_C(0xFFFFFFFFFFFFFFFF) / d + 1;
+    }
+
+// fastmod computes (a % d) given precomputed M
+    FASTMOD_API uint32_t fastmod_u32(uint32_t a, uint64_t M, uint32_t d) {
+        uint64_t lowbits = M * a;
+        return (uint32_t)(mul128_u32(lowbits, d));
+    }
+
+// fastmod computes (a / d) given precomputed M for d>1
+    FASTMOD_API uint32_t fastdiv_u32(uint32_t a, uint64_t M) {
+        return (uint32_t)(mul128_u32(M, a));
+    }
+
+// given precomputed M, checks whether n % d == 0
+    FASTMOD_API bool is_divisible(uint32_t n, uint64_t M) {
+        return n * M <= M - 1;
+    }
 
 /**
-* Given a value "word", produces an integer in [0,p) without division.
-* The function is as fair as possible in the sense that if you iterate
-* through all possible values of "word", then you will generate all
-* possible outputs as uniformly as possible.
-*/
-static inline int fastrangeint(int word, int p) {
-#if (SIZE_MAX == UINT32_MAX)
-    return (int)fastrange32(word, p);
-#else // assume 64-bit
-    return (int)fastrange64(word, p);
-#endif // (SIZE_MAX == UINT32_MAX)
-}
+ * signed integers
+ * Usage:
+ *  int32_t d = ... ; // should be non-zero and between [-2147483647,2147483647]
+ *  int32_t positive_d = d < 0 ? -d : d; // absolute value
+ *  uint64_t M = computeM_s32(d); // do once
+ *  fastmod_s32(a,M,positive_d) is a % d for all 32-bit a.
+ **/
 
-#endif// INCLUDE_FASTRANGE_H
+// M = floor( (1<<64) / d ) + 1
+// you must have that d is different from 0 and -2147483648
+// if d = -1 and a = -2147483648, the result is undefined
+    FASTMOD_API uint64_t computeM_s32(int32_t d) {
+        if (d < 0)
+            d = -d;
+        return UINT64_C(0xFFFFFFFFFFFFFFFF) / d + 1 + ((d & (d - 1)) == 0 ? 1 : 0);
+    }
+
+// fastmod computes (a % d) given precomputed M,
+// you should pass the absolute value of d
+    FASTMOD_API int32_t fastmod_s32(int32_t a, uint64_t M, int32_t positive_d) {
+        uint64_t lowbits = M * a;
+        int32_t highbits = mul128_u32(lowbits, positive_d);
+        return highbits - ((positive_d - 1) & (a >> 31));
+    }
+
+#ifndef _MSC_VER
+// fastmod computes (a / d) given precomputed M, assumes that d must not
+// be one of -1, 1, or -2147483648
+    FASTMOD_API int32_t fastdiv_s32(int32_t a, uint64_t M, int32_t d) {
+        uint64_t highbits = mul128_s32(M, a);
+        highbits += (a < 0 ? 1 : 0);
+        if (d < 0)
+            return -(int32_t)(highbits);
+        return (int32_t)(highbits);
+    }
+
+// What follows is the 64-bit functions.
+// They are currently not supported on Visual Studio
+// due to the lack of a mul128_u64 function.
+// They may not be faster than what the compiler
+// can produce.
+
+    FASTMOD_API __uint128_t computeM_u64(uint64_t d) {
+        // what follows is just ((__uint128_t)0 - 1) / d) + 1 spelled out
+        __uint128_t M = UINT64_C(0xFFFFFFFFFFFFFFFF);
+        M <<= 64;
+        M |= UINT64_C(0xFFFFFFFFFFFFFFFF);
+        M /= d;
+        M += 1;
+        return M;
+    }
+
+    FASTMOD_API __uint128_t computeM_s64(int64_t d) {
+        if (d < 0)
+            d = -d;
+        __uint128_t M = UINT64_C(0xFFFFFFFFFFFFFFFF);
+        M <<= 64;
+        M |= UINT64_C(0xFFFFFFFFFFFFFFFF);
+        M /= d;
+        M += 1;
+        M += ((d & (d - 1)) == 0 ? 1 : 0);
+        return M;
+    }
+
+    FASTMOD_API uint64_t fastmod_u64(uint64_t a, __uint128_t M, uint64_t d) {
+        __uint128_t lowbits = M * a;
+        return mul128_u64(lowbits, d);
+    }
+
+    FASTMOD_API uint64_t fastdiv_u64(uint64_t a, __uint128_t M) {
+        return mul128_u64(M, a);
+    }
+
+// End of the 64-bit functions
+
+#endif // #ifndef _MSC_VER
+
+#ifdef __cplusplus
+
+    template<uint32_t d>
+    FASTMOD_API uint32_t fastmod(uint32_t x) {
+        FASTMOD_CONSTEXPR uint64_t v = computeM_u32(d);
+        return fastmod_u32(x, v, d);
+    }
+    template<uint32_t d>
+    FASTMOD_API uint32_t fastdiv(uint32_t x) {
+        FASTMOD_CONSTEXPR uint64_t v = computeM_u32(d);
+        return fastdiv_u32(x, v);
+    }
+    template<int32_t d>
+    FASTMOD_API int32_t fastmod(int32_t x) {
+        FASTMOD_CONSTEXPR uint64_t v = computeM_s32(d);
+        return fastmod_s32(x, v, d);
+    }
+    template<int32_t d>
+    FASTMOD_API int32_t fastdiv(int32_t x) {
+        FASTMOD_CONSTEXPR uint64_t v = computeM_s32(d);
+        return fastdiv_s32(x, v, d);
+    }
+
+} // fastmod
+#endif
+
+
+// There's no reason to polute the global scope with this macro once its use ends
+// This won't create any problems as the preprocessor will have done its thing once
+// it reaches this point
+#undef FASTMOD_API
+#undef FASTMOD_CONSTEXPR
+
+#endif // FASTMOD_H

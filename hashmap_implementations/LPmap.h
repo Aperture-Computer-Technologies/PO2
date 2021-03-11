@@ -1,5 +1,5 @@
-#ifndef LP3_H
-#define LP3_H
+#ifndef LP_H
+#define LP_H
 
 #include <algorithm>
 #include <deque>
@@ -8,11 +8,12 @@
 #include <vector>
 
 #include "helpers.h"
+#include "fastmod.h"
 using std::vector;
 
 /*
- * standard linear probing map.
- * It's significantly faster than std, nd has pointer stability
+LP, but with a modulo trick
+ https://github.com/lemire/fastmod
  *
  */
 
@@ -46,6 +47,7 @@ class LP {
         V* val;
     };
     int inserted_n;
+    uint64_t modulo_help;
     float lf_max;
     vector<Element> bucket_arr;
     vector<int32_t> hash_state;
@@ -68,7 +70,7 @@ LP<K, V>::LP() : LP{LP<K, V>(251)}
 {
 }
 template <typename K, typename V>
-LP<K, V>::LP(int size) : bucket_arr{vector<Element>(2*size)}, inserted_n{0}, lf_max{0.5}, valuestore{}, open_slots{}
+LP<K, V>::LP(int size) : bucket_arr{vector<Element>(2*size)}, inserted_n{0}, modulo_help(fastmod::computeM_s32(2 * size)), lf_max{0.5}, valuestore{}, open_slots{}
 {
     hasher_state_gen();
 }
@@ -114,7 +116,8 @@ template <typename K, typename V>
 int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = bucket_arr.size();
-    int32_t pos = hash % size;
+//    int32_t pos = hash % size;
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
     while(bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || bucket_arr[pos].key != key)){
         pos++;
         if (pos >= size) {
@@ -189,6 +192,7 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
     if (open_slots.size()) {
         val_ptr = open_slots.back();
         open_slots.pop_back();
+        *val_ptr = std::move(kv.second);
     }
     else {
         valuestore.emplace_back(kv.second);
@@ -241,6 +245,7 @@ template <typename K, typename V>
 void LP<K, V>::rehash(int size)
 {
     vector<Element> arr_new(size);
+    uint64_t helper = fastmod::computeM_s32(size);
     for (const auto& x : bucket_arr) {
         if (x.hash == EMPTY) {
             continue;
@@ -248,7 +253,8 @@ void LP<K, V>::rehash(int size)
         if (x.hash == DELETED) {
             continue;
         }
-        int32_t loc = x.hash % size;
+//        int32_t loc = x.hash % size;
+        int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
 //        TODO: check if empty check satisfies
         while (arr_new[loc].hash != EMPTY) {
             loc++;
@@ -259,6 +265,7 @@ void LP<K, V>::rehash(int size)
         arr_new[loc] = x;
     }
     bucket_arr = arr_new;
+    modulo_help = helper;
 }
 /*
  * increase size and rehash
