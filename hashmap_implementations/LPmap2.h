@@ -1,5 +1,5 @@
-#ifndef LP4_H
-#define LP4_H
+#ifndef LP_H
+#define LP_H
 
 #include <algorithm>
 #include <deque>
@@ -12,27 +12,16 @@ using std::vector;
 
 /*
  * standard linear probing map.
- * It's significantly faster than std. but it won't meet some requirements of STL.
- * https://eel.is/c++draft/unord.req
- * 'The elements of an unordered associative container are organized into buckets.
- * Keys with the same hash code appear in the same bucket. Rehashing invalidates iterators,
- * changes ordering between elements, and changes which buckets elements appear in,
- * but does not invalidate pointers or references to elements.'
- * pros:
- * 1. fastest out of everything i've coded.
- * 2. simple to implement.
- * cons:
- * 1. no pointer stability
- * 2. worse memory usage than nodemaps.
+ * It's significantly faster than std, nd has pointer stability
  *
  */
 
 template <typename K, typename V>
-class LP4 {
+class LP {
   public:
-    LP4();
-    explicit LP4(int size);
-    ~LP4() { clear(); };
+    LP();
+    explicit LP(int size);
+    ~LP() { clear(); };
     void insert(const std::pair<K, V> kv);
     bool contains(const K& key) const;
     V& operator[](const K& k);
@@ -65,24 +54,30 @@ class LP4 {
 
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
-    int32_t lookup_prober(const K& key, const int32_t& hash) const;
-    int32_t insert_prober(const K& key, const int32_t& hash) const;
     int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
+/*
+ * constructor calls constructor with explicit size.
+ * reason why i'm not doing LP(size=something) is compiler complains
+ */
 template <typename K, typename V>
-LP4<K, V>::LP4() : LP4{LP4<K, V>(251)}
+LP<K, V>::LP() : LP{LP<K, V>(251)}
 {
 }
 template <typename K, typename V>
-LP4<K, V>::LP4(int size) : bucket_arr{vector<Element>((int) 2*size)}, inserted_n{0}, lf_max{0.5}, valuestore{}, open_slots{}
+LP<K, V>::LP(int size) : bucket_arr{vector<Element>(2*size)}, inserted_n{0}, lf_max{0.5}, valuestore{}, open_slots{}
 {
     hasher_state_gen();
 }
+/*
+ * function to generate hashes.
+ * it's tabulation hashing.
+ */
 template <typename K, typename V>
-int32_t LP4<K, V>::hasher(const K& key) const
+int32_t LP<K, V>::hasher(const K& key) const
 {
     static std::hash<K> hf;
     int32_t hash = hf(key);
@@ -98,60 +93,90 @@ int32_t LP4<K, V>::hasher(const K& key) const
     }
     return final_hash;
 }
-
+/*
+ * generate random values so hasher can use them
+ */
 template <typename K, typename V>
-void LP4<K, V>::hasher_state_gen()
+void LP<K, V>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
     hash_state = state;
 }
 
+/*
+ * probing function.
+ * it should probe locations, and stop when:
+ * 1. hash = empty
+ * 2. same key
+ */
 template <typename K, typename V>
-int32_t LP4<K, V>::prober(const K& key, const int32_t& hash) const
+int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
 {
-//    * is not empty & is not same key
-//    * is not empty & is not same hash & is not same key
-
-    int32_t pos = hash % bucket_arr.size();
-    while(bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash && bucket_arr[pos].key != key)){
-//    while (bucket_arr[pos].hash != EMPTY && bucket_arr[pos].hash != hash
-//           && (bucket_arr[pos].key != key || bucket_arr[pos].hash == -1)) {
+    unsigned long size = bucket_arr.size();
+    int32_t pos = hash % size;
+    while(bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || bucket_arr[pos].key != key)){
         pos++;
-        if (pos >= bucket_arr.size()) {
-            pos -= bucket_arr.size();
+        if (pos >= size) {
+            pos -= size;
         }
     }
     return pos;
+    /*
+     * test to see if find_if had any perf improvement. it doesnt.
+     * probably because it's hard to vectorize something which has
+     * hash1, key1, ptr1, hash2, key2, ptr2 as a memory region. maybe nodemap offers better improvement.
+     * at the very least, for empty checking, where you're just checking if ptr == nullptr
+     */
+//    auto res = std::find_if(bucket_arr.begin() + pos, bucket_arr.end(), [&, hash, key](const Element& e) {
+//      return (e.hash == EMPTY || (e.hash == hash && e.key == key));
+//    });
+//    if (res == bucket_arr.end()) {
+//        res = std::find_if(bucket_arr.begin(), bucket_arr.begin() + pos, [&, hash, key](const Element& e) {
+//          return (e.hash == EMPTY || (e.hash == hash && e.key == key));
+//        });
+//    }
+//    return res - bucket_arr.begin();
 }
 /*
  * returns bool, index, hash
+ * probe bucket arr, and if the resulting index is empty, key doesn't exist
  */
 template <typename K, typename V>
-std::tuple<bool, int32_t, int> LP4<K, V>::contains_key(const K& key) const
+std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (bucket_arr[pos].hash == EMPTY || bucket_arr[pos].hash == DELETED) {
+    if (bucket_arr[pos].hash == EMPTY) {
         return {false, pos, hash};
     }
     return {true, pos, hash};
 }
 
+/*
+ * std::unordered has this. i should probably just return contains_key()[0]
+ */
 template <typename K, typename V>
-bool LP4<K, V>::contains(const K& key) const
+bool LP<K, V>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (bucket_arr[pos].hash == EMPTY || bucket_arr[pos] == DELETED) {
+    if (bucket_arr[pos].hash == EMPTY) {
         return false;
     }
     return true;
 }
+/*
+ * inserts element, returns nothing.
+ * detects if insertion will result in >max load factor, rehashes if it will
+ * then check for existence. if there is, stop.
+ * else, insert.
+ *
+ */
 template <typename K, typename V>
-void LP4<K, V>::insert(const std::pair<K, V> kv)
+void LP<K, V>::insert(const std::pair<K, V> kv)
 {
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
@@ -172,9 +197,13 @@ void LP4<K, V>::insert(const std::pair<K, V> kv)
     bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val_ptr, std::get<2>(pos_info)});
     inserted_n++;
 }
-
+/*check for existence.
+ * if there is, return value
+ * if there isn't, insert V{}
+ *
+ */
 template <typename K, typename V>
-V& LP4<K, V>::operator[](const K& k)
+V& LP<K, V>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (std::get<0>(pos_info)) {
@@ -193,13 +222,15 @@ V& LP4<K, V>::operator[](const K& k)
         }
         auto pos = std::get<1>(pos_info);
         bucket_arr[pos] = {k, val_ptr, std::get<2>(pos_info)};
-
+        inserted_n++;
         return *bucket_arr[pos].val;
     }
 }
-
+/*
+ * just delete everything
+ */
 template <typename K, typename V>
-void LP4<K, V>::clear()
+void LP<K, V>::clear()
 {
     open_slots.clear();
     valuestore.clear();
@@ -207,7 +238,7 @@ void LP4<K, V>::clear()
     inserted_n = 0;
 }
 template <typename K, typename V>
-void LP4<K, V>::rehash(int size)
+void LP<K, V>::rehash(int size)
 {
     vector<Element> arr_new(size);
     for (const auto& x : bucket_arr) {
@@ -218,7 +249,8 @@ void LP4<K, V>::rehash(int size)
             continue;
         }
         int32_t loc = x.hash % size;
-        while (arr_new[loc].hash != EMPTY && arr_new[loc].key != x.key) {  // TODO: think if this is the correct thing
+//        TODO: check if empty check satisfies
+        while (arr_new[loc].hash != EMPTY) {
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -228,15 +260,18 @@ void LP4<K, V>::rehash(int size)
     }
     bucket_arr = arr_new;
 }
+/*
+ * increase size and rehash
+ */
 template <typename K, typename V>
-void LP4<K, V>::rehash()
+void LP<K, V>::rehash()
 {
     int size = helper::next_prime(bucket_arr.size());
     rehash(size);
 }
 
 template <typename K, typename V>
-void LP4<K, V>::reserve(int size)
+void LP<K, V>::reserve(int size)
 {
     int s = 1+  (size / lf_max);
     if (s < bucket_arr.size()) {
@@ -246,7 +281,7 @@ void LP4<K, V>::reserve(int size)
 }
 
 template <typename K, typename V>
-void LP4<K, V>::erase(const K& key)
+void LP<K, V>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
     if (!std::get<0>(pos_data)) {
