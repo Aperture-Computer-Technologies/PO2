@@ -7,8 +7,8 @@
 #include <tuple>
 #include <vector>
 
-#include "helpers.h"
 #include "fastmod.h"
+#include "helpers.h"
 using std::vector;
 
 /*
@@ -70,7 +70,13 @@ LP<K, V>::LP() : LP{LP<K, V>(251)}
 {
 }
 template <typename K, typename V>
-LP<K, V>::LP(int size) : bucket_arr{vector<Element>(2*size)}, inserted_n{0}, modulo_help(fastmod::computeM_s32(2 * size)), lf_max{0.5}, valuestore{}, open_slots{}
+LP<K, V>::LP(int size)
+    : bucket_arr{vector<Element>(2 * size)},
+      inserted_n{0},
+      modulo_help(fastmod::computeM_s32(2 * size)),
+      lf_max{0.5},
+      valuestore{},
+      open_slots{}
 {
     hasher_state_gen();
 }
@@ -116,9 +122,9 @@ template <typename K, typename V>
 int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = bucket_arr.size();
-//    int32_t pos = hash % size;
+    //    int32_t pos = hash % size;
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    while(bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || bucket_arr[pos].key != key)){
+    while (bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || bucket_arr[pos].key != key)) {
         pos++;
         if (pos >= size) {
             pos -= size;
@@ -131,20 +137,21 @@ int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
      * hash1, key1, ptr1, hash2, key2, ptr2 as a memory region. maybe nodemap offers better improvement.
      * at the very least, for empty checking, where you're just checking if ptr == nullptr
      */
-//    auto res = std::find_if(bucket_arr.begin() + pos, bucket_arr.end(), [&, hash, key](const Element& e) {
-//      return (e.hash == EMPTY || (e.hash == hash && e.key == key));
-//    });
-//    if (res == bucket_arr.end()) {
-//        res = std::find_if(bucket_arr.begin(), bucket_arr.begin() + pos, [&, hash, key](const Element& e) {
-//          return (e.hash == EMPTY || (e.hash == hash && e.key == key));
-//        });
-//    }
-//    return res - bucket_arr.begin();
+    //    auto res = std::find_if(store1.begin() + pos, store1.end(), [&, hash, key](const Element& e) {
+    //      return (e.hash == EMPTY || (e.hash == hash && e.key == key));
+    //    });
+    //    if (res == store1.end()) {
+    //        res = std::find_if(store1.begin(), store1.begin() + pos, [&, hash, key](const Element& e) {
+    //          return (e.hash == EMPTY || (e.hash == hash && e.key == key));
+    //        });
+    //    }
+    //    return res - store1.begin();
 }
 /*
  * returns bool, index, hash
  * probe bucket arr, and if the resulting index is empty, key doesn't exist
  */
+
 template <typename K, typename V>
 std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 {
@@ -184,11 +191,12 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
     }
+
     auto pos_info = contains_key(kv.first);
     if (std::get<0>(pos_info)) {
         return;
     }
-    V* val_ptr;
+    V* val_ptr = nullptr;
     if (open_slots.size()) {
         val_ptr = open_slots.back();
         open_slots.pop_back();
@@ -214,21 +222,19 @@ V& LP<K, V>::operator[](const K& k)
         return *bucket_arr[std::get<1>(pos_info)].val;
     }
 
-    else {
-        V* val_ptr;
-        if (open_slots.size()) {
-            val_ptr = open_slots.back();
-            open_slots.pop_back();
-        }
-        else {
-            valuestore.emplace_back(V{});
-            val_ptr = &valuestore.back();
-        }
-        auto pos = std::get<1>(pos_info);
-        bucket_arr[pos] = {k, val_ptr, std::get<2>(pos_info)};
-        inserted_n++;
-        return *bucket_arr[pos].val;
+    V* val_ptr = nullptr;
+    if (open_slots.size()) {
+        val_ptr = open_slots.back();
+        open_slots.pop_back();
     }
+    else {
+        valuestore.emplace_back(V{});
+        val_ptr = &valuestore.back();
+    }
+    auto pos = std::get<1>(pos_info);
+    bucket_arr[pos] = {k, val_ptr, std::get<2>(pos_info)};
+    inserted_n++;
+    return *bucket_arr[pos].val;
 }
 /*
  * just delete everything
@@ -253,9 +259,9 @@ void LP<K, V>::rehash(int size)
         if (x.hash == DELETED) {
             continue;
         }
-//        int32_t loc = x.hash % size;
+        //        int32_t loc = x.hash % size;
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
-//        TODO: check if empty check satisfies
+        //        TODO: check if empty check satisfies
         while (arr_new[loc].hash != EMPTY) {
             loc++;
             if (loc >= size) {
@@ -280,7 +286,7 @@ void LP<K, V>::rehash()
 template <typename K, typename V>
 void LP<K, V>::reserve(int size)
 {
-    int s = 1+  (size / lf_max);
+    int s = 1 + (size / lf_max);
     if (s < bucket_arr.size()) {
         return;
     }
