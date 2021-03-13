@@ -14,6 +14,11 @@ using std::vector;
 /*
 LP, but with a modulo trick
  https://github.com/lemire/fastmod
+ this is just a variation of a trick you can use when you know the divisor in advance,
+ eliminating divisions from it (or only need to do them once)
+ It's not important to know how the modulo trick works, just that it does, and it's faster.
+ LP is linear probing map.
+It has a vector of <K,V*, H>, and V is stored in a deque.
  *
  */
 
@@ -47,7 +52,7 @@ class LP {
         V* val;
     };
     int inserted_n;
-    uint64_t modulo_help;
+    uint64_t modulo_help;  // modulo trick
     float lf_max;
     vector<Element> bucket_arr;
     vector<int32_t> hash_state;
@@ -83,6 +88,9 @@ LP<K, V>::LP(int size)
 /*
  * function to generate hashes.
  * it's tabulation hashing.
+ * It's not important to know how it works, just copy it, or
+ * use something that works for your map.
+ * one of the cuckoo hashing papers uses this.
  */
 template <typename K, typename V>
 int32_t LP<K, V>::hasher(const K& key) const
@@ -116,7 +124,8 @@ void LP<K, V>::hasher_state_gen()
  * probing function.
  * it should probe locations, and stop when:
  * 1. hash = empty
- * 2. same key
+ * 2. same key.
+ * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V>
 int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
@@ -131,27 +140,11 @@ int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
         }
     }
     return pos;
-    /*
-     * test to see if find_if had any perf improvement. it doesnt.
-     * probably because it's hard to vectorize something which has
-     * hash1, key1, ptr1, hash2, key2, ptr2 as a memory region. maybe nodemap offers better improvement.
-     * at the very least, for empty checking, where you're just checking if ptr == nullptr
-     */
-    //    auto res = std::find_if(store1.begin() + pos, store1.end(), [&, hash, key](const Element& e) {
-    //      return (e.hash == EMPTY || (e.hash == hash && e.key == key));
-    //    });
-    //    if (res == store1.end()) {
-    //        res = std::find_if(store1.begin(), store1.begin() + pos, [&, hash, key](const Element& e) {
-    //          return (e.hash == EMPTY || (e.hash == hash && e.key == key));
-    //        });
-    //    }
-    //    return res - store1.begin();
 }
 /*
- * returns bool, index, hash
- * probe bucket arr, and if the resulting index is empty, key doesn't exist
+ * returns bool exists,  int position, int hash
+ * probe bucket arr, and if the resulting position is empty, key doesn't exist
  */
-
 template <typename K, typename V>
 std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 {
@@ -166,6 +159,8 @@ std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
 
 /*
  * std::unordered has this. i should probably just return contains_key()[0]
+ * atm, i haven't changed it, because i haven't checked if there's any perf advantage
+ * in leaving it like this, eliminating 1 call to a function.
  */
 template <typename K, typename V>
 bool LP<K, V>::contains(const K& key) const
@@ -183,7 +178,6 @@ bool LP<K, V>::contains(const K& key) const
  * detects if insertion will result in >max load factor, rehashes if it will
  * then check for existence. if there is, stop.
  * else, insert.
- *
  */
 template <typename K, typename V>
 void LP<K, V>::insert(const std::pair<K, V> kv)
@@ -209,9 +203,10 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
     bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val_ptr, std::get<2>(pos_info)});
     inserted_n++;
 }
+
 /*check for existence.
  * if there is, return value
- * if there isn't, insert V{}
+ * if there isn't, insert V{} and return reff. to that.
  *
  */
 template <typename K, typename V>
@@ -247,6 +242,11 @@ void LP<K, V>::clear()
     bucket_arr.clear();
     inserted_n = 0;
 }
+/*
+ * rehash the hashmap.
+ * get new modulohelper thing and new array, then loop over old array
+ * insert elements that aren't empty or deleted.
+ */
 template <typename K, typename V>
 void LP<K, V>::rehash(int size)
 {
@@ -274,7 +274,7 @@ void LP<K, V>::rehash(int size)
     modulo_help = helper;
 }
 /*
- * increase size and rehash
+ * increase size and rehash. need to add this to the public interface of LP later.
  */
 template <typename K, typename V>
 void LP<K, V>::rehash()
@@ -283,6 +283,11 @@ void LP<K, V>::rehash()
     rehash(size);
 }
 
+/*
+ * reserve the hashmap for a given size.
+ * this is mean you'll be able to insert <size> elements into the map
+ * without rehashes.
+ */
 template <typename K, typename V>
 void LP<K, V>::reserve(int size)
 {
@@ -293,6 +298,11 @@ void LP<K, V>::reserve(int size)
     rehash(s);
 }
 
+/*
+ * erase elements.
+ * check if it exists, and stop if it doesnt.
+ * if it does, delete.
+ */
 template <typename K, typename V>
 void LP<K, V>::erase(const K& key)
 {
