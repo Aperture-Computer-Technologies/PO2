@@ -19,10 +19,9 @@ int main()
     //
     //        cout << "--------Sagar's node3 map\n";
     //        hashmap_test_suite(Nodemap<int, int>{});
-    //        cout << "--------Sagar's LP map\n";
-    //        hashmap_test_suite(LP<int, int>{});
-    //    cout << "--------Sagar's LP2 map\n";
-    //    hashmap_test_suite(LP2<int, int>{});
-    cout << "--------Sagar's Cuckoo map\n";
-    hashmap_test_suite(Cuckoo<int, int>{});
+            cout << "--------Sagar's LP map\n";
+            hashmap_test_suite(LP<int, int>{});
+
+//    cout << "--------Sagar's Cuckoo map\n";
+//    hashmap_test_suite(Cuckoo<int, int>{});
 }

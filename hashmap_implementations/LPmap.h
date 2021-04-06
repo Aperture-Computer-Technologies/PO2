@@ -22,7 +22,11 @@ It has a vector of <K,V*, H>, and V is stored in a deque.
  *
  */
 
-template <typename K, typename V>
+template <typename K,
+          typename V,
+          typename Hash = std::hash<K>,
+          typename Pred=std::equal_to<K>
+          >
 class LP {
   public:
     LP();
@@ -40,6 +44,8 @@ class LP {
     //    V& operator[](V&& k);
 
   private:
+    Hash hashthing;
+    Pred eq;
     int32_t DELETED = -1;
     int32_t EMPTY = -2;
     struct Element {
@@ -66,17 +72,22 @@ class LP {
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
+
+
 /*
  * constructor calls constructor with explicit size.
  * reason why i'm not doing LP(size=something) is compiler complains
  */
-template <typename K, typename V>
-LP<K, V>::LP() : LP{LP<K, V>(251)}
+template <typename K, typename V, typename Hash, typename Pred>
+LP<K, V, Hash, Pred>::LP() : LP{LP<K, V>(251)}
 {
 }
-template <typename K, typename V>
-LP<K, V>::LP(int size)
-    : bucket_arr{vector<Element>(2 * size)},
+
+
+template <typename K, typename V, typename Hash, typename Pred>
+LP<K, V, Hash, Pred>::LP(int size):
+      eq(Pred()),
+      bucket_arr{vector<Element>(2 * size)},
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(2 * size)),
       lf_max{0.5},
@@ -92,11 +103,10 @@ LP<K, V>::LP(int size)
  * use something that works for your map.
  * one of the cuckoo hashing papers uses this.
  */
-template <typename K, typename V>
-int32_t LP<K, V>::hasher(const K& key) const
+template <typename K, typename V, typename Hash, typename Pred>
+int32_t LP<K, V, Hash, Pred>::hasher(const K& key) const
 {
-    static std::hash<K> hf;
-    int32_t hash = hf(key);
+    int32_t hash = hashthing(key);
     int32_t final_hash = 0;
     int32_t pos = 0;
     for (int i = 0; i < sizeof(hash); i++) {
@@ -112,12 +122,13 @@ int32_t LP<K, V>::hasher(const K& key) const
 /*
  * generate random values so hasher can use them
  */
-template <typename K, typename V>
-void LP<K, V>::hasher_state_gen()
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
     hash_state = state;
+    hashthing = Hash();
 }
 
 /*
@@ -127,13 +138,13 @@ void LP<K, V>::hasher_state_gen()
  * 2. same key.
  * it returns the position where the element is, or should be inserted.
  */
-template <typename K, typename V>
-int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
+template <typename K, typename V, typename Hash, typename Pred>
+int32_t LP<K, V, Hash, Pred>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = bucket_arr.size();
     //    int32_t pos = hash % size;
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    while (bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || bucket_arr[pos].key != key)) {
+    while (bucket_arr[pos].hash != EMPTY && (bucket_arr[pos].hash != hash || not eq(bucket_arr[pos].key, key))) {
         pos++;
         if (pos >= size) {
             pos -= size;
@@ -145,8 +156,8 @@ int32_t LP<K, V>::prober(const K& key, const int32_t& hash) const
  * returns bool exists,  int position, int hash
  * probe bucket arr, and if the resulting position is empty, key doesn't exist
  */
-template <typename K, typename V>
-std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
+template <typename K, typename V, typename Hash, typename Pred>
+std::tuple<bool, int32_t, int> LP<K, V, Hash, Pred>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -162,8 +173,8 @@ std::tuple<bool, int32_t, int> LP<K, V>::contains_key(const K& key) const
  * atm, i haven't changed it, because i haven't checked if there's any perf advantage
  * in leaving it like this, eliminating 1 call to a function.
  */
-template <typename K, typename V>
-bool LP<K, V>::contains(const K& key) const
+template <typename K, typename V, typename Hash, typename Pred>
+bool LP<K, V, Hash, Pred>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
@@ -179,8 +190,8 @@ bool LP<K, V>::contains(const K& key) const
  * then check for existence. if there is, stop.
  * else, insert.
  */
-template <typename K, typename V>
-void LP<K, V>::insert(const std::pair<K, V> kv)
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::insert(const std::pair<K, V> kv)
 {
     if (((inserted_n + 1) / (float)bucket_arr.size()) > lf_max) {
         rehash();
@@ -200,7 +211,7 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
         valuestore.emplace_back(kv.second);
         val_ptr = &valuestore.back();
     }
-    bucket_arr[std::get<1>(pos_info)] = std::move(Element{kv.first, val_ptr, std::get<2>(pos_info)});
+    bucket_arr[std::get<1>(pos_info)] = Element{kv.first, val_ptr, std::get<2>(pos_info)};
     inserted_n++;
 }
 
@@ -209,8 +220,8 @@ void LP<K, V>::insert(const std::pair<K, V> kv)
  * if there isn't, insert V{} and return reff. to that.
  *
  */
-template <typename K, typename V>
-V& LP<K, V>::operator[](const K& k)
+template <typename K, typename V, typename Hash, typename Pred>
+V& LP<K, V, Hash, Pred>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (std::get<0>(pos_info)) {
@@ -234,8 +245,8 @@ V& LP<K, V>::operator[](const K& k)
 /*
  * just delete everything
  */
-template <typename K, typename V>
-void LP<K, V>::clear()
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::clear()
 {
     open_slots.clear();
     valuestore.clear();
@@ -247,8 +258,8 @@ void LP<K, V>::clear()
  * get new modulohelper thing and new array, then loop over old array
  * insert elements that aren't empty or deleted.
  */
-template <typename K, typename V>
-void LP<K, V>::rehash(int size)
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::rehash(int size)
 {
     vector<Element> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
@@ -276,8 +287,8 @@ void LP<K, V>::rehash(int size)
 /*
  * increase size and rehash. need to add this to the public interface of LP later.
  */
-template <typename K, typename V>
-void LP<K, V>::rehash()
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::rehash()
 {
     int size = helper::next_prime(bucket_arr.size());
     rehash(size);
@@ -288,8 +299,8 @@ void LP<K, V>::rehash()
  * this is mean you'll be able to insert <size> elements into the map
  * without rehashes.
  */
-template <typename K, typename V>
-void LP<K, V>::reserve(int size)
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::reserve(int size)
 {
     int s = 1 + (size / lf_max);
     if (s < bucket_arr.size()) {
@@ -303,8 +314,8 @@ void LP<K, V>::reserve(int size)
  * check if it exists, and stop if it doesnt.
  * if it does, delete.
  */
-template <typename K, typename V>
-void LP<K, V>::erase(const K& key)
+template <typename K, typename V, typename Hash, typename Pred>
+void LP<K, V, Hash, Pred>::erase(const K& key)
 {
     auto pos_data = contains_key(key);
     if (!std::get<0>(pos_data)) {
@@ -318,5 +329,6 @@ void LP<K, V>::erase(const K& key)
     bucket_arr[pos].key = K{};
     inserted_n--;
 }
+
 
 #endif
