@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <unordered_map>
+#include <vector>
 
 #include "LPmap.h"
 
@@ -23,5 +24,7 @@ int main()
     //    cout << pair<int,int>{5,6};
     //    *test.begin().first = 600;
     auto a = test.begin();
-    cout << *a;
+    (*a).second = 5000;
+    cout << *a << "\n";
+    cout << test[4];
 }

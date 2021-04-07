@@ -54,8 +54,11 @@ class LP {
         using wrapped_pointer = wrapped_vtype*;
         using reference = Element&;
         using wrapped_reference = wrapped_vtype&;
-        Iterator(pointer ptr) : m_ptr(ptr), m{ptr->key, def}
+        Iterator(pointer ptr)
+            :  //                                m_ptr(ptr),
+              m{ptr->key, def}
         {
+            m_ptr = ptr;
             if (ptr->val) {
                 m = {ptr->key, *ptr->val};
             }
@@ -72,7 +75,7 @@ class LP {
         Iterator& operator++()
         {
             m_ptr++;
-            while (m_ptr->hash == DELETED || m_ptr->hash == DELETED) {
+            while (m_ptr->hash == DELETED || m_ptr->hash == EMPTY) {
                 m_ptr++;
             }
             m = wrapped_vtype{m_ptr->key, *m_ptr->val};
@@ -96,7 +99,7 @@ class LP {
         wrapped_vtype m;
         V def = V{};
     };
-    Iterator begin() { return ++Iterator(&bucket_arr.front()); };
+    Iterator begin() { return ++Iterator(&bucket_arr[0]); };
     Iterator end() { return Iterator(&bucket_arr.back()); }
     LP();
     explicit LP(int size);
