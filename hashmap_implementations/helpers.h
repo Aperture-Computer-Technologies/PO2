@@ -18,12 +18,14 @@ namespace helper {
 
     size_t next_prime(const int& n)
     {
+        int next;
         for (const int x : prime_sizes) {
             if (x > n) {
-                size_t t = x;
-                return t;
+                next = x;
+                break;
             }
         }
+        return next;
     }
 }  // namespace helper
 

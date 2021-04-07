@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <deque>
+#include <functional>
+#include <iterator>
 #include <numeric>
 #include <tuple>
 #include <vector>
@@ -10,6 +12,21 @@
 #include "fastmod.h"
 #include "helpers.h"
 using std::vector;
+
+constexpr int32_t DELETED = -1;
+constexpr int32_t EMPTY = -2;
+
+// element wrapper
+template <typename K, typename V>
+struct KVElement {
+    KVElement(K key_, V* val_, int32_t hash_) : hash{hash_}, key{key_}, val{val_} {};
+    KVElement() : key{0}, val{0}, hash{EMPTY} {};  // fix this, or no magic. is empty
+    KVElement(const KVElement& e) : hash{e.hash}, key{e.key}, val{e.val} {};
+    //        ~Element(){if (val){delete val;}};
+    int32_t hash;
+    K key;
+    V* val;
+};
 
 /*
 LP, but with a modulo trick
@@ -22,13 +39,65 @@ It has a vector of <K,V*, H>, and V is stored in a deque.
  *
  */
 
-template <typename K,
-          typename V,
-          typename Hash = std::hash<K>,
-          typename Pred=std::equal_to<K>
-          >
+template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>>
 class LP {
+    using Element = KVElement<K, V>;
+
   public:
+    struct Iterator {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;  // ????
+        using value_type = Element;
+        //        using constk = const K&;
+        using wrapped_vtype = std::pair<std::reference_wrapper<K>, std::reference_wrapper<V>>;
+        using pointer = Element*;
+        using wrapped_pointer = wrapped_vtype*;
+        using reference = Element&;
+        using wrapped_reference = wrapped_vtype&;
+        Iterator(pointer ptr) : m_ptr(ptr), m{ptr->key, def}
+        {
+            if (ptr->val) {
+                m = {ptr->key, *ptr->val};
+            }
+            else {
+                V& temp = def;
+                m = {ptr->key, temp};
+            }
+            //
+        };
+        wrapped_reference operator*() { return m; };
+        wrapped_pointer operator->() { return &m; };
+
+        // Prefix increment
+        Iterator& operator++()
+        {
+            m_ptr++;
+            while (m_ptr->hash == DELETED || m_ptr->hash == DELETED) {
+                m_ptr++;
+            }
+            m = wrapped_vtype{m_ptr->key, *m_ptr->val};
+            return *this;
+        }
+
+        // Postfix increment
+        Iterator operator++(int)
+        {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+        // define post and pre decrement later
+
+        friend bool operator==(const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; };
+        friend bool operator!=(const Iterator& a, const Iterator& b) { return a.m_ptr != b.m_ptr; };
+
+      private:
+        pointer m_ptr;
+        wrapped_vtype m;
+        V def = V{};
+    };
+    Iterator begin() { return ++Iterator(&bucket_arr.front()); };
+    Iterator end() { return Iterator(&bucket_arr.back()); }
     LP();
     explicit LP(int size);
     ~LP() { clear(); };
@@ -46,17 +115,6 @@ class LP {
   private:
     Hash hashthing;
     Pred eq;
-    int32_t DELETED = -1;
-    int32_t EMPTY = -2;
-    struct Element {
-        Element(K key_, V* val_, int32_t hash_) : hash{hash_}, key{key_}, val{val_} {};
-        Element() : key{0}, val{0}, hash{-2} {};  // fix this, or no magic. is empty
-        Element(const Element& e) : hash{e.hash}, key{e.key}, val{e.val} {};
-        //        ~Element(){if (val){delete val;}};
-        int32_t hash;
-        K key;
-        V* val;
-    };
     int inserted_n;
     uint64_t modulo_help;  // modulo trick
     float lf_max;
@@ -72,8 +130,6 @@ class LP {
     std::tuple<bool, int32_t, int> contains_key(const K& key) const;
 };
 
-
-
 /*
  * constructor calls constructor with explicit size.
  * reason why i'm not doing LP(size=something) is compiler complains
@@ -83,10 +139,9 @@ LP<K, V, Hash, Pred>::LP() : LP{LP<K, V>(251)}
 {
 }
 
-
 template <typename K, typename V, typename Hash, typename Pred>
-LP<K, V, Hash, Pred>::LP(int size):
-      eq(Pred()),
+LP<K, V, Hash, Pred>::LP(int size)
+    : eq(Pred()),
       bucket_arr{vector<Element>(2 * size)},
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(2 * size)),
@@ -329,6 +384,5 @@ void LP<K, V, Hash, Pred>::erase(const K& key)
     bucket_arr[pos].key = K{};
     inserted_n--;
 }
-
 
 #endif
