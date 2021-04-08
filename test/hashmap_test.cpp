@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "./../hashmap_implementations/Cuckoo.h"
-#include "./../hashmap_implementations/LPmap.h"
+//#include "./../hashmap_implementations/LPmap.h"
 #include "./../hashmap_implementations/LPmap2.h"
 #include "./../hashmap_implementations/Nodemap.h"
 
