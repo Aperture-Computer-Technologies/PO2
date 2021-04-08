@@ -1,12 +1,14 @@
 //
 // Created by MassiveAtoms on 4/7/21.
 //
+#include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "LPmap.h"
+#include "LPmap2.h"
 
 using namespace std;
 template <typename K, typename V>
@@ -18,13 +20,12 @@ ostream& operator<<(ostream& os, pair<K, V> obj)
 
 int main()
 {
-    LP<int, int> test;
+    LP2<int, int> test;
     test.insert({1, 2});
     test.insert({4, 5});
-    //    cout << pair<int,int>{5,6};
-    //    *test.begin().first = 600;
     auto a = test.begin();
+    cout << *a;  // operator<< for pair<K,V> added but not shown
     (*a).second = 5000;
-    cout << *a << "\n";
+    //    cout << *(++a);
     cout << test[4];
 }

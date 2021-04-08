@@ -73,6 +73,7 @@ CMAKE_BINARY_DIR = /home/MassiveAtoms/Desktop/PO2/cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/snippet-run.dir/all
 all: CMakeFiles/sagar-test.dir/all
 all: CMakeFiles/rehash_bench.dir/all
 all: CMakeFiles/cuckoo-impl.dir/all
@@ -86,12 +87,40 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/snippet-run.dir/clean
 clean: CMakeFiles/sagar-test.dir/clean
 clean: CMakeFiles/rehash_bench.dir/clean
 clean: CMakeFiles/cuckoo-impl.dir/clean
 clean: CMakeFiles/benchmarks.dir/clean
 
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/snippet-run.dir
+
+# All Build rule for target.
+CMakeFiles/snippet-run.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles --progress-num=10,11 "Built target snippet-run"
+.PHONY : CMakeFiles/snippet-run.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/snippet-run.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/snippet-run.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/MassiveAtoms/Desktop/PO2/cmake-build-debug/CMakeFiles 0
+.PHONY : CMakeFiles/snippet-run.dir/rule
+
+# Convenience name for target.
+snippet-run: CMakeFiles/snippet-run.dir/rule
+
+.PHONY : snippet-run
+
+# clean rule for target.
+CMakeFiles/snippet-run.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/clean
+.PHONY : CMakeFiles/snippet-run.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/sagar-test.dir

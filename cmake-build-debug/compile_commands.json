@@ -1,6 +1,11 @@
 [
 {
   "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
+  "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.o -c /home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippet-tester.cpp",
+  "file": "/home/MassiveAtoms/Desktop/PO2/hashmap_implementations/snippet-tester.cpp"
+},
+{
+  "directory": "/home/MassiveAtoms/Desktop/PO2/cmake-build-debug",
   "command": "/usr/bin/clang++    -o3  -march=native -g   -std=gnu++17 -o CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.o -c /home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp",
   "file": "/home/MassiveAtoms/Desktop/PO2/test/hashmap_test.cpp"
 },

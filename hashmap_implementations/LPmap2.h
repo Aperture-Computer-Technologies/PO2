@@ -1,0 +1,379 @@
+#ifndef LP2_H
+#define LP2_H
+
+#include <algorithm>
+#include <deque>
+#include <functional>
+#include <iterator>
+#include <numeric>
+#include <tuple>
+#include <vector>
+
+#include "fastmod.h"
+#include "helpers.h"
+using std::vector;
+
+namespace LPspace {
+    constexpr int32_t DELETED = -1;
+    constexpr int32_t EMPTY = -2;
+    template <typename K, typename V>
+    struct KVElement {
+        KVElement(int32_t hash_, std::pair<K, V>* pair) : hash{hash_}, pair_p{pair} {};
+        KVElement() : hash{EMPTY}, pair_p{nullptr} {};  //
+        KVElement(const KVElement& e) : hash{e.hash}, pair_p{e.pair_p} {};
+        int32_t hash;
+        std::pair<K, V>* pair_p;
+    };
+
+    struct Result {
+        Result(bool is_here, int32_t position, int hash_) : contains{is_here}, pos{position}, hash{hash_} {};
+        bool contains;
+        int32_t pos;
+        int hash;
+    };
+
+}  // namespace LPspace
+
+// element wrapper
+
+/*
+LP2, but with KV in deque
+ *
+ */
+
+template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>>
+class LP2 {
+    using Element = LPspace::KVElement<K, V>;
+    using Pair_elem = std::pair<K, V>;
+
+    //    struct Iterator {
+    //        using iterator_category = std::forward_iterator_tag;
+    //        using difference_type = std::ptrdiff_t;
+    //
+    //        using pointer = Pair_elem*;    // or also value_type*
+    //        using reference = Pair_elem&;  // or also value_type&
+    //        using deqit = typename std::deque<Pair_elem>::iterator;
+    //
+    //        Iterator(deqit it, std::deque<Pair_elem>* nsp) : nested_it(it), nested_ptr{nsp}{};
+    //        reference operator*() const { return *nested_it; }
+    ////        pointer operator->() { return &(*nested_it); }
+    //        Iterator& operator++()
+    //        {  // prefix
+    //            do {
+    //                nested_it++;
+    //            } while (nested_it->first == K{} &&
+    //                     nested_it->second == V{} &&
+    //                     std::find(nested_ptr->begin(), nested_ptr->end(), &(*nested_it)) != nested_ptr->end());
+    //            return *this;
+    //        }
+    //        Iterator operator++(int) // postfix
+    //        {
+    //            Iterator tmp = *this;
+    //            ++(*this);
+    //            return tmp;
+    //        }
+    //
+    //      private:
+    //        deqit nested_it;
+    //        std::deque<Pair_elem>* nested_ptr;
+    //
+    //    };
+
+  public:
+    //        Iterator begin(){
+    //            auto temp = Iterator(kv_store.begin(), &kv_store);
+    //            if ((*temp).first == K{} &&
+    //                (*temp).second == V{} &&
+    //                std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()){
+    //                temp++;
+    //            }
+    //            return temp;
+    //    };
+    //    Iterator end() { return --Iterator(kv_store.end(), *kv_store); }
+
+    LP2();
+    explicit LP2(int size);
+    ~LP2() { clear(); };
+    void insert(const Pair_elem kv);
+    bool contains(const K& key) const;
+    V& operator[](const K& k);
+    void clear();
+    int32_t bucket_count() { return hash_store.size(); };
+    int32_t size() { return inserted_n; };
+    void reserve(int size);
+    void erase(const K& key);
+    void rehash();
+    //    V& operator[](V&& k);
+
+  private:
+    Hash hashthing;
+    Pred eq;
+    int inserted_n;
+    uint64_t modulo_help;  // modulo trick
+    float lf_max;
+    vector<Element> hash_store;
+    vector<int32_t> random_state;
+    std::deque<Pair_elem> kv_store;
+    vector<Pair_elem*> open_slots;
+
+    int32_t hasher(const K& key) const;
+    void hasher_state_gen();
+    int32_t prober(const K& key, const int32_t& hash) const;
+    void rehash(int size);
+    LPspace::Result contains_key(const K& key) const;
+};
+
+/*
+ * constructor calls constructor with explicit size.
+ * reason why i'm not doing LP2(size=something) is compiler complains
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+LP2<K, V, Hash, Pred>::LP2() : LP2{LP2<K, V>(251)}
+{
+}
+
+template <typename K, typename V, typename Hash, typename Pred>
+LP2<K, V, Hash, Pred>::LP2(int size)
+    : eq(Pred()),
+      hash_store{vector<Element>(2 * size)},
+      inserted_n{0},
+      modulo_help(fastmod::computeM_s32(2 * size)),
+      lf_max{0.5},
+      kv_store{},
+      open_slots{}
+{
+    hasher_state_gen();
+}
+/*
+ * function to generate hashes.
+ * it's tabulation hashing.
+ * It's not important to know how it works, just copy it, or
+ * use something that works for your map.
+ * one of the cuckoo hashing papers uses this.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+int32_t LP2<K, V, Hash, Pred>::hasher(const K& key) const
+{
+    int32_t hash = hashthing(key);
+    int32_t final_hash = 0;
+    int32_t pos = 0;
+    for (int i = 0; i < sizeof(hash); i++) {
+        pos = hash & 0x00000000000000ff;
+        hash = hash >> 8;
+        final_hash = final_hash ^ random_state[pos + i];
+    }
+    if (final_hash < 0) {
+        final_hash = final_hash * -1;
+    }
+    return final_hash;
+}
+/*
+ * generate random values so hasher can use them
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::hasher_state_gen()
+{
+    std::vector<int32_t> state(259);
+    std::generate(state.begin(), state.end(), gen_integer);
+    random_state = state;
+    hashthing = Hash();
+}
+
+/*
+ * probing function.
+ * it should probe locations, and stop when:
+ * 1. hash = empty
+ * 2. same key.
+ * it returns the position where the element is, or should be inserted.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+int32_t LP2<K, V, Hash, Pred>::prober(const K& key, const int32_t& hash) const
+{
+    unsigned long size = hash_store.size();
+    //    int32_t pos = hash % size;
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+    while (hash_store[pos].hash != LPspace::EMPTY
+           && (hash_store[pos].hash != hash || not eq(hash_store[pos].pair_p->first, key))) {
+        pos++;
+        if (pos >= size) {
+            pos -= size;
+        }
+    }
+
+    return pos;
+}
+
+/*
+ * returns Result(exists, position, hash)
+ * probe bucket arr, and if the resulting position is empty, key doesn't exist
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+LPspace::Result LP2<K, V, Hash, Pred>::contains_key(const K& key) const
+{
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
+    if (hash_store[pos].hash == LPspace::EMPTY) {
+        return {false, pos, hash};
+    }
+    return {true, pos, hash};
+}
+
+/*
+ * std::unordered has this. i should probably just return contains_key()[0]
+ * atm, i haven't changed it, because i haven't checked if there's any perf advantage
+ * in leaving it like this, eliminating 1 call to a function.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+bool LP2<K, V, Hash, Pred>::contains(const K& key) const
+{
+    int32_t hash = hasher(key);
+    int pos = prober(key, hash);
+
+    if (hash_store[pos].hash == LPspace::EMPTY) {
+        return false;
+    }
+    return true;
+}
+/*
+ * inserts element, returns nothing.
+ * detects if insertion will result in >max load factor, rehashes if it will
+ * then check for existence. if there is, stop.
+ * else, insert.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::insert(const Pair_elem kv)
+{
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+        rehash();
+    }
+
+    auto pos_info = contains_key(kv.first);
+    if (pos_info.contains) {
+        return;
+    }
+    Pair_elem* pair_ptr = nullptr;
+    if (open_slots.size()) {
+        pair_ptr = open_slots.back();
+        open_slots.pop_back();
+        *pair_ptr = std::move(kv);
+    }
+    else {
+        kv_store.emplace_back(kv);
+        pair_ptr = &kv_store.back();
+    }
+    hash_store[pos_info.pos] = Element{pos_info.hash, pair_ptr};
+    inserted_n++;
+}
+
+/*check for existence.
+ * if there is, return value
+ * if there isn't, insert V{} and return reff. to that.
+ *
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+V& LP2<K, V, Hash, Pred>::operator[](const K& k)
+{
+    auto pos_info = contains_key(k);
+    if (pos_info.contains) {
+        return hash_store[pos_info.pos].pair_p->second;
+    }
+
+    Pair_elem* pair_ptr = nullptr;
+    if (open_slots.size()) {
+        pair_ptr = open_slots.back();
+        open_slots.pop_back();
+    }
+    else {
+        kv_store.emplace_back(Pair_elem{k, V{}});
+        pair_ptr = &kv_store.back();
+    }
+    auto pos = pos_info.pos;
+    hash_store[pos] = {pos_info.hash, pair_ptr};
+    inserted_n++;
+    return pair_ptr->second;
+}
+/*
+ * just delete everything
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::clear()
+{
+    open_slots.clear();
+    kv_store.clear();
+    hash_store.clear();
+    inserted_n = 0;
+}
+/*
+ * rehash the hashmap.
+ * get new modulohelper thing and new array, then loop over old array
+ * insert elements that aren't empty or deleted.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::rehash(int size)
+{
+    vector<Element> arr_new(size);
+    uint64_t helper = fastmod::computeM_s32(size);
+    for (const auto& x : hash_store) {
+        if (x.hash < 0) {
+            continue;
+        }
+        //        int32_t loc = x.hash % size;
+        int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
+        while (arr_new[loc].hash != LPspace::EMPTY) {
+            loc++;
+            if (loc >= size) {
+                loc -= size;
+            }
+        }
+        arr_new[loc] = x;
+    }
+    hash_store = arr_new;
+    modulo_help = helper;
+}
+/*
+ * increase size and rehash. need to add this to the public interface of LP2 later.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::rehash()
+{
+    int size = helper::next_prime(hash_store.size());
+    rehash(size);
+}
+
+/*
+ * reserve the hashmap for a given size.
+ * this is mean you'll be able to insert <size> elements into the map
+ * without rehashes.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::reserve(int size)
+{
+    int s = 1 + (size / lf_max);
+    if (s < hash_store.size()) {
+        return;
+    }
+    rehash(s);
+}
+
+/*
+ * erase elements.
+ * check if it exists, and stop if it doesnt.
+ * if it does, delete.
+ */
+template <typename K, typename V, typename Hash, typename Pred>
+void LP2<K, V, Hash, Pred>::erase(const K& key)
+{
+    auto pos_info = contains_key(key);
+    if (not pos_info.contains) {
+        return;
+    }
+    auto pos = pos_info.pos;
+    hash_store[pos].hash = LPspace::DELETED;
+    open_slots.push_back(hash_store[pos].pair_p);
+    *hash_store[pos].pair_p = {K{}, V{}};
+    hash_store[pos].pair_p = nullptr;
+    inserted_n--;
+}
+
+#endif

@@ -131,6 +131,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named snippet-run
+
+# Build rule for target.
+snippet-run: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippet-run
+.PHONY : snippet-run
+
+# fast build rule for target.
+snippet-run/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/build
+.PHONY : snippet-run/fast
+
+#=============================================================================
 # Target rules for targets named sagar-test
 
 # Build rule for target.
@@ -263,6 +276,33 @@ hashmap_implement/cuckoo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
 .PHONY : hashmap_implement/cuckoo.cpp.s
 
+hashmap_implementations/snippet-tester.o: hashmap_implementations/snippet-tester.cpp.o
+
+.PHONY : hashmap_implementations/snippet-tester.o
+
+# target to build an object file
+hashmap_implementations/snippet-tester.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.o
+.PHONY : hashmap_implementations/snippet-tester.cpp.o
+
+hashmap_implementations/snippet-tester.i: hashmap_implementations/snippet-tester.cpp.i
+
+.PHONY : hashmap_implementations/snippet-tester.i
+
+# target to preprocess a source file
+hashmap_implementations/snippet-tester.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.i
+.PHONY : hashmap_implementations/snippet-tester.cpp.i
+
+hashmap_implementations/snippet-tester.s: hashmap_implementations/snippet-tester.cpp.s
+
+.PHONY : hashmap_implementations/snippet-tester.s
+
+# target to generate assembly for a file
+hashmap_implementations/snippet-tester.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.s
+.PHONY : hashmap_implementations/snippet-tester.cpp.s
+
 test/hashmap_test.o: test/hashmap_test.cpp.o
 
 .PHONY : test/hashmap_test.o
@@ -329,6 +369,7 @@ help:
 	@echo "... cuckoo-impl"
 	@echo "... rehash_bench"
 	@echo "... sagar-test"
+	@echo "... snippet-run"
 	@echo "... benchmarks/bench.o"
 	@echo "... benchmarks/bench.i"
 	@echo "... benchmarks/bench.s"
@@ -338,6 +379,9 @@ help:
 	@echo "... hashmap_implement/cuckoo.o"
 	@echo "... hashmap_implement/cuckoo.i"
 	@echo "... hashmap_implement/cuckoo.s"
+	@echo "... hashmap_implementations/snippet-tester.o"
+	@echo "... hashmap_implementations/snippet-tester.i"
+	@echo "... hashmap_implementations/snippet-tester.s"
 	@echo "... test/hashmap_test.o"
 	@echo "... test/hashmap_test.i"
 	@echo "... test/hashmap_test.s"

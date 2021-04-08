@@ -45,33 +45,24 @@ class LP {
 
   public:
     struct Iterator {
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;  // ????
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;  // ???? still not completely sure what it does
         using value_type = Element;
-        //        using constk = const K&;
-        using wrapped_vtype = std::pair<std::reference_wrapper<K>, std::reference_wrapper<V>>;
         using pointer = Element*;
-        using wrapped_pointer = wrapped_vtype*;
         using reference = Element&;
+        using wrapped_vtype = std::pair<std::reference_wrapper<K>, std::reference_wrapper<V>>;
+        using wrapped_pointer = wrapped_vtype*;
         using wrapped_reference = wrapped_vtype&;
-        Iterator(pointer ptr)
-            :  //                                m_ptr(ptr),
-              m{ptr->key, def}
+        Iterator(pointer ptr) : m_ptr{ptr}, m{ptr->key, def}
         {
-            m_ptr = ptr;
             if (ptr->val) {
                 m = {ptr->key, *ptr->val};
             }
-            else {
-                V& temp = def;
-                m = {ptr->key, temp};
-            }
-            //
         };
         wrapped_reference operator*() { return m; };
         wrapped_pointer operator->() { return &m; };
 
-        // Prefix increment
+        // Prefix
         Iterator& operator++()
         {
             m_ptr++;
@@ -81,7 +72,6 @@ class LP {
             m = wrapped_vtype{m_ptr->key, *m_ptr->val};
             return *this;
         }
-
         // Postfix increment
         Iterator operator++(int)
         {
