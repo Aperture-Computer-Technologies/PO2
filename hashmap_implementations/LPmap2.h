@@ -17,10 +17,10 @@ namespace LPspace {
     constexpr int32_t DELETED = -1;
     constexpr int32_t EMPTY = -2;
     template <typename K, typename V>
-    struct KVElement {
-        KVElement(int32_t hash_, std::pair<K, V>* pair) : hash{hash_}, pair_p{pair} {};
-        KVElement() : hash{EMPTY}, pair_p{nullptr} {};  //
-        KVElement(const KVElement& e) : hash{e.hash}, pair_p{e.pair_p} {};
+    struct Bucket_wrapper {
+        Bucket_wrapper(int32_t hash_, std::pair<K, V>* pair) : hash{hash_}, pair_p{pair} {};
+        Bucket_wrapper() : hash{EMPTY}, pair_p{nullptr} {};  //
+        Bucket_wrapper(const Bucket_wrapper& e) : hash{e.hash}, pair_p{e.pair_p} {};
         int32_t hash;
         std::pair<K, V>* pair_p;
     };
@@ -281,7 +281,7 @@ void LP2<K, V, Hash, Pred>::insert(const Pair_elem kv)
         kv_store.emplace_back(kv);
         pair_ptr = &kv_store.back();
     }
-    hash_store[pos_info.pos] = Element{pos_info.hash, pair_ptr};
+    hash_store[pos_info.pos] = Bucket{pos_info.hash, pair_ptr};
     inserted_n++;
 }
 
