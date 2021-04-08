@@ -17,10 +17,10 @@ namespace LPspace {
     constexpr int32_t DELETED = -1;
     constexpr int32_t EMPTY = -2;
     template <typename K, typename V>
-    struct KVElement {
-        KVElement(int32_t hash_, std::pair<K, V>* pair) : hash{hash_}, pair_p{pair} {};
-        KVElement() : hash{EMPTY}, pair_p{nullptr} {};  //
-        KVElement(const KVElement& e) : hash{e.hash}, pair_p{e.pair_p} {};
+    struct Bucket_wrapper {
+        Bucket_wrapper(int32_t hash_, std::pair<K, V>* pair) : hash{hash_}, pair_p{pair} {};
+        Bucket_wrapper() : hash{EMPTY}, pair_p{nullptr} {};  //
+        Bucket_wrapper(const Bucket_wrapper& e) : hash{e.hash}, pair_p{e.pair_p} {};
         int32_t hash;
         std::pair<K, V>* pair_p;
     };
@@ -31,6 +31,64 @@ namespace LPspace {
         int32_t pos;
         int hash;
     };
+
+    template <typename K, typename V>
+    class Iter {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::pair<K, V>;
+        using pointer = value_type*;
+        using reference = value_type&;
+        using deqit = typename std::deque<value_type>::iterator;
+
+      public:
+        Iter(deqit it, vector<value_type*>* deleted_slots) : current_it{it}, current{&(*it)}, deleted{deleted_slots} {};
+        reference operator*() const { return *current; }
+        pointer operator->() { return current; }
+        Iter& operator++();    // prefix
+        Iter operator++(int);  // postfix
+        Iter& operator--();
+        Iter operator--(int);
+        friend bool operator==(const Iter& a, const Iter& b) { return a.current == b.current; };
+        friend bool operator!=(const Iter& a, const Iter& b) { return a.current != b.current; };
+
+      private:
+        pointer current;
+        deqit current_it;
+        vector<value_type*>* deleted;
+    };
+    template <typename K, typename V>
+    Iter<K, V>& Iter<K, V>::operator++()
+    {  // prefix
+        do {
+            current_it++;
+            current = &(*current_it);
+        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+        return *this;
+    }
+    template <typename K, typename V>
+    Iter<K, V> Iter<K, V>::operator++(int)
+    {  // postfix
+        Iter tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+    template <typename K, typename V>
+    Iter<K, V>& Iter<K, V>::operator--()
+    {  // prefix
+        do {
+            current_it--;
+            current = &(*current_it);
+        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+        return *this;
+    }
+    template <typename K, typename V>
+    Iter<K, V> Iter<K, V>::operator--(int)
+    {  // postfix
+        Iter tmp = *this;
+        --(*this);
+        return tmp;
+    }
 
 }  // namespace LPspace
 
@@ -43,54 +101,12 @@ LP2, but with KV in deque
 
 template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>>
 class LP2 {
-    using Element = LPspace::KVElement<K, V>;
+    using Bucket = LPspace::Bucket_wrapper<K, V>;
     using Pair_elem = std::pair<K, V>;
-
-    //    struct Iterator {
-    //        using iterator_category = std::forward_iterator_tag;
-    //        using difference_type = std::ptrdiff_t;
-    //
-    //        using pointer = Pair_elem*;    // or also value_type*
-    //        using reference = Pair_elem&;  // or also value_type&
-    //        using deqit = typename std::deque<Pair_elem>::iterator;
-    //
-    //        Iterator(deqit it, std::deque<Pair_elem>* nsp) : nested_it(it), nested_ptr{nsp}{};
-    //        reference operator*() const { return *nested_it; }
-    ////        pointer operator->() { return &(*nested_it); }
-    //        Iterator& operator++()
-    //        {  // prefix
-    //            do {
-    //                nested_it++;
-    //            } while (nested_it->first == K{} &&
-    //                     nested_it->second == V{} &&
-    //                     std::find(nested_ptr->begin(), nested_ptr->end(), &(*nested_it)) != nested_ptr->end());
-    //            return *this;
-    //        }
-    //        Iterator operator++(int) // postfix
-    //        {
-    //            Iterator tmp = *this;
-    //            ++(*this);
-    //            return tmp;
-    //        }
-    //
-    //      private:
-    //        deqit nested_it;
-    //        std::deque<Pair_elem>* nested_ptr;
-    //
-    //    };
+    using Iter = LPspace::Iter<K, V>;
+    friend class LPspace::Iter<K, V>;
 
   public:
-    //        Iterator begin(){
-    //            auto temp = Iterator(kv_store.begin(), &kv_store);
-    //            if ((*temp).first == K{} &&
-    //                (*temp).second == V{} &&
-    //                std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()){
-    //                temp++;
-    //            }
-    //            return temp;
-    //    };
-    //    Iterator end() { return --Iterator(kv_store.end(), *kv_store); }
-
     LP2();
     explicit LP2(int size);
     ~LP2() { clear(); };
@@ -105,13 +121,16 @@ class LP2 {
     void rehash();
     //    V& operator[](V&& k);
 
+    Iter begin();
+    Iter end();
+
   private:
     Hash hashthing;
     Pred eq;
     int inserted_n;
     uint64_t modulo_help;  // modulo trick
     float lf_max;
-    vector<Element> hash_store;
+    vector<Bucket> hash_store;
     vector<int32_t> random_state;
     std::deque<Pair_elem> kv_store;
     vector<Pair_elem*> open_slots;
@@ -135,7 +154,7 @@ LP2<K, V, Hash, Pred>::LP2() : LP2{LP2<K, V>(251)}
 template <typename K, typename V, typename Hash, typename Pred>
 LP2<K, V, Hash, Pred>::LP2(int size)
     : eq(Pred()),
-      hash_store{vector<Element>(2 * size)},
+      hash_store{vector<Bucket>(2 * size)},
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(2 * size)),
       lf_max{0.5},
@@ -262,7 +281,7 @@ void LP2<K, V, Hash, Pred>::insert(const Pair_elem kv)
         kv_store.emplace_back(kv);
         pair_ptr = &kv_store.back();
     }
-    hash_store[pos_info.pos] = Element{pos_info.hash, pair_ptr};
+    hash_store[pos_info.pos] = Bucket{pos_info.hash, pair_ptr};
     inserted_n++;
 }
 
@@ -312,7 +331,7 @@ void LP2<K, V, Hash, Pred>::clear()
 template <typename K, typename V, typename Hash, typename Pred>
 void LP2<K, V, Hash, Pred>::rehash(int size)
 {
-    vector<Element> arr_new(size);
+    vector<Bucket> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
     for (const auto& x : hash_store) {
         if (x.hash < 0) {
@@ -372,8 +391,27 @@ void LP2<K, V, Hash, Pred>::erase(const K& key)
     hash_store[pos].hash = LPspace::DELETED;
     open_slots.push_back(hash_store[pos].pair_p);
     *hash_store[pos].pair_p = {K{}, V{}};
+    //    auto test = std::deque<Pair_elem>::iterator(hash_store[pos].pair_p);
     hash_store[pos].pair_p = nullptr;
     inserted_n--;
+}
+template <typename K, typename V, typename Hash, typename Pred>
+LPspace::Iter<K, V> LP2<K, V, Hash, Pred>::end()
+{
+    auto temp = Iter(kv_store.end(), &open_slots);
+    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+        temp--;
+    }
+    return temp;
+}
+template <typename K, typename V, typename Hash, typename Pred>
+LPspace::Iter<K, V> LP2<K, V, Hash, Pred>::begin()
+{
+    auto temp = Iter(kv_store.begin(), &open_slots);
+    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+        temp++;
+    }
+    return temp;
 }
 
 #endif

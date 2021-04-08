@@ -22,7 +22,7 @@ struct KVElement {
     KVElement(K key_, V* val_, int32_t hash_) : hash{hash_}, key{key_}, val{val_} {};
     KVElement() : key{0}, val{0}, hash{EMPTY} {};  // fix this, or no magic. is empty
     KVElement(const KVElement& e) : hash{e.hash}, key{e.key}, val{e.val} {};
-    //        ~Element(){if (val){delete val;}};
+    //        ~Bucket(){if (val){delete val;}};
     int32_t hash;
     K key;
     V* val;

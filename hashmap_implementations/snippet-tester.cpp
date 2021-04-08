@@ -23,9 +23,13 @@ int main()
     LP2<int, int> test;
     test.insert({1, 2});
     test.insert({4, 5});
-    auto a = test.begin();
-    cout << *a;  // operator<< for pair<K,V> added but not shown
-    (*a).second = 5000;
-    //    cout << *(++a);
-    cout << test[4];
+    test.insert({6, 8});
+    test.erase(4);
+    for (auto it = test.begin(); it != test.end(); it++) {
+        cout << *(it) << "\n";
+        it->second = 1000;
+    }
+    for (auto it = test.begin(); it != test.end(); it++) {
+        cout << *(it) << "\n";
+    }
 }
