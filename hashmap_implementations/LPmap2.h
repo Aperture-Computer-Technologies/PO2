@@ -18,7 +18,7 @@ namespace LPspace {  // namespace for LP internals
     constexpr int32_t DELETED = -1;
     constexpr int32_t EMPTY = -2;
     /*
-     * This is a struct I use instead of std::pair<int, int> for storing hashes
+     * This is a struct I use instead of std::pair<int, pair<>*> for storing hashes
      * and pair<K,V>*
      * It's just here for added semantic value, plus having a guaranteed data layout I know
      */
@@ -33,9 +33,9 @@ namespace LPspace {  // namespace for LP internals
 
     /*
      * For passing around result data when probing the location of a KVpair.
-     * This is significantly better than std::tuple. it has more symantic value, and much easier syntax
+     * This is significantly better than std::tuple. it has more semantic value, and much easier syntax
      *  (eg Result.pos instead of std::get<2>(a result tuple))
-     *  it is also much better compared to having to recomute the hash and repeated probings
+     *  it is also much better compared to having to recompute the hash and repeated probings
      */
     struct Result {
         Result(bool is_here, int32_t position, int hash_) : contains{is_here}, pos{position}, hash{hash_} {};
@@ -50,7 +50,7 @@ namespace LPspace {  // namespace for LP internals
      * rely on "traditional" pointer arithmic, which isn't guaranteed to work on deque, because
      * a deque is basically a bunch of arrays, and something which stores the ends of each array.
      * I cant guarantee that (pointer to an element in deque)++ will not result in an illegal memory access.
-     * If the pointer points to the end of one of the internal arrays (but not the end of the queue), incrmeenting
+     * If the pointer points to the end of one of the internal arrays (but not the end of the queue), incrementing
      * and accessing it would be bad.
      * But I can't fully rely on it either, otherwise i'd just make LP.begin() return std::deque<pair>::iterator.
      * Well, I could. But deque's iterator would also iterate over deleted pairs, and I think it shouldn't for LP2
@@ -59,7 +59,8 @@ namespace LPspace {  // namespace for LP internals
     template <typename K, typename V>
     class Iter {
         using iterator_category = std::bidirectional_iterator_tag;  // unordered provides forward_it,
-        // but i can do both forward and backward, so why not?
+        // but i can do both forward and backward, so why not? I assume that std::unordered doesn;t,
+        // because it's not a doubly linked list, and can't iter backwards
         using difference_type = std::ptrdiff_t;
         using value_type = std::pair<K, V>;
         using pointer = value_type*;
@@ -120,7 +121,16 @@ namespace LPspace {  // namespace for LP internals
 // element wrapper
 
 /*
-LP2, but with KV in deque
+LP, but with KV in deque
+LP has the best performing memory layout of the data that still satisfied the property that
+ pointers to V didn't invalidate upon rehash.
+ It also uses a modulo trick where the divisor is known in advance, same here.
+ https://github.com/lemire/fastmod
+ I've changed the memory layout because implementing iterators for this layout is significantly easier
+ (well, possible at all without overloading some builtin things.)
+ It also has the advantage that pointers to both K and V are not invalidated on rehash, compared to only the
+ key in LP.
+ The major disadvantage is that it's slower.
  *
  */
 
@@ -153,14 +163,14 @@ class LP2 {
 
   private:
     Hash hashthing;
-    Pred eq;
+    Pred eq;  // equality operator needs to be instantiated first, for some reason
     int inserted_n;
-    uint64_t modulo_help;  // modulo trick
+    uint64_t modulo_help;  // faster modulo trick thing, see lemire's fastmod
     float lf_max;
-    vector<Bucket> hash_store;
-    vector<int32_t> random_state;
-    std::deque<Pair_elem, Allocator> kv_store;
-    vector<Pair_elem*> open_slots;
+    vector<Bucket> hash_store;                  // stores <hash, kv_pair*>
+    vector<int32_t> random_state;               // random bits used for hashing
+    std::deque<Pair_elem, Allocator> kv_store;  // stores kv_pairs
+    vector<Pair_elem*> open_slots;              // stores pointers to kv_pairs that have been deleted
 
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
@@ -171,7 +181,7 @@ class LP2 {
 
 /*
  * constructor calls constructor with explicit size.
- * reason why i'm not doing LP2(size=something) is compiler complains
+ * reason why i'm not doing only LP2(size=something) is compiler complains
  */
 template <typename K, typename V, typename Hash, typename Pred, typename Allocator>
 LP2<K, V, Hash, Pred, Allocator>::LP2() : LP2{LP2<K, V>(251)}
