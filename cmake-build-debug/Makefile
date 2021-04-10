@@ -131,6 +131,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named snippet-run
+
+# Build rule for target.
+snippet-run: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippet-run
+.PHONY : snippet-run
+
+# fast build rule for target.
+snippet-run/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/build
+.PHONY : snippet-run/fast
+
+#=============================================================================
 # Target rules for targets named sagar-test
 
 # Build rule for target.
@@ -144,6 +157,19 @@ sagar-test/fast:
 .PHONY : sagar-test/fast
 
 #=============================================================================
+# Target rules for targets named rehash_bench
+
+# Build rule for target.
+rehash_bench: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 rehash_bench
+.PHONY : rehash_bench
+
+# fast build rule for target.
+rehash_bench/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rehash_bench.dir/build.make CMakeFiles/rehash_bench.dir/build
+.PHONY : rehash_bench/fast
+
+#=============================================================================
 # Target rules for targets named cuckoo-impl
 
 # Build rule for target.
@@ -155,19 +181,6 @@ cuckoo-impl: cmake_check_build_system
 cuckoo-impl/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/build
 .PHONY : cuckoo-impl/fast
-
-#=============================================================================
-# Target rules for targets named node-build
-
-# Build rule for target.
-node-build: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 node-build
-.PHONY : node-build
-
-# fast build rule for target.
-node-build/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/build
-.PHONY : node-build/fast
 
 #=============================================================================
 # Target rules for targets named benchmarks
@@ -263,32 +276,32 @@ hashmap_implement/cuckoo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuckoo-impl.dir/build.make CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.s
 .PHONY : hashmap_implement/cuckoo.cpp.s
 
-hashmap_implementations/profiling.o: hashmap_implementations/profiling.cpp.o
+hashmap_implementations/snippet-tester.o: hashmap_implementations/snippet-tester.cpp.o
 
-.PHONY : hashmap_implementations/profiling.o
+.PHONY : hashmap_implementations/snippet-tester.o
 
 # target to build an object file
-hashmap_implementations/profiling.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.o
-.PHONY : hashmap_implementations/profiling.cpp.o
+hashmap_implementations/snippet-tester.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.o
+.PHONY : hashmap_implementations/snippet-tester.cpp.o
 
-hashmap_implementations/profiling.i: hashmap_implementations/profiling.cpp.i
+hashmap_implementations/snippet-tester.i: hashmap_implementations/snippet-tester.cpp.i
 
-.PHONY : hashmap_implementations/profiling.i
+.PHONY : hashmap_implementations/snippet-tester.i
 
 # target to preprocess a source file
-hashmap_implementations/profiling.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.i
-.PHONY : hashmap_implementations/profiling.cpp.i
+hashmap_implementations/snippet-tester.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.i
+.PHONY : hashmap_implementations/snippet-tester.cpp.i
 
-hashmap_implementations/profiling.s: hashmap_implementations/profiling.cpp.s
+hashmap_implementations/snippet-tester.s: hashmap_implementations/snippet-tester.cpp.s
 
-.PHONY : hashmap_implementations/profiling.s
+.PHONY : hashmap_implementations/snippet-tester.s
 
 # target to generate assembly for a file
-hashmap_implementations/profiling.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/node-build.dir/build.make CMakeFiles/node-build.dir/hashmap_implementations/profiling.cpp.s
-.PHONY : hashmap_implementations/profiling.cpp.s
+hashmap_implementations/snippet-tester.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/snippet-run.dir/build.make CMakeFiles/snippet-run.dir/hashmap_implementations/snippet-tester.cpp.s
+.PHONY : hashmap_implementations/snippet-tester.cpp.s
 
 test/hashmap_test.o: test/hashmap_test.cpp.o
 
@@ -317,6 +330,33 @@ test/hashmap_test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sagar-test.dir/build.make CMakeFiles/sagar-test.dir/test/hashmap_test.cpp.s
 .PHONY : test/hashmap_test.cpp.s
 
+test/rehash_bench.o: test/rehash_bench.cpp.o
+
+.PHONY : test/rehash_bench.o
+
+# target to build an object file
+test/rehash_bench.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rehash_bench.dir/build.make CMakeFiles/rehash_bench.dir/test/rehash_bench.cpp.o
+.PHONY : test/rehash_bench.cpp.o
+
+test/rehash_bench.i: test/rehash_bench.cpp.i
+
+.PHONY : test/rehash_bench.i
+
+# target to preprocess a source file
+test/rehash_bench.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rehash_bench.dir/build.make CMakeFiles/rehash_bench.dir/test/rehash_bench.cpp.i
+.PHONY : test/rehash_bench.cpp.i
+
+test/rehash_bench.s: test/rehash_bench.cpp.s
+
+.PHONY : test/rehash_bench.s
+
+# target to generate assembly for a file
+test/rehash_bench.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rehash_bench.dir/build.make CMakeFiles/rehash_bench.dir/test/rehash_bench.cpp.s
+.PHONY : test/rehash_bench.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -327,8 +367,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... benchmarks"
 	@echo "... cuckoo-impl"
-	@echo "... node-build"
+	@echo "... rehash_bench"
 	@echo "... sagar-test"
+	@echo "... snippet-run"
 	@echo "... benchmarks/bench.o"
 	@echo "... benchmarks/bench.i"
 	@echo "... benchmarks/bench.s"
@@ -338,12 +379,15 @@ help:
 	@echo "... hashmap_implement/cuckoo.o"
 	@echo "... hashmap_implement/cuckoo.i"
 	@echo "... hashmap_implement/cuckoo.s"
-	@echo "... hashmap_implementations/profiling.o"
-	@echo "... hashmap_implementations/profiling.i"
-	@echo "... hashmap_implementations/profiling.s"
+	@echo "... hashmap_implementations/snippet-tester.o"
+	@echo "... hashmap_implementations/snippet-tester.i"
+	@echo "... hashmap_implementations/snippet-tester.s"
 	@echo "... test/hashmap_test.o"
 	@echo "... test/hashmap_test.i"
 	@echo "... test/hashmap_test.s"
+	@echo "... test/rehash_bench.o"
+	@echo "... test/rehash_bench.i"
+	@echo "... test/rehash_bench.s"
 .PHONY : help
 
 

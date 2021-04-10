@@ -74,6 +74,9 @@ add_executable(benchmarks
         ./benchmarks/bench.cpp
         )
 
+add_executable(snippet-run
+        ./hashmap_implementations/snippet-tester.cpp
+        )
 # target_link_libraries(benchmarks
 #         pthread
 #         dl
