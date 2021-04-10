@@ -136,6 +136,7 @@ LP has the best performing memory layout of the data that still satisfied the pr
 
 template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>,
           class Allocator = std::allocator<std::pair<K, V>>  // Yeah, no idea what I'm doing
+          //          , template <typename> class Allocator2 = std::allocator
           >
 class LP2 {
     using Bucket = LPspace::Bucket_wrapper<K, V>;
@@ -384,7 +385,7 @@ void LP2<K, V, Hash, Pred, Allocator>::rehash(int size)
         }
         arr_new[loc] = x;
     }
-    hash_store = arr_new;
+    hash_store = std::move(arr_new);
     modulo_help = helper;
 }
 /*
