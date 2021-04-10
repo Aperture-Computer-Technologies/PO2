@@ -32,4 +32,5 @@ int main()
     for (auto it = test.begin(); it != test.end(); it++) {
         cout << *(it) << "\n";
     }
+    std::unordered_map<int, int> b;
 }
