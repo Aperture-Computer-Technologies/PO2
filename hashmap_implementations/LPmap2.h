@@ -6,6 +6,7 @@
 #include <functional>
 #include <iterator>
 #include <numeric>
+#include <set>
 #include <tuple>
 #include <vector>
 
@@ -101,7 +102,7 @@ namespace LPspace {  // namespace for LP internals
          * @param it iterator of the internal std::deque<K,V>
          * @param deleted_slots_ptr pointer to where "deleted" space is stored
          */
-        Iter(deqit it, vector<value_type*>* deleted_slots_ptr)
+        Iter(deqit it, std::set<value_type*>* deleted_slots_ptr)
             : current_it{it}, current{&(*it)}, deleted{deleted_slots_ptr} {};
         reference operator*() const { return *current; }
         pointer operator->() { return current; }
@@ -115,7 +116,7 @@ namespace LPspace {  // namespace for LP internals
       private:
         pointer current;
         deqit current_it;
-        vector<value_type*>* deleted;  // here to check if a pair is a deleted pair
+        std::set<value_type*>* deleted;  // here to check if a pair is a deleted pair
     };
 
     /**
@@ -133,7 +134,8 @@ namespace LPspace {  // namespace for LP internals
         do {
             current_it++;
             current = &(*current_it);
-        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+            //        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+        } while (deleted->count(current));
         return *this;
     }
     template <typename K, typename V>
@@ -149,7 +151,8 @@ namespace LPspace {  // namespace for LP internals
         do {
             current_it--;
             current = &(*current_it);
-        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+            //        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
+        } while (deleted->count(current));
         return *this;
     }
     template <typename K, typename V>
@@ -219,8 +222,8 @@ class LP2 {
     vector<Bucket, Allocator<Bucket>> hash_store;          // stores <hash, kv_pair*>
     vector<int32_t, Allocator<int32_t>> random_state;      // random bits used for hashing
     std::deque<Pair_elem, Allocator<Pair_elem>> kv_store;  // stores kv_pairs
-    vector<Pair_elem*, Allocator<Pair_elem*>> open_slots;  // stores pointers to kv_pairs that have been deleted
-
+    //    vector<Pair_elem*, Allocator<Pair_elem*>> open_slots;  // stores pointers to kv_pairs that have been deleted
+    std::set<Pair_elem*> open_slots;  // testing out if this works better for iters
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
     int32_t prober(const K& key, const int32_t& hash) const;
@@ -404,9 +407,12 @@ void LP2<K, V, Hash, Pred, Allocator>::insert(const Pair_elem kv)
         return;
     }
     Pair_elem* pair_ptr = nullptr;
-    if (open_slots.size()) {
-        pair_ptr = open_slots.back();
-        open_slots.pop_back();
+    if (not open_slots.empty()) {
+        //        pair_ptr = open_slots.back(); // Replace with set ops
+        //        open_slots.pop_back();
+        auto it = open_slots.begin();
+        pair_ptr = *it;
+        open_slots.erase(it);
         *pair_ptr = std::move(kv);
     }
     else {
@@ -436,8 +442,11 @@ V& LP2<K, V, Hash, Pred, Allocator>::operator[](const K& k)
 
     Pair_elem* pair_ptr = nullptr;
     if (open_slots.size()) {
-        pair_ptr = open_slots.back();
-        open_slots.pop_back();
+        //        pair_ptr = open_slots.back();
+        //        open_slots.pop_back();
+        auto it = open_slots.begin();  // replace with set operations
+        pair_ptr = *it;
+        open_slots.erase(it);
     }
     else {
         kv_store.emplace_back(Pair_elem{k, V{}});
@@ -529,7 +538,8 @@ void LP2<K, V, Hash, Pred, Allocator>::erase(const K& key)
     }
     auto pos = pos_info.pos;
     hash_store[pos].hash = LPspace::DELETED;
-    open_slots.push_back(hash_store[pos].pair_p);
+    //    open_slots.push_back(hash_store[pos].pair_p); // replace with set ops
+    open_slots.insert(hash_store[pos].pair_p);
     *hash_store[pos].pair_p = {K{}, V{}};
     //    auto test = std::deque<Pair_elem>::iterator(hash_store[pos].pair_p);
     hash_store[pos].pair_p = nullptr;
@@ -539,7 +549,8 @@ template <typename K, typename V, typename Hash, typename Pred, template <typena
 LPspace::Iter<K, V> LP2<K, V, Hash, Pred, Allocator>::end()
 {
     auto temp = Iter(kv_store.end(), &open_slots);
-    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+    //    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+    if (open_slots.count(&(*temp))) {
         temp--;
     }
     return temp;
@@ -548,7 +559,8 @@ template <typename K, typename V, typename Hash, typename Pred, template <typena
 LPspace::Iter<K, V> LP2<K, V, Hash, Pred, Allocator>::begin()
 {
     auto temp = Iter(kv_store.begin(), &open_slots);
-    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+    //    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
+    if (open_slots.count(&(*temp))) {
         temp++;
     }
     return temp;
