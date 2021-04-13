@@ -21,9 +21,9 @@ string choicetext
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5,6,7};
-vector<int> hashmaps = {3};
+vector<int> hashmaps = {1, 3};
 int runs = 3;
-int maxsize = 1000000;
+int maxsize = 2000000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps
@@ -62,15 +62,15 @@ int main(int argc, char **argv)
                 string_test_aggregate(LP2<string, string>{}, runs, maxsize);
                 break;
             }
-            case 4: {
-                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap<string, string>{}, runs, maxsize);
-                break;
-            }
-            case 5: {
-
-                break;
-            }
+                //            case 4: {
+                //                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
+                //                string_test_aggregate(Nodemap<string, string>{}, runs, maxsize);
+                //                break;
+                //            }
+                //            case 5: {
+                //
+                //                break;
+                //            }
         }
 
         time_point<steady_clock> end_test = steady_clock::now();

@@ -192,8 +192,7 @@ template <typename K, typename V> void Nodemap<K, V>::rehash(int size)
             continue;
         }
         int32_t loc = x->hash % size;
-        //        while (arr_new[loc] && arr_new[loc]->hash != x->hash) {  // TODO: think if this is the correct thing
-        while (arr_new[loc]) {  // TODO: replaace if eronious
+        while (arr_new[loc]) {
             loc++;
             if (loc >= size) {
                 loc -= size;

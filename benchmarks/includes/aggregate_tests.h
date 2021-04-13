@@ -68,11 +68,13 @@ void int_test_aggregate(T map, int runs, int maxsize = 20000000)
         string succ_lookup = "\nint_succ_lookup, \"";
         string nosucc_lookup = "\nint_nosucc_lookup, \"";
         string delet = "\nint_delete, \"";
+        string iter = "\nint_iter, \"";
 
         insert += string{name(map)} + "\"";
         succ_lookup += string{name(map)} + "\"";
         nosucc_lookup += string{name(map)} + "\"";
         delet += string{name(map)} + "\"";
+        iter += string{name(map)} + "\"";
         for (auto size : sizes) {
             if (size > maxsize) {
                 break;
@@ -83,9 +85,10 @@ void int_test_aggregate(T map, int runs, int maxsize = 20000000)
             succ_lookup += ", " + std::to_string(results[1]);
             nosucc_lookup += ", " + std::to_string(results[2]);
             delet += ", " + std::to_string(results[3]);
+            iter += ", " + std::to_string(results[4]);
         }
-        output << insert << succ_lookup << nosucc_lookup << delet;
-        cout << insert << succ_lookup << nosucc_lookup << delet;
+        output << insert << succ_lookup << nosucc_lookup << delet << iter;
+        cout << insert << succ_lookup << nosucc_lookup << delet << iter;
     }
 }
 
@@ -102,11 +105,13 @@ void string_test_aggregate(T map, int runs, int maxsize = 20000000)
         string succ_lookup = "\nstring_succ_lookup, \"";
         string nosucc_lookup = "\nstring_nosucc_lookup, \"";
         string delet = "\nstring_delete, \"";
+        string iter = "\nstring_iter, \"";
 
         insert += string{name(map)} + "\"";
         succ_lookup += string{name(map)} + "\"";
         nosucc_lookup += string{name(map)} + "\"";
         delet += string{name(map)} + "\"";
+        iter += string{name(map)} + "\"";
         for (auto size : sizes) {
             if (size > maxsize) {
                 break;
@@ -117,9 +122,10 @@ void string_test_aggregate(T map, int runs, int maxsize = 20000000)
             succ_lookup += ", " + std::to_string(results[1]);
             nosucc_lookup += ", " + std::to_string(results[2]);
             delet += ", " + std::to_string(results[3]);
+            iter += ", " + std::to_string(results[4]);
         }
-        output << insert << succ_lookup << nosucc_lookup << delet;
-        cout << insert << succ_lookup << nosucc_lookup << delet;
+        output << insert << succ_lookup << nosucc_lookup << delet << iter;
+        cout << insert << succ_lookup << nosucc_lookup << delet << iter;
     }
 }
 
