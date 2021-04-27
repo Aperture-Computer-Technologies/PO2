@@ -71,6 +71,28 @@ namespace Lp {  // namespace for LP internals
         int hash;
     };
 
+    template <typename K, typename V, template <typename> class Allocator = std::allocator>
+    class dense_iter {  // saving 4 bytes, which might make no difference
+        using Pair_elem = std::pair<const K, V>;
+        using iter = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::iterator;
+        using group_type = typename iter::group_pointer_type;
+        using skipfield_type = typename iter::skipfield_pointer_type;
+        dense_iter(iter& iter)
+            : elem{reinterpret_cast<Pair_elem*>(iter.element_pointer)},
+              group{iter.group_pointer},
+              skipfield{iter.skipfield_pointer} {};
+        dense_iter() : elem{nullptr}, group{nullptr}, skipfield{nullptr} {};
+        iter convert() { return iter(group, elem, skipfield); }
+        Pair_elem elem;
+        group_type group;
+        skipfield_type skipfield;
+
+        //        inline  Pair_elem* operator -> () const
+        //        {
+        //            return reinterpret_cast<Pair_elem*>(elem);
+        //        }
+    };
+
 }  // namespace Lp
 
 // element wrapper
@@ -134,6 +156,29 @@ class LP {
 
     iter begin() { return kv_store.begin(); };
     iter end() { return kv_store.end(); };
+
+    // debugging shit
+    bool filter(Bucket& b) { return b.hash > 0; }
+    vector<iter> debug_iters()
+    {
+        vector<Bucket, Allocator<Bucket>> valid_buckets(hash_store.size());
+        auto it = std::copy_if(
+            hash_store.begin(), hash_store.end(), valid_buckets.begin(), [](Bucket& b) { return b.hash > 0; });
+        valid_buckets.resize(std::distance(valid_buckets.begin(), it));
+
+        vector<iter> valid_its(valid_buckets.size());
+        std::transform(
+            valid_buckets.begin(), valid_buckets.end(), valid_its.begin(), [](Bucket& b) { return b.pair_iter; });
+        vector<int> group, element, skipfield;
+        for (auto x : valid_its) {
+            auto a = x.element_pointer;
+            int b = reinterpret_cast<std::uintptr_t>(a) - reinterpret_cast<std::uintptr_t>(x.skipfield_pointer);
+            //            cout << x.group_pointer << ", " << x.element_pointer << ", " << x.skipfield_pointer << "\n";
+            //            cout << ", (" << x->first << "," << iter(x.group_pointer, x.element_pointer,
+            //            x.skipfield_pointer)->first <<  ")\n";
+        }
+        return valid_its;
+    }
 
   private:
     Hash hashthing;

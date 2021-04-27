@@ -32,7 +32,6 @@ int main()
     for (auto it = test.begin(); it != test.end(); it++) {
         cout << *(it) << "\n";
     }
-    auto it = test.begin();
-
-    cout << sizeof(it) << ", " << sizeof(int*);
+    //    auto it = test.begin();
+    //    cout << sizeof(it) + sizeof(int32_t) << ", " << sizeof(Dummy) + sizeof(int32_t) ;
 }
