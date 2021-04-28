@@ -112,25 +112,121 @@ template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = 
 class LP3 {
     using Bucket = Lp::Bucket_wrapper2<K, V>;
     using Pair_elem = std::pair<const K, V>;
-    using iter = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::iterator;
+    using plf_iter = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::iterator;
 
   public:
+    // iterators
+    class Iterator {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::pair<const K, V>;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        plf_iter slave;
+
+      public:
+        Iterator(plf_iter plf) : slave{plf} {};
+        reference operator*() const { return *slave; }
+        pointer operator->() { return slave.operator->(); }
+        // Prefix increment
+        Iterator& operator++() { return ++slave; }
+        // Postfix increment
+        Iterator operator++(int) { return slave++; }
+        // Prefix increment
+        Iterator& operator--() { return --slave; }
+        // Postfix increment
+        Iterator operator--(int) { return slave--; }
+        friend bool operator==(const Iterator& a, const Iterator& b) { return a.slave == b.slave; };
+        friend bool operator!=(const Iterator& a, const Iterator& b) { return a.slave != b.slave; };
+    };
+
+    class ConstIterator {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::pair<const K, V>;
+        using pointer = const value_type*;
+        using reference = const value_type&;
+
+        plf_iter slave;
+
+      public:
+        ConstIterator(plf_iter plf) : slave{plf} {};
+        ConstIterator(Iterator lp3_it) : slave{lp3_it.slave} {};
+        reference operator*() const { return *slave; }
+        pointer operator->() { return slave.operator->(); }
+        // Prefix increment
+        ConstIterator& operator++() { return ++slave; }
+        // Postfix increment
+        ConstIterator operator++(int) { return slave++; }
+        ConstIterator& operator--() { return --slave; }
+        ConstIterator operator--(int) { return slave--; }
+        friend bool operator==(const ConstIterator& a, const ConstIterator& b) { return a.slave == b.slave; };
+        friend bool operator!=(const ConstIterator& a, const ConstIterator& b) { return a.slave != b.slave; };
+    };
+
+    // constructors and destructors
     LP3();
     explicit LP3(size_t bucket_count);
+    LP3(Iterator first, Iterator last);
+    LP3(Iterator first, Iterator last, size_t size);
+    // these are defined here because template fuckery
+    LP3(const LP3& other)  // copy constructor
+    : is_equal(other.is_equal),
+      inserted_n{other.inserted_n},
+      modulo_help(other.modulo_help),
+      lf_max{other.lf_max},
+      hash_store{other.hash_store},
+      random_state{other.random_state},
+      kv_store{other.kv_store} {};
+    LP3(LP3&& other)  // move constructor
+    : is_equal(std::move(other.is_equal)),
+      inserted_n{other.inserted_n},
+      modulo_help{other.modulo_help},
+      lf_max{other.lf_max},
+      hash_store{std::move(other.hash_store)},
+      random_state{other.random_state},
+      kv_store{std::move(other.kv_store)}
+    {
+        other.clear();
+    };
+    LP3(std::initializer_list<Pair_elem> init, size_t bucket_count) : LP3{LP3<K, V>(bucket_count)}
+    {
+        for (const auto& x : init) {
+            insert(x);
+        }
+    }
     ~LP3() { clear(); };
-    void insert(const Pair_elem kv);
-    bool contains(const K& key) const;
-    V& operator[](const K& k);
-    void clear();
-    int32_t bucket_count() { return hash_store.size(); };
+
+    // Iterators
+    Iterator begin() { return Iterator(kv_store.begin()); };
+    Iterator end() { return Iterator(kv_store.end()); };
+    ConstIterator cbegin() { return ConstIterator(kv_store.begin()); };
+    ConstIterator cend() { return ConstIterator(kv_store.end()); };
+
+    // Capacity checks
     int32_t size() { return inserted_n; };
+
+// AHHHH, soon everything will be macro hell
+#if __cplusplus >= 202002L
+    [[nodiscard]] bool empty() const noexcept { return kv_store.empty(); };
+#else
+    bool empty() const noexcept { return kv_store.empty(); };
+#endif
+    // theoretical max elements you could have in it
+    size_t max_size() const noexcept { return std::min({kv_store.max_size(), hash_store.max_size()}); }
+
+    // modifying
+    void insert(const Pair_elem kv);
+    V& operator[](const K& k);
+    void clear() noexcept;
     void reserve(int size);
     void erase(const K& key);
     void rehash();
-    //    V& operator[](V&& k);
 
-    iter begin() { return kv_store.begin(); };
-    iter end() { return kv_store.end(); };
+    // non modifying
+    bool contains(const K& key) const;
+    int32_t bucket_count() { return hash_store.size(); };
 
   private:
     Hash user_hash;
@@ -141,6 +237,7 @@ class LP3 {
     vector<Bucket, Allocator<Bucket>> hash_store;      // stores <hash, kv_pair iterator>
     vector<int32_t, Allocator<int32_t>> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator<Pair_elem>> kv_store;
+
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
     inline int32_t prober(const K& key, const int32_t& hash) const;
@@ -181,14 +278,53 @@ LP3<K, V, Hash, Pred, Allocator>::LP3() : LP3{LP3<K, V>(251)}
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
 LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size)
     : is_equal(Pred()),
-      hash_store{vector<Bucket, Allocator<Bucket>>(2 * size)},
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(2 * size)),
       lf_max{0.5},
+      hash_store{vector<Bucket, Allocator<Bucket>>(2 * size)},
       kv_store{}
 {
     hasher_state_gen();
 }
+
+/**
+ *
+ * @tparam K
+ * @tparam V
+ * @tparam Hash
+ * @tparam Pred
+ * @tparam Allocator
+ * @param first iterator to first element you want to include
+ * @param last iterator to last element of the range you want to include
+ * Constructs LP3 from another (part of) LP3 with iterators
+ */
+template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last) : LP3{LP3<K, V>(251)}
+{
+    while (first != last) {
+        insert(*first++);
+    }
+}
+
+/**
+ *
+ * @tparam K
+ * @tparam V
+ * @tparam Hash
+ * @tparam Pred
+ * @tparam Allocator
+ * @param first iterator to first element you want to include
+ * @param last iterator to last element of the range you want to include
+ * Constructs LP3 from another (part of) LP3 with iterators, but you can specify size
+ */
+template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last, size_t size) : LP3{LP3<K, V>(size)}
+{
+    while (first != last) {
+        insert(*first++);
+    }
+}
+
 /**
  * @brief Function to determine the hash of the supplied key
  * @param key Key that needs to be hashed

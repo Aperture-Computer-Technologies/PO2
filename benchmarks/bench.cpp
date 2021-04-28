@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "./../hashmap_implementations/LPmap.h"
-#include "./../hashmap_implementations/LPmap2.h"
+#include "./../hashmap_implementations/LPmap3.h"
 #include "./../hashmap_implementations/Nodemap.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
@@ -58,8 +58,8 @@ int main(int argc, char **argv)
             case 3: {
                 int_test_aggregate(LP<int, int>{}, runs, maxsize);
                 string_test_aggregate(LP<string, string>{}, runs, maxsize);
-                int_test_aggregate(LP2<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP2<string, string>{}, runs, maxsize);
+                int_test_aggregate(LP3<int, int>{}, runs, maxsize);
+                string_test_aggregate(LP3<string, string>{}, runs, maxsize);
                 break;
             }
                 //            case 4: {
