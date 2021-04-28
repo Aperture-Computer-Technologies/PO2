@@ -71,7 +71,33 @@ namespace Lp {  // namespace for LP internals
         int hash;
     };
 
+    template <typename K, typename V, template <typename> class Allocator = std::allocator>
+    class dense_iter {  // saving 4 bytes, which might make no difference, we'll see
+        using Pair_elem = std::pair<const K, V>;
+        using iter = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::iterator;
+        using group_type = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::group_pointer_type;
+        using skipfield_type = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::skipfield_pointer_type;
+        using elem_type = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::aligned_pointer_type;
 
+        Pair_elem* elem;
+        group_type group;
+        int32_t skipfield;
+
+      public:
+        dense_iter(iter& iter)
+            : elem{reinterpret_cast<Pair_elem*>(iter.element_pointer)},
+              group{iter.group_pointer},
+              skipfield{(int32_t)(reinterpret_cast<intptr_t>(iter.skipfield_pointer)
+                                  - reinterpret_cast<intptr_t>(iter.element_pointer))} {};
+        inline dense_iter() : elem{nullptr}, group{nullptr}, skipfield{0} {};
+        iter convert()
+        {
+            return iter(group,
+                        reinterpret_cast<elem_type>(elem),
+                        reinterpret_cast<skipfield_type>(skipfield + reinterpret_cast<intptr_t>(elem)));
+        }
+        Pair_elem* operator->() const { return elem; }
+    };
 
 }  // namespace Lp
 

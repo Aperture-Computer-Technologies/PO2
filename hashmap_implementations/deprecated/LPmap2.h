@@ -10,8 +10,8 @@
 #include <tuple>
 #include <vector>
 
-#include "fastmod.h"
-#include "helpers.h"
+#include "../fastmod.h"
+#include "../helpers.h"
 using std::vector;
 
 namespace LPspace {  // namespace for LP internals
