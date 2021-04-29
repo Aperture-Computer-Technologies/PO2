@@ -1,11 +1,12 @@
+#ifndef HMTEST
+#define HMTEST
+
 #include <algorithm>
 #include <iostream>
 #include <unordered_set>
 #include <vector>
 
 #include "./../tools/random.h"
-#include "immintrin.h"  // for AVX
-#include "nmmintrin.h"  // for SSE4.2
 
 using std::cerr;
 using std::cout;
@@ -344,3 +345,5 @@ void hashmap_test_suite(CustomHashmap h)
         std::cout << "\t\tReserve+Delete Failed!\n";
     }
 }
+
+#endif
