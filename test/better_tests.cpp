@@ -2,6 +2,7 @@
 // Created by MassiveAtoms on 4/28/21.
 //
 #include <catch2/catch.hpp>
+#include <set>
 #include <sstream>
 #include <unordered_map>
 
@@ -172,5 +173,78 @@ TEMPLATE_TEST_CASE("constructors work", "[constructors]", (std::unordered_map<in
         REQUIRE(testmap[2] == 3);
         REQUIRE(testmap.size() == 3);
         REQUIRE(testmap.bucket_count() >= 3);
+    }
+}
+
+TEMPLATE_TEST_CASE("iterators work", "[iterators]", (LP3<int, int>))
+{
+    TestType empty{};
+    TestType testmap({{0, 1}, {1, 2}, {2, 3}}, 3);
+
+    SECTION("constit = it")
+    {
+        REQUIRE(empty.begin() == empty.cbegin());
+        REQUIRE(empty.end() == empty.cend());
+        REQUIRE(testmap.begin() == testmap.cbegin());
+        REQUIRE(testmap.end() == testmap.cend());
+    }
+    SECTION("end and begin are the same on empty maps")
+    {
+        REQUIRE(empty.begin() == empty.end());
+        REQUIRE(empty.cbegin() == empty.cend());
+    }
+    SECTION("Can modify elements with iterator")
+    {
+        auto it = testmap.begin();
+        while (it != testmap.end()) {
+            it->second++;
+            it++;
+        }
+
+        bool incremented_correctly = true;
+        for (auto& x : testmap) {
+            if (x.first != x.second - 2) {
+                incremented_correctly = false;
+                break;
+            }
+        }
+        REQUIRE(incremented_correctly == true);
+    }
+
+    SECTION("increment and decrement correctly")
+    {
+        auto it = testmap.begin();
+        it++;
+        it--;
+        ++it;
+        --it;
+        REQUIRE(it == testmap.begin());
+        auto it2 = testmap.cbegin();
+        it2++;
+        it2--;
+        ++it2;
+        --it2;
+        REQUIRE(it2 == testmap.begin());
+    }
+
+    SECTION("derefferencing works")
+    {
+        std::set<int> contains{0, 1, 2};
+        bool working = true;
+        auto it = testmap.begin();
+        while (it != testmap.end()) {
+            if (contains.count((*it++).first) != 1) {
+                working = false;
+            }
+        }
+        REQUIRE(working == true);
+        auto it2 = testmap.cbegin();
+        bool working2 = true;
+        while (it2 != testmap.end()) {
+            if (contains.count((*it2++).first) != 1) {
+                working2 = false;
+            }
+        }
+        REQUIRE(working2 == true);
     }
 }

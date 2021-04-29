@@ -63,12 +63,6 @@ add_executable(rehash_bench
         )
 
 
-# cuckoo hashing implementation, rajeev 
-add_executable(cuckoo-impl
-        ./hashmap_implement/cuckoo_hashing.h
-        ./hashmap_implement/cuckoo.cpp
-        )
-
 # hashmap benchmakrs
 add_executable(benchmarks
         ./benchmarks/includes/generator.h

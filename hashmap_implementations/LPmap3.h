@@ -135,6 +135,7 @@ class LP3 {
 
   public:
     // iterators
+    class ConstIterator;  // iterator needs it to declar friend
     class Iterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -175,6 +176,7 @@ class LP3 {
 
         friend bool operator==(const Iterator& a, const Iterator& b) { return a.slave == b.slave; };
         friend bool operator!=(const Iterator& a, const Iterator& b) { return a.slave != b.slave; };
+        friend class ConstIterator;
     };
 
     class ConstIterator {
