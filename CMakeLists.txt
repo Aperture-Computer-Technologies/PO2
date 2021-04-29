@@ -41,10 +41,6 @@ set(CLANG_TIDY_CXX -checks=-*,
 set(CLANG_TIDY_SUPPRESS_CXX
     misc-*,
 )
-# Process Abseil's CMake build system
-# add_subdirectory(
-#     ./src/includes/3thparty/abseil-cpp # example
-#                 )
 
 # check the cmake stuff at the json lib you're using for cmake help
 
@@ -53,6 +49,14 @@ set(CLANG_TIDY_SUPPRESS_CXX
 add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
         )
+
+
+## tests with catch2
+find_package(Catch2 REQUIRED)
+add_executable(better-test
+        test/better_tests.cpp test/better_test_speed.cpp)
+target_link_libraries(better-test PRIVATE Catch2::Catch2)
+
 
 add_executable(rehash_bench
         test/rehash_bench.cpp
@@ -77,6 +81,7 @@ add_executable(benchmarks
 add_executable(snippet-run
         ./hashmap_implementations/snippet-tester.cpp
         )
+
 # target_link_libraries(benchmarks
 #         pthread
 #         dl

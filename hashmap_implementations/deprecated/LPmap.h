@@ -1,19 +1,21 @@
-#ifndef LP2_H
-#define LP2_H
+#ifndef LP_H
+#define LP_H
 
 #include <algorithm>
 #include <deque>
 #include <functional>
 #include <iterator>
 #include <numeric>
+#include <set>
 #include <tuple>
 #include <vector>
 
 #include "fastmod.h"
 #include "helpers.h"
+#include "plf_colony.h"
 using std::vector;
 
-namespace LPspace {  // namespace for LP internals
+namespace Lp {  // namespace for LP internals
 
     constexpr int32_t DELETED = -1;
     constexpr int32_t EMPTY = -2;
@@ -23,28 +25,29 @@ namespace LPspace {  // namespace for LP internals
      *  @tparam V Value
      *  @details
      * This is a struct I use instead of std::pair<int, pair<>*> for storing hashes
-     * and pair<K,V>*
      * It's just here for added semantic value, plus having a guaranteed data layout I know
      *
      */
-    template <typename K, typename V>
+    template <typename K, typename V, template <typename> class Allocator = std::allocator>
     struct Bucket_wrapper {
+        using pair = std::pair<const K, V>;
+        using iter = typename plf::colony<pair, Allocator<pair>>::iterator;
         /**
          * @param hash_ hash of the key
-         * @param pair_ptr pointer to the pair
+         * @param pair_iter_ iterator to the pair
          */
-        Bucket_wrapper(int32_t hash_, std::pair<K, V>* pair_ptr) : hash{hash_}, pair_p{pair_ptr} {};
+        Bucket_wrapper(int32_t hash_, iter pair_iter_) : hash{hash_}, pair_iter{pair_iter_} {};
         /**
          * @brief constructor for empty bucket.
          */
-        Bucket_wrapper() : hash{EMPTY}, pair_p{nullptr} {};  //
+        Bucket_wrapper() : hash{EMPTY}, pair_iter{} {};  //
         /**
          * @brief Copy constructor
          * @param e other Bucket_wrapper
          */
-        Bucket_wrapper(const Bucket_wrapper& e) : hash{e.hash}, pair_p{e.pair_p} {};
+        Bucket_wrapper(const Bucket_wrapper& e) : hash{e.hash}, pair_iter{e.pair_iter} {};
         int32_t hash;
-        std::pair<K, V>* pair_p;
+        iter pair_iter;
     };
 
     /**
@@ -68,99 +71,9 @@ namespace LPspace {  // namespace for LP internals
         int hash;
     };
 
-    /**
-     * @brief Iterator for LPmap
-     * @tparam K Key
-     * @tparam V value
-     * @details
-     * The other big part of STL. Containers have iterators.
-     * I'm delegating a lot to deque's iterator, because all examples I've seen of iterator implementations
-     * rely on "traditional" pointer arithmic, which isn't guaranteed to work on deque, because
-     * a deque is basically a bunch of arrays, and something which stores the ends of each array.
-     * I cant guarantee that (pointer to an element in deque)++ will not result in an illegal memory access.
-     * If the pointer points to the end of one of the internal arrays (but not the end of the queue), incrementing
-     * and accessing it would be bad.
-     * But I can't fully rely on it either, otherwise i'd just make LP.begin() return std::deque<pair>::iterator.
-     * Well, I could. But deque's iterator would also iterate over deleted pairs, and I think it shouldn't for LP2
-     * https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-overload
-     */
-    template <typename K, typename V>
-    class Iter {
-        using iterator_category = std::bidirectional_iterator_tag;  // unordered provides forward_it,
-        // but i can do both forward and backward, so why not? I assume that std::unordered doesn;t,
-        // because it's not a doubly linked list, and can't iter backwards
-        using difference_type = std::ptrdiff_t;
-        using value_type = std::pair<K, V>;
-        using pointer = value_type*;
-        using reference = value_type&;
-        using deqit = typename std::deque<value_type>::iterator;
 
-      public:
-        /**
-         * @brief constructor of iterator
-         * @param it iterator of the internal std::deque<K,V>
-         * @param deleted_slots_ptr pointer to where "deleted" space is stored
-         */
-        Iter(deqit it, vector<value_type*>* deleted_slots_ptr)
-            : current_it{it}, current{&(*it)}, deleted{deleted_slots_ptr} {};
-        reference operator*() const { return *current; }
-        pointer operator->() { return current; }
-        Iter& operator++();    // prefix
-        Iter operator++(int);  // postfix
-        Iter& operator--();
-        Iter operator--(int);
-        friend bool operator==(const Iter& a, const Iter& b) { return a.current == b.current; };
-        friend bool operator!=(const Iter& a, const Iter& b) { return a.current != b.current; };
 
-      private:
-        pointer current;
-        deqit current_it;
-        vector<value_type*>* deleted;  // here to check if a pair is a deleted pair
-    };
-
-    /**
-     * @brief prefix increment of iterator
-     * @tparam K
-     * @tparam V
-     * @return incremented iterator
-     *
-     * @details
-     * increment underlying deque iterator untill it reaches the next nonempty pair
-     */
-    template <typename K, typename V>
-    Iter<K, V>& Iter<K, V>::operator++()
-    {  // prefix
-        do {
-            current_it++;
-            current = &(*current_it);
-        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
-        return *this;
-    }
-    template <typename K, typename V>
-    Iter<K, V> Iter<K, V>::operator++(int)
-    {  // postfix
-        Iter tmp = *this;
-        ++(*this);
-        return tmp;
-    }
-    template <typename K, typename V>
-    Iter<K, V>& Iter<K, V>::operator--()
-    {  // prefix
-        do {
-            current_it--;
-            current = &(*current_it);
-        } while (std::find(deleted->begin(), deleted->end(), current) != deleted->end());
-        return *this;
-    }
-    template <typename K, typename V>
-    Iter<K, V> Iter<K, V>::operator--(int)
-    {  // postfix
-        Iter tmp = *this;
-        --(*this);
-        return tmp;
-    }
-
-}  // namespace LPspace
+}  // namespace Lp
 
 // element wrapper
 
@@ -173,29 +86,43 @@ namespace LPspace {  // namespace for LP internals
  * @tparam Allocator=std::allocator the allocator
  *
  * @details
- * LP, but with KV in deque.
- LP has the best performing memory layout of the data that still satisfied the property that
- pointers to V didn't invalidate upon rehash.
- It also uses a modulo trick where the divisor is known in advance.
- https://github.com/lemire/fastmod or lemire's blog for more info.
- I've changed the memory layout because implementing iterators for this layout is significantly easier
- (well, possible at all without overloading some builtin things.)
- It also has the advantage that pointers to both K and V are not invalidated on rehash, compared to only the
- key in LP.
- The major disadvantage is that it's slower.
+ * LP2, but with KV in a colony.
+ * https://www.plflib.org/colony.htm#faq
+ * I can delegate everything to colony's delegator, no check to see if it's deleted.
+ * The highlights of colony include:
+ * 1. can insert without refference AND iter invalidation
+ * 2. can delete without refference and iter invalidation
+ * 3. performance on par with deque
+ *
+ * It has all the good bits of deque without the downsides.
+ *
+ * Using it does bring some additional downsides, however.
+ * To be able to delete, I need to store an iter to it's position.
+ * an iter is 24 bytes, instead of an 8-byte pointer.
+ * This means each bucket wrapper is 32 bytes instead of 16.
+ * I can only fit 2 buckets in a cache line.
+ *
+ * Consequently, probing is slower. But now, iterators actually work,
+ * I'm not storing pointers to deleted pairs, and memory of the deleted pairs get released
+ *
+ * potential solutions:
+ * 1. find a way to store extra info about the colony in the hashmap once,
+ * and go back to storing pointers to pairs.
+ * On deletions, I'll then have to reconstruct the iterator from the pointer and extra stored info.
+ * 2. ???
+ *
  */
 template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>,
           template <typename> class Allocator = std::allocator>
-class LP2 {
-    using Bucket = LPspace::Bucket_wrapper<K, V>;
-    using Pair_elem = std::pair<K, V>;
-    using Iter = LPspace::Iter<K, V>;
-    friend class LPspace::Iter<K, V>;
+class LP {
+    using Bucket = Lp::Bucket_wrapper<K, V>;
+    using Pair_elem = std::pair<const K, V>;
+    using iter = typename plf::colony<Pair_elem, Allocator<Pair_elem>>::iterator;
 
   public:
-    LP2();
-    explicit LP2(int size);
-    ~LP2() { clear(); };
+    LP();
+    explicit LP(int size);
+    ~LP() { clear(); };
     void insert(const Pair_elem kv);
     bool contains(const K& key) const;
     V& operator[](const K& k);
@@ -207,25 +134,38 @@ class LP2 {
     void rehash();
     //    V& operator[](V&& k);
 
-    Iter begin();
-    Iter end();
+    iter begin() { return kv_store.begin(); };
+    iter end() { return kv_store.end(); };
+
+    // debugging shit
+    bool filter(Bucket& b) { return b.hash > 0; }
+    vector<iter> debug_iters()
+    {
+        vector<Bucket, Allocator<Bucket>> valid_buckets(hash_store.size());
+        auto it = std::copy_if(
+            hash_store.begin(), hash_store.end(), valid_buckets.begin(), [](Bucket& b) { return b.hash > 0; });
+        valid_buckets.resize(std::distance(valid_buckets.begin(), it));
+
+        vector<iter> valid_its(valid_buckets.size());
+        std::transform(
+            valid_buckets.begin(), valid_buckets.end(), valid_its.begin(), [](Bucket& b) { return b.pair_iter; });
+        return valid_its;
+    }
 
   private:
     Hash hashthing;
     Pred eq;  // equality operator needs to be instantiated first, for some reason
     int inserted_n;
-    uint64_t modulo_help;  // faster modulo trick thing, see lemire's fastmod
-    float lf_max;
-    vector<Bucket, Allocator<Bucket>> hash_store;          // stores <hash, kv_pair*>
-    vector<int32_t, Allocator<int32_t>> random_state;      // random bits used for hashing
-    std::deque<Pair_elem, Allocator<Pair_elem>> kv_store;  // stores kv_pairs
-    vector<Pair_elem*, Allocator<Pair_elem*>> open_slots;  // stores pointers to kv_pairs that have been deleted
-
+    uint64_t modulo_help;                              // faster modulo trick thing, see lemire's fastmod
+    float lf_max;                                      // max loadfactor
+    vector<Bucket, Allocator<Bucket>> hash_store;      // stores <hash, kv_pair iterator>
+    vector<int32_t, Allocator<int32_t>> random_state;  // random bits used for hashing
+    plf::colony<Pair_elem, Allocator<Pair_elem>> kv_store;
     int32_t hasher(const K& key) const;
     void hasher_state_gen();
-    int32_t prober(const K& key, const int32_t& hash) const;
+    inline int32_t prober(const K& key, const int32_t& hash) const;
     void rehash(int size);
-    LPspace::Result contains_key(const K& key) const;
+    inline Lp::Result contains_key(const K& key) const;
 };
 
 /**
@@ -237,10 +177,10 @@ class LP2 {
  * @tparam Allocator
  * @details
  * default constructor that delegates to constructor with explicit size.
- * reason why i'm not doing only LP2(size=something) is compiler complains
+ * reason why i'm not doing only LP(size=something) is compiler complains
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-LP2<K, V, Hash, Pred, Allocator>::LP2() : LP2{LP2<K, V>(251)}
+LP<K, V, Hash, Pred, Allocator>::LP() : LP{LP<K, V>(251)}
 {
 }
 
@@ -253,20 +193,19 @@ LP2<K, V, Hash, Pred, Allocator>::LP2() : LP2{LP2<K, V>(251)}
  * @tparam Allocator allocator
  * @param size How many objects can be stored without rehash.
  * @details
- * > LP2<int, int> map = LP2<int, int>(1024)
+ * > LP<int, int> map = LP<int, int>(1024)
  * is equivalent to
- * > LP2<int, int> map{}
+ * > LP<int, int> map{}
  * > map.reserve(1024)
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-LP2<K, V, Hash, Pred, Allocator>::LP2(int size)
+LP<K, V, Hash, Pred, Allocator>::LP(int size)
     : eq(Pred()),
       hash_store{vector<Bucket, Allocator<Bucket>>(2 * size)},
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(2 * size)),
       lf_max{0.5},
-      kv_store{},
-      open_slots{}
+      kv_store{}
 {
     hasher_state_gen();
 }
@@ -283,11 +222,11 @@ LP2<K, V, Hash, Pred, Allocator>::LP2(int size)
  * It uses the user supplied hash and hashes that further, so even if users supply weak ass hashes,
  * we'd still get something better from it (i think/hope). I need to turn the key in a number __somehow__
  * to make tabulation hashing work.
- * Well, if i found a way to read any supplied key as an array of chars, i could totally ignore the user's hashing
- * function
+ * Well, if i found a way to read any supplied key as an array of chars (that's fast and properly distributed),
+ * i could totally ignore the user's hashing function
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-int32_t LP2<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
+int32_t LP<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
 {
     int32_t hash = hashthing(key);
     int32_t final_hash = 0;
@@ -307,7 +246,7 @@ int32_t LP2<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
  * generate random values so hasher can use them
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::hasher_state_gen()
+void LP<K, V, Hash, Pred, Allocator>::hasher_state_gen()
 {
     std::vector<int32_t, Allocator<int32_t>> state(259);
     std::generate(state.begin(), state.end(), gen_integer);
@@ -328,18 +267,17 @@ void LP2<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-int32_t LP2<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
+inline int32_t LP<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = hash_store.size();
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    while (hash_store[pos].hash != LPspace::EMPTY
-           && (hash_store[pos].hash != hash || not eq(hash_store[pos].pair_p->first, key))) {
+    while (hash_store[pos].hash != Lp::EMPTY
+           && (hash_store[pos].hash != hash || not eq(hash_store[pos].pair_iter->first, key))) {
         pos++;
         if (pos >= size) {
             pos -= size;
         }
     }
-
     return pos;
 }
 
@@ -351,12 +289,12 @@ int32_t LP2<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& ha
  * probe bucket arr, and if the resulting position is empty, key doesn't exist
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-LPspace::Result LP2<K, V, Hash, Pred, Allocator>::contains_key(const K& key) const
+inline Lp::Result LP<K, V, Hash, Pred, Allocator>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (hash_store[pos].hash == LPspace::EMPTY) {
+    if (hash_store[pos].hash == Lp::EMPTY) {
         return {false, pos, hash};
     }
     return {true, pos, hash};
@@ -372,12 +310,12 @@ LPspace::Result LP2<K, V, Hash, Pred, Allocator>::contains_key(const K& key) con
  * in leaving it like this, eliminating 1 call to a function.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-bool LP2<K, V, Hash, Pred, Allocator>::contains(const K& key) const
+bool LP<K, V, Hash, Pred, Allocator>::contains(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (hash_store[pos].hash == LPspace::EMPTY) {
+    if (hash_store[pos].hash == Lp::EMPTY) {
         return false;
     }
     return true;
@@ -393,27 +331,17 @@ bool LP2<K, V, Hash, Pred, Allocator>::contains(const K& key) const
  * else, insert.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::insert(const Pair_elem kv)
+void LP<K, V, Hash, Pred, Allocator>::insert(const Pair_elem kv)
 {
     if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
         rehash();
     }
-
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
         return;
     }
-    Pair_elem* pair_ptr = nullptr;
-    if (open_slots.size()) {
-        pair_ptr = open_slots.back();
-        open_slots.pop_back();
-        *pair_ptr = std::move(kv);
-    }
-    else {
-        kv_store.emplace_back(kv);
-        pair_ptr = &kv_store.back();
-    }
-    hash_store[pos_info.pos] = Bucket{pos_info.hash, pair_ptr};
+    auto it = kv_store.insert(kv);
+    hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
     inserted_n++;
 }
 
@@ -427,34 +355,24 @@ void LP2<K, V, Hash, Pred, Allocator>::insert(const Pair_elem kv)
  * if there isn't, insert V{} and return reff. to that.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-V& LP2<K, V, Hash, Pred, Allocator>::operator[](const K& k)
+V& LP<K, V, Hash, Pred, Allocator>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (pos_info.contains) {
-        return hash_store[pos_info.pos].pair_p->second;
+        return hash_store[pos_info.pos].pair_iter->second;
     }
-
-    Pair_elem* pair_ptr = nullptr;
-    if (open_slots.size()) {
-        pair_ptr = open_slots.back();
-        open_slots.pop_back();
-    }
-    else {
-        kv_store.emplace_back(Pair_elem{k, V{}});
-        pair_ptr = &kv_store.back();
-    }
+    auto it = kv_store.insert(Pair_elem{k, V{}});
     auto pos = pos_info.pos;
-    hash_store[pos] = {pos_info.hash, pair_ptr};
+    hash_store[pos] = {pos_info.hash, it};
     inserted_n++;
-    return pair_ptr->second;
+    return it->second;
 }
 /**
  * @brief deletes all keys and values, so size is 0. Beware that _capacity_ is still that of the original
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::clear()
+void LP<K, V, Hash, Pred, Allocator>::clear()
 {
-    open_slots.clear();
     kv_store.clear();
     hash_store.clear();
     inserted_n = 0;
@@ -469,7 +387,7 @@ void LP2<K, V, Hash, Pred, Allocator>::clear()
  * @bug it actually doesn't respect loadfactor_max, so it will definitely rehash if you try to insert n=size elements
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::rehash(int size)
+void LP<K, V, Hash, Pred, Allocator>::rehash(int size)
 {
     vector<Bucket, Allocator<Bucket>> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
@@ -479,7 +397,7 @@ void LP2<K, V, Hash, Pred, Allocator>::rehash(int size)
         }
         //        int32_t loc = x.hash % size;
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
-        while (arr_new[loc].hash != LPspace::EMPTY) {
+        while (arr_new[loc].hash != Lp::EMPTY) {
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -491,10 +409,10 @@ void LP2<K, V, Hash, Pred, Allocator>::rehash(int size)
     modulo_help = helper;
 }
 /**
- * @brief increase size and rehash. need to add this to the public interface of LP2 later.
+ * @brief increase size and rehash. need to add this to the public interface of LP later.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::rehash()
+void LP<K, V, Hash, Pred, Allocator>::rehash()
 {
     int size = helper::next_prime(hash_store.size());
     rehash(size);
@@ -506,7 +424,7 @@ void LP2<K, V, Hash, Pred, Allocator>::rehash()
  * without rehashes.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::reserve(int size)
+void LP<K, V, Hash, Pred, Allocator>::reserve(int size)
 {
     int s = 1 + (size / lf_max);
     if (s < hash_store.size()) {
@@ -521,37 +439,16 @@ void LP2<K, V, Hash, Pred, Allocator>::reserve(int size)
  * if it does, delete.
  */
 template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-void LP2<K, V, Hash, Pred, Allocator>::erase(const K& key)
+void LP<K, V, Hash, Pred, Allocator>::erase(const K& key)
 {
     auto pos_info = contains_key(key);
     if (not pos_info.contains) {
         return;
     }
     auto pos = pos_info.pos;
-    hash_store[pos].hash = LPspace::DELETED;
-    open_slots.push_back(hash_store[pos].pair_p);
-    *hash_store[pos].pair_p = {K{}, V{}};
-    //    auto test = std::deque<Pair_elem>::iterator(hash_store[pos].pair_p);
-    hash_store[pos].pair_p = nullptr;
+    hash_store[pos].hash = Lp::DELETED;
+    kv_store.erase(hash_store[pos].pair_iter);
     inserted_n--;
-}
-template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-LPspace::Iter<K, V> LP2<K, V, Hash, Pred, Allocator>::end()
-{
-    auto temp = Iter(kv_store.end(), &open_slots);
-    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
-        temp--;
-    }
-    return temp;
-}
-template <typename K, typename V, typename Hash, typename Pred, template <typename> class Allocator>
-LPspace::Iter<K, V> LP2<K, V, Hash, Pred, Allocator>::begin()
-{
-    auto temp = Iter(kv_store.begin(), &open_slots);
-    if (std::find(open_slots.begin(), open_slots.end(), &(*temp)) != open_slots.end()) {
-        temp++;
-    }
-    return temp;
 }
 
 #endif
