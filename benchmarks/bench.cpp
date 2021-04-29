@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "./../hashmap_implementations/LPmap.h"
-#include "./../hashmap_implementations/LPmap2.h"
+#include "./../hashmap_implementations/LPmap3.h"
 #include "./../hashmap_implementations/Nodemap.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
@@ -21,9 +21,9 @@ string choicetext
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5,6,7};
-vector<int> hashmaps = {3};
+vector<int> hashmaps = {1, 3};
 int runs = 3;
-int maxsize = 1000000;
+int maxsize = 2000000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps
@@ -58,19 +58,19 @@ int main(int argc, char **argv)
             case 3: {
                 int_test_aggregate(LP<int, int>{}, runs, maxsize);
                 string_test_aggregate(LP<string, string>{}, runs, maxsize);
-                int_test_aggregate(LP2<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP2<string, string>{}, runs, maxsize);
+                int_test_aggregate(LP3<int, int>{}, runs, maxsize);
+                string_test_aggregate(LP3<string, string>{}, runs, maxsize);
                 break;
             }
-            case 4: {
-                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
-                string_test_aggregate(Nodemap<string, string>{}, runs, maxsize);
-                break;
-            }
-            case 5: {
-
-                break;
-            }
+                //            case 4: {
+                //                int_test_aggregate(Nodemap<int, int>{}, runs, maxsize);
+                //                string_test_aggregate(Nodemap<string, string>{}, runs, maxsize);
+                //                break;
+                //            }
+                //            case 5: {
+                //
+                //                break;
+                //            }
         }
 
         time_point<steady_clock> end_test = steady_clock::now();

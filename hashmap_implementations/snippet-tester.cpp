@@ -8,8 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "LPmap2.h"
-
+#include "LPmap3.h"
 using namespace std;
 template <typename K, typename V>
 ostream& operator<<(ostream& os, pair<K, V> obj)
@@ -20,17 +19,13 @@ ostream& operator<<(ostream& os, pair<K, V> obj)
 
 int main()
 {
-    LP2<int, int> test;
-    test.insert({1, 2});
-    test.insert({4, 5});
-    test.insert({6, 8});
-    test.erase(4);
-    for (auto it = test.begin(); it != test.end(); it++) {
-        cout << *(it) << "\n";
-        it->second = 1000;
-    }
-    for (auto it = test.begin(); it != test.end(); it++) {
-        cout << *(it) << "\n";
-    }
-    std::unordered_map<int, int> b;
+    LP3<int, int> testo;
+    //    testo.insert({5, 6});
+    //    testo.insert({7, 8});
+    //    auto it = testo.begin()++;
+    //    auto it2 = testo.end()++;
+    //    auto it3 = testo.cbegin();
+    //    auto it4 = testo.cend();
+    cout << (testo.cbegin() == testo.cend());
+    LP3<int, int> testmap({{0, 1}, {1, 2}, {2, 3}});
 }

@@ -121,6 +121,16 @@ vector<int> int_test(T map, int size)
     time_point<steady_clock> delete_end = steady_clock::now();
     auto delete_time = (duration_cast<nanoseconds>(delete_end - delete_start) - vector_acces_time) / 10000;
     results.push_back(delete_time.count());
+
+    //    Iteration time
+    time_point<steady_clock> iter_start = steady_clock::now();
+    auto iter = testmap.begin();
+    while (++iter != testmap.end()) {
+        if (iter->second == -1) cout << "WTF";
+    }
+    time_point<steady_clock> iter_end = steady_clock::now();
+    auto iter_time = (duration_cast<nanoseconds>(iter_end - iter_start)) / testmap.size();
+    results.push_back(iter_time.count());
     testmap.clear();
     return results;
 }
@@ -205,6 +215,17 @@ vector<int> string_test(T map, int size)
     time_point<steady_clock> delete_end = steady_clock::now();
     auto delete_time = (duration_cast<nanoseconds>(delete_end - delete_start) - vector_acces_time) / 10000;
     results.push_back(delete_time.count());
+
+    //    Iteration time
+    time_point<steady_clock> iter_start = steady_clock::now();
+    auto iter = testmap.begin();
+    while (++iter != testmap.end()) {
+        if (iter->second == "a") cout << "WTF";
+    }
+    time_point<steady_clock> iter_end = steady_clock::now();
+    auto iter_time = (duration_cast<nanoseconds>(iter_end - iter_start)) / testmap.size();
+    results.push_back(iter_time.count());
+
     testmap.clear();
     return results;
 }

@@ -1,11 +1,12 @@
+#ifndef HMTEST
+#define HMTEST
+
 #include <algorithm>
 #include <iostream>
 #include <unordered_set>
 #include <vector>
 
 #include "./../tools/random.h"
-#include "immintrin.h"  // for AVX
-#include "nmmintrin.h"  // for SSE4.2
 
 using std::cerr;
 using std::cout;
@@ -17,6 +18,7 @@ template <class CustomHashmap>
 bool creation(CustomHashmap h)
 {
     CustomHashmap testmap;
+    CustomHashmap testmap2{501};
     return true;
 }
 
@@ -239,37 +241,37 @@ bool delete_n_with_reserve(CustomHashmap b, int n)
 template <class CustomHashmap>
 void hashmap_test_suite(CustomHashmap h)
 {
-    //    if (creation(h)) {
-    //        std::cout << "creation Passed\n";
-    //    }
-    //    else {
-    //        std::cout << "\t\tcreation Failed!\n";
-    //    }
-    //
-    //    if (creation_reserve(h)) {
-    //        std::cout << "Creation with reserve Passed\n";
-    //    }
-    //    else {
-    //        std::cout << "\t\tCreation with reserve  Failed!\n";
-    //    }
-    //    if (single_insert(h)) {
-    //        std::cout << "Single insert Passed\n";
-    //    }
-    //    else {
-    //        std::cout << "\t\tSingle insert Failed!\n";
-    //    }
-    //    if (single_insert_with_reserve(h)) {
-    //        std::cout << "Single insert with reserve Passed\n";
-    //    }
-    //    else {
-    //        std::cout << "\t\tSingle insert with reserve Failed!\n";
-    //    }
-    //    if (insert_n(h, 10)) {
-    //        std::cout << "inserting 10 keys Passed\n";
-    //    }
-    //    else {
-    //        std::cout << "\t\tinserting 10 keys  Failed!\n";
-    //    }
+    if (creation(h)) {
+        std::cout << "creation Passed\n";
+    }
+    else {
+        std::cout << "\t\tcreation Failed!\n";
+    }
+
+    if (creation_reserve(h)) {
+        std::cout << "Creation with reserve Passed\n";
+    }
+    else {
+        std::cout << "\t\tCreation with reserve  Failed!\n";
+    }
+    if (single_insert(h)) {
+        std::cout << "Single insert Passed\n";
+    }
+    else {
+        std::cout << "\t\tSingle insert Failed!\n";
+    }
+    if (single_insert_with_reserve(h)) {
+        std::cout << "Single insert with reserve Passed\n";
+    }
+    else {
+        std::cout << "\t\tSingle insert with reserve Failed!\n";
+    }
+    if (insert_n(h, 10)) {
+        std::cout << "inserting 10 keys Passed\n";
+    }
+    else {
+        std::cout << "\t\tinserting 10 keys  Failed!\n";
+    }
     if (insert_n(h, 1000)) {
         std::cout << "inserting 1000 keys Passed\n";
     }
@@ -282,7 +284,7 @@ void hashmap_test_suite(CustomHashmap h)
     else {
         std::cout << "\t\tInserting 10 with reserve  Failed!\n";
     }
-    if (insert_n_with_reserve(h, 1000)) {
+    if (insert_n_with_reserve(h, 100000)) {
         std::cout << "Inserting 1000 with reserve Passed\n";
     }
     else {
@@ -343,3 +345,5 @@ void hashmap_test_suite(CustomHashmap h)
         std::cout << "\t\tReserve+Delete Failed!\n";
     }
 }
+
+#endif
