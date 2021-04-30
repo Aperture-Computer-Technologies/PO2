@@ -12,7 +12,6 @@
 #include "fastmod.h"
 #include "helpers.h"
 #include "plf_colony.h"
-using std::vector;
 
 namespace Lp {
 
@@ -153,10 +152,10 @@ class LP3 {
     Hash user_hash;
     Pred is_equal;
     int inserted_n;
-    uint64_t modulo_help;          // faster modulo trick thing, see lemire's fastmod
-    float lf_max;                  // max loadfactor
-    vector<Bucket> hash_store;     // stores <hash, kv_pair iterator>
-    vector<int32_t> random_state;  // random bits used for hashing
+    uint64_t modulo_help;               // faster modulo trick thing, see lemire's fastmod
+    float lf_max;                       // max loadfactor
+    std::vector<Bucket> hash_store;     // stores <hash, kv_pair iterator>
+    std::vector<int32_t> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator> kv_store;
 
     int32_t hasher(const K& key) const;                              // hashes key
@@ -168,8 +167,8 @@ class LP3 {
   public:
     // iterators
 
-    class ConstIterator;  // iterator needs it to declar friend
-    class Iterator {
+    struct ConstIterator;  // iterator needs it to declar friend
+    struct Iterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = std::pair<const K, V>;
@@ -212,7 +211,7 @@ class LP3 {
         friend class ConstIterator;
     };
 
-    class ConstIterator {
+    struct ConstIterator {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = std::pair<const K, V>;
@@ -262,9 +261,18 @@ class LP3 {
 
     // constructors and destructors
     LP3();
-    explicit LP3(size_t bucket_count);
-    LP3(Iterator first, Iterator last);
-    LP3(Iterator first, Iterator last, size_t size);
+    explicit LP3(size_t size, const Hash& hash = Hash(), const Pred& equal = Pred(),
+                 const Allocator& alloc = Allocator());
+    LP3(size_t size, const Allocator& alloc);
+    LP3(size_t size, const Hash& hash, const Allocator& alloc);
+    explicit LP3(const Allocator& alloc);
+
+    // ^ end of 1
+    template <class InputIt>
+    LP3(InputIt first, InputIt last);
+    template <class InputIt>
+    LP3(InputIt first, InputIt last, size_t size);
+    // ^ 2
     //    below constructors are correct, ^ may need attention due to allocator changes
     LP3(const LP3& other);  // copy constructor
     LP3(LP3&& other);       // move constructor
@@ -509,15 +517,46 @@ LP3<K, V, Hash, Pred, Allocator>::LP3() : LP3{LP3<K, V>(251)}
  * > map.reserve(1024)
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size)
+LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size, const Hash& hash, const Pred& equal, const Allocator& alloc)
     : is_equal(Pred()),
       inserted_n{0},
       modulo_help(fastmod::computeM_s32(helper::next_prime(2 * size))),
       lf_max{0.5},
-      hash_store{vector<Bucket>(helper::next_prime(2 * size))},
+      hash_store{std::vector<Bucket>(helper::next_prime(2 * size))},
       kv_store{}
 {
     hasher_state_gen();
+}
+
+/**
+ *
+ * @param bucket_count the bucket count
+ * @param alloc the allocator
+ */
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(size_t bucket_count, const Allocator& alloc) : LP3{bucket_count}
+{
+}
+/**
+ *
+ * @param size
+ * @param hash hash function
+ * @param alloc allocator
+ */
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size, const Hash& hash, const Allocator& alloc) : LP3{}, user_hash(hash)
+{
+}
+
+/**
+ *
+ * @param size
+ * @param hash hash function
+ * @param alloc allocator
+ */
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(const Allocator& alloc) : LP3{}
+{
 }
 
 /**
@@ -527,7 +566,8 @@ LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size)
  * Constructs LP3 from another (part of) LP3 with iterators
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last) : LP3{LP3<K, V>(251)}
+template <class InputIt>
+LP3<K, V, Hash, Pred, Allocator>::LP3(InputIt first, InputIt last) : LP3{LP3<K, V>(std::distance(first, last))}
 {
     while (first != last) {
         insert(*first++);
@@ -541,7 +581,9 @@ LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last) :
  * Constructs LP3 from another (part of) LP3 with iterators, but you can specify size
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last, size_t size) : LP3{LP3<K, V>(size)}
+template <class InputIt>
+LP3<K, V, Hash, Pred, Allocator>::LP3(InputIt first, InputIt last, size_t size)
+    : LP3{LP3<K, V>(std::max((size_t)std::distance(first, last), (size_t)size))}
 {
     while (first != last) {
         insert(*first++);
@@ -1165,7 +1207,7 @@ void LP3<K, V, Hash, Pred, Allocator>::max_load_factor(float ml)
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 void LP3<K, V, Hash, Pred, Allocator>::rehash(int size)
 {
-    vector<Bucket> arr_new(size);
+    std::vector<Bucket> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
     for (const auto& x : hash_store) {
         if (x.hash < 0) {

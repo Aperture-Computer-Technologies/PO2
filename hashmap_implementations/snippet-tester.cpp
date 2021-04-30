@@ -28,9 +28,10 @@ int main()
     //    auto it4 = testo.cend();
     //    cout << (testo.cbegin() == testo.cend());
 
-    LP3<int, int> testmap{};
+    LP3<int, int> testmap{{1, 2}};
+    std::max((size_t)std::distance(testmap.begin(), testmap.end()), (size_t)500);
 
-    for (int i = 0; i < 1000; i++) {
-        testmap.insert({i, i + 1});
-    }
+    //    for (int i = 0; i < 1000; i++) {
+    //        testmap.insert({i, i + 1});
+    //    }
 }
