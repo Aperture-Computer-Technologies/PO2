@@ -132,9 +132,11 @@ class LP3 {
     using Pair_elem = std::pair<const K, V>;
     using plf_iter = typename plf::colony<Pair_elem, Allocator>::iterator;
     using plf_constiter = typename plf::colony<Pair_elem, Allocator>::const_iterator;
+    using std_nodetype = typename std::unordered_map<K, V>::node_type;
 
   public:
     // iterators
+
     class ConstIterator;  // iterator needs it to declar friend
     class Iterator {
         using iterator_category = std::bidirectional_iterator_tag;
@@ -222,65 +224,53 @@ class LP3 {
         friend bool operator!=(const ConstIterator& a, const ConstIterator& b) { return a.slave != b.slave; };
     };
 
-    // constructors and destructors
-    LP3();
-    explicit LP3(size_t bucket_count);  //
-    LP3(Iterator first, Iterator last);
-    LP3(Iterator first, Iterator last, size_t size);
-    // these are defined here because template fuckery
-    LP3(const LP3& other)  // copy constructor
-    : is_equal(other.is_equal),
-      inserted_n{other.inserted_n},
-      modulo_help(other.modulo_help),
-      lf_max{other.lf_max},
-      hash_store{other.hash_store},
-      random_state{other.random_state},
-      kv_store{other.kv_store} {};
-    LP3(LP3&& other)  // move constructor
-    : is_equal(std::move(other.is_equal)),
-      inserted_n{other.inserted_n},
-      modulo_help{other.modulo_help},
-      lf_max{other.lf_max},
-      hash_store{std::move(other.hash_store)},
-      random_state{other.random_state},
-      kv_store{std::move(other.kv_store)}
-    {
-        other.clear();
-    };
-    LP3(std::initializer_list<Pair_elem> init) : LP3{LP3<K, V>{}}
-    {
-        for (const auto& x : init) {
-            insert(x);
-        }
-    }
-    LP3(std::initializer_list<Pair_elem> init, size_t bucket_count) : LP3{LP3<K, V>(bucket_count)}
-    {
-        for (const auto& x : init) {
-            insert(x);
-        }
-    }
-    ~LP3() { clear(); };
-
-    // Iterators
     Iterator begin() { return Iterator(kv_store.begin()); };
     Iterator end() { return Iterator(kv_store.end()); };
     ConstIterator cbegin() const { return ConstIterator(kv_store.cbegin()); };
     ConstIterator cend() const { return ConstIterator(kv_store.cend()); };
 
+    // constructors and destructors
+    LP3();
+    explicit LP3(size_t bucket_count);  //
+    LP3(Iterator first, Iterator last);
+    LP3(Iterator first, Iterator last, size_t size);
+    LP3(const LP3& other);  // copy constructor
+    LP3(LP3&& other);       // move constructor
+    LP3(std::initializer_list<Pair_elem> init);
+    LP3(std::initializer_list<Pair_elem> init, size_t bucket_count);
+    ~LP3() { clear(); };
+
     // Capacity checks
     int32_t size() const { return inserted_n; };
 
-// AHHHH, soon everything will be macro hell
-#if __cplusplus >= 202002L
+#if __cplusplus >= 202002L  // if c++ version > c++20
     [[nodiscard]] bool empty() const noexcept { return kv_store.empty(); };
 #else
     bool empty() const noexcept { return kv_store.empty(); };
 #endif
+
     // theoretical max elements you could have in it
     size_t max_size() const noexcept { return std::min({kv_store.max_size(), hash_store.max_size()}); }
 
-    // modifying
-    void insert(const Pair_elem kv);
+    // insertion overloads
+    std::pair<Iterator, bool> insert(const Pair_elem& value);                 // copy
+    inline Iterator insert(ConstIterator hint, const Pair_elem& value);       // copy, delegate to above
+#if __cplusplus >= 201703L                                                    // if C++17+
+    std::pair<Iterator, bool> insert(Pair_elem&& value);                      // move
+    inline Iterator insert(ConstIterator hint, const Pair_elem&& value);      // move, delegate to above
+    std::pair<Iterator, bool> insert(std_nodetype&& nh);                      // insert from unordered_map::node
+    std::pair<Iterator, bool> insert(ConstIterator hint, std_nodetype&& nh);  // delegate to above
+#else
+#endif
+
+    template <class P>
+    inline std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
+    template <class P>
+    inline Iterator insert(ConstIterator hint, P&& value);  // delegate to move insert or to above
+    template <class InputIt>
+    inline void insert(InputIt first, InputIt last);             // delegate
+    inline void insert(std::initializer_list<Pair_elem> ilist);  // delegate
+
     V& operator[](const K& k);
     void clear() noexcept;
     void reserve(int size);
@@ -385,6 +375,54 @@ LP3<K, V, Hash, Pred, Allocator>::LP3(LP3::Iterator first, LP3::Iterator last, s
 {
     while (first != last) {
         insert(*first++);
+    }
+}
+
+/**
+ * @details Copy constructor
+ * @param other Other hashmap you want to copy
+ */
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(const LP3& other)
+    : is_equal(other.is_equal),
+      inserted_n{other.inserted_n},
+      modulo_help(other.modulo_help),
+      lf_max{other.lf_max},
+      hash_store{other.hash_store},
+      random_state{other.random_state},
+      kv_store{other.kv_store} {};
+
+/**
+ * @details Move constructor
+ * @param other Other hashmap you want to copy
+ */
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(LP3&& other)
+    : is_equal(std::move(other.is_equal)),
+      inserted_n{other.inserted_n},
+      modulo_help{other.modulo_help},
+      lf_max{other.lf_max},
+      hash_store{std::move(other.hash_store)},
+      random_state{other.random_state},
+      kv_store{std::move(other.kv_store)}
+{
+    other.clear();
+};
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(std::initializer_list<Pair_elem> init) : LP3{LP3<K, V>{}}
+{
+    for (const auto& x : init) {
+        insert(x);
+    }
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+LP3<K, V, Hash, Pred, Allocator>::LP3(std::initializer_list<Pair_elem> init, size_t bucket_count)
+    : LP3{LP3<K, V>(bucket_count)}
+{
+    for (const auto& x : init) {
+        insert(x);
     }
 }
 
@@ -510,20 +548,111 @@ bool LP3<K, V, Hash, Pred, Allocator>::contains(const K& key) const
  * else, insert.
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-void LP3<K, V, Hash, Pred, Allocator>::insert(const Pair_elem kv)
+std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
+    const LP3::Pair_elem& kv)
 {
     if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
         rehash();
     }
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
-        return;
+        return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
     auto it = kv_store.insert(kv);
     hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
     inserted_n++;
+    return std::pair<Iterator, bool>(it, true);
 }
 
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
+    LP3::Pair_elem&& kv)
+{
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+        rehash();
+    }
+    auto pos_info = contains_key(kv.first);
+    if (pos_info.contains) {
+        return {hash_store[pos_info.pos].pair_iter.convert(), false};
+    }
+    auto it = kv_store.insert(std::forward<Pair_elem&&>(kv));
+    hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
+    inserted_n++;
+    return std::pair<Iterator, bool>(it, true);
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert(ConstIterator hint,
+                                                                                             const Pair_elem& kv)
+{
+    return insert(kv);
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert(ConstIterator hint,
+                                                                                             const Pair_elem&& kv)
+{
+    return insert(std::forward<Pair_elem&&>(kv));
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <class P>
+std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(P&& value)
+{
+    return insert(std::forward<Pair_elem&&>(Pair_elem{value}));
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <class P>
+typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert(ConstIterator hint,
+                                                                                             P&& value)
+{
+    return insert(hint, std::forward<Pair_elem&&>(Pair_elem{value}));
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <class InputIt>
+void LP3<K, V, Hash, Pred, Allocator>::insert(InputIt first, InputIt last)
+{
+    while (first != last) {
+        insert(*first++);
+    }
+}
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+void LP3<K, V, Hash, Pred, Allocator>::insert(std::initializer_list<Pair_elem> ilist)
+{
+    for (auto x : ilist) {
+        insert(std::move(x));
+    }
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
+    std_nodetype&& node)
+{
+    if (node) {
+        Pair_elem kv = {std::move(node.key), std::move(node.value)};
+        if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+            rehash();
+        }
+        auto pos_info = contains_key(kv.first);
+        if (pos_info.contains) {
+            return {hash_store[pos_info.pos].pair_iter.convert(), false};
+        }
+        auto it = kv_store.insert(std::forward<Pair_elem&&>(kv));
+        hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
+        inserted_n++;
+        return std::pair<Iterator, bool>(it, true);
+    }
+    return {end(), false};
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
+    ConstIterator hint, std_nodetype&& node)
+{
+    return insert(std::forward<std_nodetype&&>(node));
+}
 /**
  * @brief access operator, also inserts <key, V{}> if key doesn't exist
  * @param key

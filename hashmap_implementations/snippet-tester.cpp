@@ -19,13 +19,18 @@ ostream& operator<<(ostream& os, pair<K, V> obj)
 
 int main()
 {
-    LP3<int, int> testo;
+    //    LP3<int, int> testo;
     //    testo.insert({5, 6});
     //    testo.insert({7, 8});
     //    auto it = testo.begin()++;
     //    auto it2 = testo.end()++;
     //    auto it3 = testo.cbegin();
     //    auto it4 = testo.cend();
-    cout << (testo.cbegin() == testo.cend());
-    LP3<int, int> testmap({{0, 1}, {1, 2}, {2, 3}});
+    //    cout << (testo.cbegin() == testo.cend());
+
+    LP3<int, int> testmap{};
+
+    for (int i = 0; i < 1000; i++) {
+        testmap.insert({i, i + 1});
+    }
 }

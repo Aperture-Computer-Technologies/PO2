@@ -14,10 +14,10 @@
 
 int main()
 {
-    //        hashmap_test_suite(std::unordered_map<int, int>{});
+    cout << "------------- unordered map";
+    hashmap_test_suite(std::unordered_map<int, int>{});
     //
 
-    cout << "--------Sagar's LP3 map\n";
-    hashmap_test_suite(LP3<int, int>{});
-
+    //    cout << "--------Sagar's LP3 map\n";
+    //    hashmap_test_suite(LP3<int, int>{});
 }
