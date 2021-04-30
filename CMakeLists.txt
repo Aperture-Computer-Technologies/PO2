@@ -8,7 +8,7 @@ project(PO2 VERSION 1.0
         DESCRIPTION "project ontwerp 2"
         LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 # add "-fsanitize=address -fno-omit-frame-pointer"
 # to detect memory errors (leaks, double deletes, etc)
 
