@@ -6,13 +6,47 @@
 #include <functional>
 #include <iterator>
 #include <numeric>
+#include <random>
 #include <vector>
 
 #include "fastmod.h"
-#include "helpers.h"
 #include "plf_colony.h"
 
-namespace Lp {
+namespace LP {
+
+    /*
+     * Randomness generator.
+     */
+    static std::mt19937 gener(INT32_MAX - 2020);
+    /*
+     * this converts the random data and distributes it over [1, int32 max]
+     */
+    static std::uniform_int_distribution<int> random_int_distr(1, INT32_MAX);
+    // gen integers between 0 and int32max
+    int gen_integer() { return random_int_distr(gener); }
+
+    /*
+     * prime sizes.
+     * the next primesize that's 2x the last one till 100m, then 1.25x the last prime size
+     */
+    static constexpr size_t prime_sizes[]
+        = {127,        251,        479,        911,        1733,      3299,      6269,       11923,      22669,
+           43093,      81883,      155579,     295601,     561667,    1067179,   2027659,    3852553,    7319857,
+           13907737,   26424707,   50206957,   95393219,   143731457, 179424989, 224367413,  280465301,  350916677,
+           373588249,  467886691,  573259913,  717266647,  776531999, 971057303, 1190495191, 1400305763, 1611624473,
+           1824261979, 2252945627, 2685457727, 3340200581, 4000846897};
+
+    size_t next_prime(const size_t& n)
+    {
+        size_t next = n;
+        for (const int x : prime_sizes) {
+            if (x > n) {
+                next = x;
+                break;
+            }
+        }
+        return next;
+    }
 
     /**
      * @brief simple struct for passing around info needed (existence, expected/real position, and hash) when probing
@@ -110,7 +144,7 @@ namespace Lp {
         /**
          * @brief constructor for empty bucket.
          */
-        Bucket_wrapper() : hash{Lp::EMPTY}, pair_iter{} {};  //
+        Bucket_wrapper() : hash{LP::EMPTY}, pair_iter{} {};  //
         /**
          * @brief Copy constructor
          * @param e other Bucket_wrapper
@@ -165,7 +199,7 @@ namespace Lp {
 template <typename K, typename V, typename Hash = std::hash<K>, typename Pred = std::equal_to<K>,
           class Allocator = std::allocator<std::pair<const K, V>>>
 class LP3 {
-    using Bucket = Lp::Bucket_wrapper<K, V>;
+    using Bucket = LP::Bucket_wrapper<K, V>;
     using Pair_elem = std::pair<const K, V>;
     using plf_iter = typename plf::colony<Pair_elem, Allocator>::iterator;
     using plf_constiter = typename plf::colony<Pair_elem, Allocator>::const_iterator;
@@ -184,7 +218,7 @@ class LP3 {
     void hasher_state_gen();                                         // generates randomness for hashing function
     inline int32_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
     void rehash(size_t size);                                        // rehashes
-    inline Lp::Result contains_key(const K& key) const;              // prober() with extended info
+    LP::Result contains_key(const K& key) const;                     // prober() with extended info
     inline void rehash_if_needed();
 
   public:
@@ -453,7 +487,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
 {
     std::vector<int32_t> state(259);
-    std::generate(state.begin(), state.end(), gen_integer);
+    std::generate(state.begin(), state.end(), LP::gen_integer);
     random_state = std::move(state);
     user_hash = Hash();
 }
@@ -475,7 +509,7 @@ inline int32_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int3
 {
     unsigned long size = hash_store.size();
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    while (hash_store[pos].hash != Lp::EMPTY
+    while (hash_store[pos].hash != LP::EMPTY
            && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
         pos++;
         if (pos >= size) {
@@ -493,25 +527,25 @@ inline int32_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int3
  * probe bucket arr, and if the resulting position is empty, key doesn't exist
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-inline Lp::Result LP3<K, V, Hash, Pred, Allocator>::contains_key(const K& key) const
+LP::Result LP3<K, V, Hash, Pred, Allocator>::contains_key(const K& key) const
 {
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (hash_store[pos].hash == Lp::EMPTY) {
+    if (hash_store[pos].hash == LP::EMPTY) {
         return {false, pos, hash};
     }
     return {true, pos, hash};
 }
 
-// Removing 2 lines of code I have to write in every insert function
-template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-void LP3<K, V, Hash, Pred, Allocator>::rehash_if_needed()
-{
-    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
-        rehash();
-    }
-}
+// // Removing 2 lines of code I have to write in every insert function
+// template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+// void LP3<K, V, Hash, Pred, Allocator>::rehash_if_needed()
+//{
+//    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+//        rehash();
+//    }
+//}
 //--------------------------- END PRIVATE FUNCTIONS
 
 /**
@@ -548,9 +582,9 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size, const Hash& hash, const Pred& equal, const Allocator& alloc)
     : is_equal(Pred()),
       inserted_n{0},
-      modulo_help(fastmod::computeM_s32(helper::next_prime(2 * size))),
+      modulo_help(fastmod::computeM_s32(LP::next_prime(2 * size))),
       lf_max{0.5},
-      hash_store{std::vector<Bucket>(helper::next_prime(2 * size))},
+      hash_store{std::vector<Bucket>(LP::next_prime(2 * size))},
       kv_store{}
 {
     hasher_state_gen();
@@ -764,7 +798,9 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
     const LP3::Pair_elem& kv)
 {
-    rehash_if_needed();
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+        rehash();
+    }
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
         return {hash_store[pos_info.pos].pair_iter.convert(), false};
@@ -787,12 +823,14 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
     LP3::Pair_elem&& kv)
 {
-    rehash_if_needed();
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+        rehash();
+    }
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
         return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
-    auto it = kv_store.insert(std::forward<Pair_elem&&>(kv));
+    auto it = kv_store.insert(std::forward<Pair_elem>(kv));
     hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
     inserted_n++;
     return std::pair<Iterator, bool>(it, true);
@@ -850,7 +888,7 @@ template <class P>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(P&& value)
 {
     static_assert(std::is_constructible<Pair_elem, P>::value);
-    return insert(std::forward<Pair_elem&&>(Pair_elem{value}));
+    return insert(std::forward<Pair_elem>(Pair_elem{value}));
 }
 
 /**
@@ -866,7 +904,9 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
                                                                                              P&& value)
 {
     static_assert(std::is_constructible<Pair_elem, P>::value);
-    rehash_if_needed();
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+        rehash();
+    }
     Pair_elem kv{value};
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
@@ -981,7 +1021,7 @@ template <class M>
 typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert_or_assign(
     ConstIterator hint, const K& k, M&& obj)
 {
-    return insert_or_assign(k, std::forward<M&&>(obj)).first;
+    return insert_or_assign(k, std::forward<M>(obj)).first;
 }
 
 /**
@@ -996,7 +1036,7 @@ template <class M>
 typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert_or_assign(
     ConstIterator hint, K&& k, M&& obj)
 {
-    return insert_or_assign(std::forward<K&&>(k), std::forward<M&&>(obj)).first;
+    return insert_or_assign(std::forward<K>(k), std::forward<M>(obj)).first;
 }
 #else
 #endif
@@ -1022,7 +1062,7 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
     std::pair<Args...> temp{args...};
     bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>::value;
     assert(constructible);
-    return insert(std::forward<Pair_elem&&>(temp));
+    return insert(std::forward<Pair_elem>(temp));
 }
 
 /**
@@ -1041,7 +1081,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
     std::pair<Args...> temp{args...};
     bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>::value;
     assert(constructible);
-    return insert(std::forward<Pair_elem&&>(temp)).first;
+    return insert(std::forward<Pair_elem>(temp)).first;
 }
 
 /**
@@ -1091,7 +1131,7 @@ size_t LP3<K, V, Hash, Pred, Allocator>::erase(const K& key)
         return 0;
     }
     auto pos = pos_info.pos;
-    hash_store[pos].hash = Lp::DELETED;
+    hash_store[pos].hash = LP::DELETED;
     kv_store.erase(hash_store[pos].pair_iter.convert());
     inserted_n--;
     return 1;
@@ -1111,7 +1151,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
     }
     auto pos_info = contains_key(it->first);
     auto pos = pos_info.pos;
-    hash_store[pos].hash = Lp::DELETED;
+    hash_store[pos].hash = LP::DELETED;
     kv_store.erase(it.slave);
     inserted_n--;
     return Iterator{++it.slave};
@@ -1187,7 +1227,7 @@ V& LP3<K, V, Hash, Pred, Allocator>::operator[](K&& k)
     if (pos_info.contains) {
         return hash_store[pos_info.pos].pair_iter->second;
     }
-    auto it = kv_store.insert(Pair_elem{std::forward<K&&>(k), V{}});
+    auto it = kv_store.insert(Pair_elem{k, V{}});  // change back to forward later
     auto pos = pos_info.pos;
     hash_store[pos] = {pos_info.hash, it};
     inserted_n++;
@@ -1286,7 +1326,7 @@ bool LP3<K, V, Hash, Pred, Allocator>::contains(const K& key) const
     int32_t hash = hasher(key);
     int pos = prober(key, hash);
 
-    if (hash_store[pos].hash == Lp::EMPTY) {
+    if (hash_store[pos].hash == LP::EMPTY) {
         return false;
     }
     return true;
@@ -1370,7 +1410,7 @@ void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
         }
         //        int32_t loc = x.hash % size;
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
-        while (arr_new[loc].hash != Lp::EMPTY) {
+        while (arr_new[loc].hash != LP::EMPTY) {
             loc++;
             if (loc >= size) {
                 loc -= size;
@@ -1387,7 +1427,7 @@ void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 void LP3<K, V, Hash, Pred, Allocator>::rehash()
 {
-    int size = helper::next_prime(int(kv_store.size() / lf_max));
+    int size = LP::next_prime(int(kv_store.size() / lf_max));
     rehash(size);
 }
 

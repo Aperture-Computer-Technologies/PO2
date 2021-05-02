@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 # checks if anything you wrote relies on undefined behaviour
 # which means that your program prolly won't behave exactly as you want on a different compiler
 
-set(CMAKE_CXX_FLAGS "-o3 -flto=thin -march=native")
+set(CMAKE_CXX_FLAGS "-o3 -march=native")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CLANG_TIDY_CXX -checks=-*,

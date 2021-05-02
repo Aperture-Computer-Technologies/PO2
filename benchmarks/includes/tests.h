@@ -38,10 +38,10 @@ key that will mark a location as empty, etc.
 
 */
 template <class T>
-vector<long int> int_test(int size)
+vector<int> int_test(T map, int size)
 {
-    vector<long int> results;  // insert, lookup, unsuccesful lookup, delete times
-    vector<int> sample_keys;   // get a sample of keys to lookup and later delete, will be filled later
+    vector<int> results;      // insert, lookup, unsuccesful lookup, delete times
+    vector<int> sample_keys;  // get a sample of keys to lookup and later delete, will be filled later
 
     // unsuccesful lookup keys
     vector<int> nonkeys(10000);
@@ -139,9 +139,9 @@ vector<long int> int_test(int size)
 // the reason it's split up in 2 functions is because we need other functions to
 // generate the keys, and unfortunately we can't overload based on return type
 template <class T>
-vector<long int> string_test(int size)
+vector<int> string_test(T map, int size)
 {
-    vector<long int> results;    // insert, lookup, unsuccesful lookup, delete times
+    vector<int> results;         // insert, lookup, unsuccesful lookup, delete times
     vector<string> sample_keys;  // get a sample of keys to lookup and later delete
 
     // unsuccesful lookup keys
@@ -160,7 +160,7 @@ vector<long int> string_test(int size)
         std::generate(all_keys.begin(), all_keys.end(), gen_string);
         std::sample(all_keys.begin(), all_keys.end(), std::back_inserter(sample_keys), 10000, generator);
 
-        for (const auto& i : all_keys) {
+        for (auto i : all_keys) {
             testmap.insert({i, i});
         }
         all_keys.clear();
@@ -168,7 +168,7 @@ vector<long int> string_test(int size)
 
     // testing vector access times to subtract later
     time_point<steady_clock> vector_start = steady_clock::now();
-    for (auto& i : sample_keys) {
+    for (auto i : sample_keys) {
         if (i == "") cout << "WTF";  // should never run, is here so loop doesnt get optimized away
     }
     time_point<steady_clock> vector_end = steady_clock::now();
