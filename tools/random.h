@@ -14,7 +14,7 @@ static std::uniform_int_distribution<int> singlech(33, 123);
 std::string gen_str() {  // 90^inserted posibilities
   std::string randomstring;
   for (int i = 0; i < 5; ++i) {
-    randomstring += singlech(gener);
+      randomstring += (char)singlech(gener);
   }
   return randomstring;
 }

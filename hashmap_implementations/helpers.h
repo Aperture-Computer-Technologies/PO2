@@ -12,13 +12,13 @@
 using std::vector;
 #include "../tools/random.h"
 namespace helper {
-    vector<int> prime_sizes
+    vector<size_t> prime_sizes
         = {127,    251,    479,     911,     1733,    3299,    6269,     11923,    22669,    43093,    81883,   155579,
            295601, 561667, 1067179, 2027659, 3852553, 7319857, 13907737, 26424707, 50206957, 95393219, 18124717};
 
-    size_t next_prime(const int& n)
+    size_t next_prime(const size_t& n)
     {
-        int next;
+        size_t next = n;
         for (const int x : prime_sizes) {
             if (x > n) {
                 next = x;

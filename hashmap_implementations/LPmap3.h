@@ -1,9 +1,8 @@
 #ifndef LP33_H
 #define LP33_H
 
-#import <assert.h>
-
 #include <algorithm>
+#import <cassert>
 #include <functional>
 #include <iterator>
 #include <numeric>
@@ -184,7 +183,7 @@ class LP3 {
     int32_t hasher(const K& key) const;                              // hashes key
     void hasher_state_gen();                                         // generates randomness for hashing function
     inline int32_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
-    void rehash(int size);                                           // rehashes
+    void rehash(size_t size);                                        // rehashes
     inline Lp::Result contains_key(const K& key) const;              // prober() with extended info
     inline void rehash_if_needed();
 
@@ -396,8 +395,8 @@ class LP3 {
     std::pair<ConstIterator, ConstIterator> equal_range(const K& key) const;
 
     //    bucket interface
-    inline int32_t bucket_count() const { return hash_store.size(); };
-    int32_t max_bucket_count() const { return max_size(); };
+    inline size_t bucket_count() const { return hash_store.size(); };
+    size_t max_bucket_count() const { return max_size(); };
     size_t bucket_size(size_t n) const { return (kv_store[n].hash >= 0); };
     size_t bucket(const K& key) const { return contains_key(key).pos; };
     //    Hash policy
@@ -573,7 +572,7 @@ LP3<K, V, Hash, Pred, Allocator>::LP3(size_t bucket_count, const Allocator& allo
  * @param alloc allocator
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size, const Hash& hash, const Allocator& alloc) : LP3{}
+LP3<K, V, Hash, Pred, Allocator>::LP3(size_t size, const Hash& hash, const Allocator& alloc) : LP3{size}
 {
     user_hash = hash;
 }
@@ -694,7 +693,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(const LP3& other)
 {
     auto temp{other};
-    swap(temp);
+    std::swap(*this, temp);
     for (auto it = kv_store.begin(); it != kv_store.end(); it++) {
         auto pos_info = contains_key(it->first);
         hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
@@ -836,7 +835,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert(ConstIterator hint,
                                                                                              const Pair_elem& kv)
 {
-    return insert(kv);
+    return insert(kv).first;
 }
 
 /**
@@ -979,9 +978,8 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 template <class M>
-typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert_or_assign(ConstIterator it,
-                                                                                                       const K& k,
-                                                                                                       M&& obj)
+typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert_or_assign(
+    ConstIterator hint, const K& k, M&& obj)
 {
     return insert_or_assign(k, std::forward<M&&>(obj)).first;
 }
@@ -1362,7 +1360,7 @@ void LP3<K, V, Hash, Pred, Allocator>::max_load_factor(float ml)
  * @bug it actually doesn't respect loadfactor_max, so it will definitely rehash if you try to insert n=size elements
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-void LP3<K, V, Hash, Pred, Allocator>::rehash(int size)
+void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
 {
     std::vector<Bucket> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
@@ -1467,8 +1465,7 @@ bool operator!=(const LP3<K_, V_, Hash_, Pred_, Allocator_>& lhs, const LP3<K_, 
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs) noexcept
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs) noexcept
 {
     lhs.swap(rhs);
 }

@@ -68,6 +68,10 @@ int main(int argc, char **argv)
                 //
                 //                break;
                 //            }
+
+            default: {
+                break;
+            }
         }
 
         time_point<steady_clock> end_test = steady_clock::now();
