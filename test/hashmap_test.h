@@ -78,7 +78,7 @@ bool insert_n(CustomHashmap b, int n)
     CustomHashmap testmap;
     std::generate(keys.begin(), keys.end(), gen_integer);
     std::unordered_set<int> unique{};
-    for (const int &x : keys) {
+    for (const int x : keys) {
         testmap.insert({x, x + 1});
         unique.insert(x);
     }

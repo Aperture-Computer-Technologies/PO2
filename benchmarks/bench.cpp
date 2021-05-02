@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include "./../hashmap_implementations/LPmap.h"
 #include "./../hashmap_implementations/LPmap3.h"
 #include "./../hashmap_implementations/Nodemap.h"
 #include "./includes/3thparty/CLI11.hpp"
@@ -47,17 +46,15 @@ int main(int argc, char **argv)
         switch (i) {
             case 1: {
                 int_test_aggregate(std::unordered_map<int, int>{}, runs, maxsize);
-                string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize); // TODO:
+                string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize);
                 break;
             }
             case 2: {
                 int_test_aggregate(boost::unordered_map<int, int>{}, runs, maxsize);
-                string_test_aggregate(boost::unordered_map<string, string>{}, runs, maxsize);  // TODO:
+                string_test_aggregate(boost::unordered_map<string, string>{}, runs, maxsize);
                 break;
             }
             case 3: {
-                int_test_aggregate(LP<int, int>{}, runs, maxsize);
-                string_test_aggregate(LP<string, string>{}, runs, maxsize);
                 int_test_aggregate(LP3<int, int>{}, runs, maxsize);
                 string_test_aggregate(LP3<string, string>{}, runs, maxsize);
                 break;
@@ -71,6 +68,10 @@ int main(int argc, char **argv)
                 //
                 //                break;
                 //            }
+
+            default: {
+                break;
+            }
         }
 
         time_point<steady_clock> end_test = steady_clock::now();

@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "./../hashmap_implementations/LPmap.h"
 #include "./../tools/random.h"
 using namespace std::chrono;
 
@@ -108,5 +107,5 @@ void bench_output(int n, T map)
 
 int main()
 {
-    bench_output(2, LP<int, int>{});
+    //    bench_output(2, LP<int, int>{});
 }

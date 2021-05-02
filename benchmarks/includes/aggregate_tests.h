@@ -79,8 +79,7 @@ void int_test_aggregate(T map, int runs, int maxsize = 20000000)
             if (size > maxsize) {
                 break;
             }
-            vector<int> results = int_test(map, size);
-
+            vector<long int> results = int_test<T>(size);
             insert += ", " + std::to_string(results[0]);
             succ_lookup += ", " + std::to_string(results[1]);
             nosucc_lookup += ", " + std::to_string(results[2]);
@@ -116,7 +115,7 @@ void string_test_aggregate(T map, int runs, int maxsize = 20000000)
             if (size > maxsize) {
                 break;
             }
-            vector<int> results = string_test(map, size);
+            vector<long int> results = string_test<T>(size);
 
             insert += ", " + std::to_string(results[0]);
             succ_lookup += ", " + std::to_string(results[1]);
