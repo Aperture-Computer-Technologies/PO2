@@ -23,7 +23,7 @@ namespace LP {
      */
     static std::uniform_int_distribution<int> random_int_distr(1, INT32_MAX);
     // gen integers between 0 and int32max
-    int gen_integer() { return random_int_distr(gener); }
+    inline int gen_integer() { return random_int_distr(gener); }
 
     /*
      * prime sizes.
@@ -36,7 +36,7 @@ namespace LP {
            373588249,  467886691,  573259913,  717266647,  776531999, 971057303, 1190495191, 1400305763, 1611624473,
            1824261979, 2252945627, 2685457727, 3340200581, 4000846897};
 
-    size_t next_prime(const size_t& n)
+    inline size_t next_prime(const size_t& n)
     {
         size_t next = n;
         for (const int x : prime_sizes) {
@@ -47,6 +47,7 @@ namespace LP {
         }
         return next;
     }
+
 
     /**
      * @brief simple struct for passing around info needed (existence, expected/real position, and hash) when probing
@@ -99,7 +100,7 @@ namespace LP {
          * @brief conversion constructor
          * @param iter plf::colony::iterator
          */
-        inline naive_faster_colony_iter(iter& iter)
+        naive_faster_colony_iter(iter& iter)
             : elem{reinterpret_cast<Pair_elem*>(iter.element_pointer)},
               group{iter.group_pointer},
               skipfield{iter.skipfield_pointer} {};
@@ -117,7 +118,7 @@ namespace LP {
          * pointer to member
          * @return
          */
-        inline Pair_elem* operator->() const { return elem; }
+        Pair_elem* operator->() const { return elem; }
     };
     constexpr int32_t DELETED = -1;
     constexpr int32_t EMPTY = -2;
@@ -216,10 +217,10 @@ class LP3 {
 
     int32_t hasher(const K& key) const;                              // hashes key
     void hasher_state_gen();                                         // generates randomness for hashing function
-    inline int32_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
+    int32_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
     void rehash(size_t size);                                        // rehashes
     LP::Result contains_key(const K& key) const;                     // prober() with extended info
-    inline void rehash_if_needed();
+    void rehash_if_needed();
 
   public:
     // iterators
@@ -320,6 +321,15 @@ class LP3 {
     ConstIterator cbegin() const { return ConstIterator(kv_store.cbegin()); };
     ConstIterator cend() const { return ConstIterator(kv_store.cend()); };
 
+    // some required typedefs
+    using value_type = Pair_elem;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = Iterator;
+    using const_iterator = ConstIterator;
+    using difference_type = typename iterator::difference_type;
+    using size_type = difference_type;
+
     // constructors and destructors
     LP3();
     explicit LP3(size_t size, const Hash& hash = Hash(), const Pred& equal = Pred(),
@@ -358,31 +368,31 @@ class LP3 {
 
     // --------------- modifying stuff
     void clear() noexcept;
-    // insertion overloads. all overloads that delegate are inlined
+    // insertion overloads.
     std::pair<Iterator, bool> insert(const Pair_elem& value);         // copy
-    inline Iterator insert(ConstIterator hint, const Pair_elem& kv);  // copy
+    Iterator insert(ConstIterator hint, const Pair_elem& kv);  // copy
     template <class P>
-    inline std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
+     std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
     template <class P>
     Iterator insert(ConstIterator hint, P&& value);
     /* TODO: the above are meant to eliminate a move/copy. instead of convert, copy/move, it should do convert only
      * atm, they don't do that, but they do correctly insert
      */
     template <class InputIt>
-    inline void insert(InputIt first, InputIt last);                      // delegate
-    inline void insert(std::initializer_list<Pair_elem> ilist);           // delegate
+     void insert(InputIt first, InputIt last);                      // delegate
+     void insert(std::initializer_list<Pair_elem> ilist);           // delegate
 #if __cplusplus >= 201703L                                                // if C++17+
     std::pair<Iterator, bool> insert(Pair_elem&& value);                  // move
-    inline Iterator insert(ConstIterator hint, const Pair_elem&& value);  // move, delegate to above
+     Iterator insert(ConstIterator hint, const Pair_elem&& value);  // move, delegate to above
     //    insert or assign overloads
     template <class M>
     std::pair<Iterator, bool> insert_or_assign(const K& k, M&& obj);  // copy key
     template <class M>
     std::pair<Iterator, bool> insert_or_assign(K&& k, M&& obj);  // move key
     template <class M>
-    inline Iterator insert_or_assign(ConstIterator hint, const K& k, M&& obj);
+     Iterator insert_or_assign(ConstIterator hint, const K& k, M&& obj);
     template <class M>
-    inline Iterator insert_or_assign(ConstIterator hint, K&& k, M&& obj);
+     Iterator insert_or_assign(ConstIterator hint, K&& k, M&& obj);
 #else
 #endif
 
@@ -403,7 +413,7 @@ class LP3 {
 
     size_t erase(const K& key);
     Iterator erase(ConstIterator pos);
-    inline Iterator erase(ConstIterator first, ConstIterator last);
+     Iterator erase(ConstIterator first, ConstIterator last);
 #if __cplusplus >= 201703L
     Iterator erase(Iterator pos);
 #else
@@ -429,7 +439,7 @@ class LP3 {
     std::pair<ConstIterator, ConstIterator> equal_range(const K& key) const;
 
     //    bucket interface
-    inline size_t bucket_count() const { return hash_store.size(); };
+     size_t bucket_count() const { return hash_store.size(); };
     size_t max_bucket_count() const { return max_size(); };
     size_t bucket_size(size_t n) const { return (kv_store[n].hash >= 0); };
     size_t bucket(const K& key) const { return contains_key(key).pos; };
@@ -444,6 +454,66 @@ class LP3 {
     Hash hash_function() const { return Hash{}; };
     Pred key_eq() const { return Pred{}; };
 };
+
+
+
+/**
+ *
+ * @param lhs left lp3 map
+ * @param rhs right lp3 map
+ * @return bool isequal
+ * @details
+ * The contents of two unordered containers lhs and rhs are equal if the following conditions hold:
+    - lhs.size() == rhs.size()
+    - each key, value pair in lhs has the same key, value pair in rhs
+The behavior is undefined if Key or T are not EqualityComparable.
+ *
+ */
+template <class K_, class V_, class Hash_, class Pred_, class Allocator_>
+bool operator==(const LP3<K_, V_, Hash_, Pred_, Allocator_>& lhs, const LP3<K_, V_, Hash_, Pred_, Allocator_>& rhs);
+
+/**
+ *
+ * @param lhs left lp3 map
+ * @param rhs right lp3 map
+ * @return bool is not equal
+ * @details
+ * The contents of two unordered containers lhs and rhs are equal if the following conditions hold:
+ *  - lhs.size() == rhs.size()
+ *  - each key, value pair in lhs has the same key, value pair in rhs
+ *  The behavior is undefined if Key or T are not EqualityComparable.
+ *
+ */
+template <class K_, class V_, class Hash_, class Pred_, class Allocator_>
+bool operator!=(const LP3<K_, V_, Hash_, Pred_, Allocator_>& lhs, const LP3<K_, V_, Hash_, Pred_, Allocator_>& rhs);
+
+#if __cplusplus >= 201703L
+/**
+ *
+ * @param lhs one LP3 map
+ * @param rhs another LP3 map
+ * @details
+ * swaps the maps by calling lhs.swap(rhs)
+ */
+template <class Key, class T, class Hash, class KeyEqual, class Alloc>
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs) noexcept;
+#else
+/**
+ *
+ * @param lhs one LP3 map
+ * @param rhs another LP3 map
+ * @details
+ * swaps the maps by calling lhs.swap(rhs)
+ */
+template <class Key, class T, class Hash, class KeyEqual, class Alloc>
+void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
+          std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs);
+#endif
+
+#ifndef LP3_DEF_H
+
+// helper futions defs
+
 
 // --------- private functions
 
@@ -505,7 +575,7 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-inline int32_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
+ int32_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = hash_store.size();
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
@@ -1000,7 +1070,7 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
         return {it.convert(), false};
     }
     else {
-        auto it = kv_store.insert({std::move(k), std::forward<M>(obj)});
+        auto it = kv_store.insert({std::forward<K>(k), std::forward<M>(obj)});
         hash_store[pos_info.pos] = {pos_info.hash, it};
         inserted_n++;
         return {it, true};
@@ -1447,6 +1517,26 @@ void LP3<K, V, Hash, Pred, Allocator>::reserve(int size)
 }
 
 /**
+ * @param c container
+ * @param pred  predicate that returns true if the element should be erased
+ * @return The number of erased elements.
+ */
+template <class Key, class T, class Hash, class KeyEqual, class Alloc, class Pred>
+size_t erase_if(LP3<Key, T, Hash, KeyEqual, Alloc>& c, Pred pred)
+{
+    auto old_size = c.size();
+    for (auto i = c.begin(), last = c.end(); i != last;) {
+        if (pred(*i)) {
+            i = c.erase(i);
+        }
+        else {
+            ++i;
+        }
+    }
+    return old_size - c.size();
+}
+
+/**
  *
  * @param lhs left lp3 map
  * @param rhs right lp3 map
@@ -1530,24 +1620,6 @@ void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
 #else
 #endif
 
-/**
- * @param c container
- * @param pred  predicate that returns true if the element should be erased
- * @return The number of erased elements.
- */
-template <class Key, class T, class Hash, class KeyEqual, class Alloc, class Pred>
-size_t erase_if(LP3<Key, T, Hash, KeyEqual, Alloc>& c, Pred pred)
-{
-    auto old_size = c.size();
-    for (auto i = c.begin(), last = c.end(); i != last;) {
-        if (pred(*i)) {
-            i = c.erase(i);
-        }
-        else {
-            ++i;
-        }
-    }
-    return old_size - c.size();
-}
 
-#endif
+#endif // LP3_DEF_H
+#endif // LP3_H
