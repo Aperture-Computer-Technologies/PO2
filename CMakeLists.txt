@@ -51,11 +51,11 @@ add_executable(sagar-test
         )
 
 
-## tests with catch2
-#find_package(Catch2 REQUIRED)
-#add_executable(better-test
-#       test/better_tests.cpp test/better_test_speed.cpp)
-#target_link_libraries(better-test PRIVATE Catch2::Catch2)
+# tests with catch2
+find_package(Catch2 REQUIRED)
+add_executable(better-test
+       test/better_tests.cpp test/better_test_speed.cpp)
+target_link_libraries(better-test PRIVATE Catch2::Catch2)
 
 
 #add_executable(rehash_bench
