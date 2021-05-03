@@ -104,7 +104,8 @@ vector<int> int_test(T map, int size)
     // unsuccesful lookup test
     time_point<steady_clock> unlookup_start = steady_clock::now();
     for (auto key : nonkeys) {
-        if (testmap[key] == -1) cout << "WTF";
+//        if (testmap[key] == -1) cout << "WTF";
+            if (testmap.count(key)) cout << "WTF";
     }
     time_point<steady_clock> unlookup_end = steady_clock::now();
     auto unlookup_time = (duration_cast<nanoseconds>(unlookup_end - unlookup_start) - vector_acces_time) / 10000;
@@ -198,7 +199,8 @@ vector<int> string_test(T map, int size)
     // unsuccesful lookup test
     time_point<steady_clock> unlookup_start = steady_clock::now();
     for (auto key : nonkeys) {
-        if (testmap[key] == "a") cout << "WTF";
+//        if (testmap[key] == "a") cout << "WTF";
+        if (testmap.count(key)) cout << "huh";
     }
     time_point<steady_clock> unlookup_end = steady_clock::now();
     auto unlookup_time = (duration_cast<nanoseconds>(unlookup_end - unlookup_start) - vector_acces_time) / 10000;
