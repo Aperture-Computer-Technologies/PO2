@@ -50,7 +50,9 @@ add_executable(sagar-test
         ${PROJECT_SOURCE_DIR}/test/hashmap_test.cpp
         )
 
-
+add_executable(LP-profiling
+        ${PROJECT_SOURCE_DIR}/hashmap_implementations/profiler.cpp
+        )
 # tests with catch2
 find_package(Catch2 REQUIRED)
 add_executable(better-test

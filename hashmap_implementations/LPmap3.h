@@ -48,7 +48,6 @@ namespace LP {
         return next;
     }
 
-
     /**
      * @brief simple struct for passing around info needed (existence, expected/real position, and hash) when probing
      * @details
@@ -155,7 +154,7 @@ namespace LP {
         iter pair_iter;
     };
 
-}  // namespace Lp
+}  // namespace LP
 
 /**
  * @brief Linear probing map
@@ -215,11 +214,11 @@ class LP3 {
     std::vector<int32_t> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator> kv_store;
 
-    int32_t hasher(const K& key) const;                              // hashes key
-    void hasher_state_gen();                                         // generates randomness for hashing function
-    int32_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
-    void rehash(size_t size);                                        // rehashes
-    LP::Result contains_key(const K& key) const;                     // prober() with extended info
+    int32_t hasher(const K& key) const;                       // hashes key
+    void hasher_state_gen();                                  // generates randomness for hashing function
+    size_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
+    void rehash(size_t size);                                 // rehashes
+    LP::Result contains_key(const K& key) const;              // prober() with extended info
     void rehash_if_needed();
 
   public:
@@ -369,30 +368,30 @@ class LP3 {
     // --------------- modifying stuff
     void clear() noexcept;
     // insertion overloads.
-    std::pair<Iterator, bool> insert(const Pair_elem& value);         // copy
+    std::pair<Iterator, bool> insert(const Pair_elem& value);  // copy
     Iterator insert(ConstIterator hint, const Pair_elem& kv);  // copy
     template <class P>
-     std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
+    std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
     template <class P>
     Iterator insert(ConstIterator hint, P&& value);
     /* TODO: the above are meant to eliminate a move/copy. instead of convert, copy/move, it should do convert only
      * atm, they don't do that, but they do correctly insert
      */
     template <class InputIt>
-     void insert(InputIt first, InputIt last);                      // delegate
-     void insert(std::initializer_list<Pair_elem> ilist);           // delegate
-#if __cplusplus >= 201703L                                                // if C++17+
-    std::pair<Iterator, bool> insert(Pair_elem&& value);                  // move
-     Iterator insert(ConstIterator hint, const Pair_elem&& value);  // move, delegate to above
+    void insert(InputIt first, InputIt last);                      // delegate
+    void insert(std::initializer_list<Pair_elem> ilist);           // delegate
+#if __cplusplus >= 201703L                                         // if C++17+
+    std::pair<Iterator, bool> insert(Pair_elem&& value);           // move
+    Iterator insert(ConstIterator hint, const Pair_elem&& value);  // move, delegate to above
     //    insert or assign overloads
     template <class M>
     std::pair<Iterator, bool> insert_or_assign(const K& k, M&& obj);  // copy key
     template <class M>
     std::pair<Iterator, bool> insert_or_assign(K&& k, M&& obj);  // move key
     template <class M>
-     Iterator insert_or_assign(ConstIterator hint, const K& k, M&& obj);
+    Iterator insert_or_assign(ConstIterator hint, const K& k, M&& obj);
     template <class M>
-     Iterator insert_or_assign(ConstIterator hint, K&& k, M&& obj);
+    Iterator insert_or_assign(ConstIterator hint, K&& k, M&& obj);
 #else
 #endif
 
@@ -413,7 +412,7 @@ class LP3 {
 
     size_t erase(const K& key);
     Iterator erase(ConstIterator pos);
-     Iterator erase(ConstIterator first, ConstIterator last);
+    Iterator erase(ConstIterator first, ConstIterator last);
 #if __cplusplus >= 201703L
     Iterator erase(Iterator pos);
 #else
@@ -439,7 +438,7 @@ class LP3 {
     std::pair<ConstIterator, ConstIterator> equal_range(const K& key) const;
 
     //    bucket interface
-     size_t bucket_count() const { return hash_store.size(); };
+    size_t bucket_count() const { return hash_store.size(); };
     size_t max_bucket_count() const { return max_size(); };
     size_t bucket_size(size_t n) const { return (kv_store[n].hash >= 0); };
     size_t bucket(const K& key) const { return contains_key(key).pos; };
@@ -454,8 +453,6 @@ class LP3 {
     Hash hash_function() const { return Hash{}; };
     Pred key_eq() const { return Pred{}; };
 };
-
-
 
 /**
  *
@@ -513,7 +510,6 @@ void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
 #ifndef LP3_DEF_H
 
 // helper futions defs
-
 
 // --------- private functions
 
@@ -575,18 +571,23 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
- int32_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
 {
     unsigned long size = hash_store.size();
-    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    while (hash_store[pos].hash != LP::EMPTY
-           && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
-        pos++;
-        if (pos >= size) {
-            pos -= size;
+    size_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+        for (int i = 0; i < size; i++) {
+            if (hash_store[pos].hash != LP::EMPTY
+                && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
+                pos++;
+                if (pos >= size) {
+                    pos -= size;
+                }
+            }
+            else {
+                return pos;
+            }
         }
-    }
-    return pos;
+//        return pos;
 }
 
 /**
@@ -697,8 +698,8 @@ LP3<K, V, Hash, Pred, Allocator>::LP3(const Allocator& alloc) : LP3{}
  * @param first iterator to first element you want to include
  * @param last iterator to last element of the range you want to include
  * @details
- * Constraint: `std::is_constructible<std::pair<const K,V>, typename std::iterator_traits<InputIt>::value_type>::value`
- * is true
+ * Constraint: `std::is_constructible<std::pair<const K,V>, typename
+ * std::iterator_traits<InputIt>::value_type>::value` is true
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 template <class InputIt>
@@ -805,7 +806,7 @@ LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(co
     return *this;
 }
 
-#if __cplusplus >= 201703L
+#    if __cplusplus >= 201703L
 /**
  *
  * @param other map you want to move assign
@@ -817,7 +818,7 @@ LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP
     swap(other);
     return *this;
 }
-#else
+#    else
 /**
  * @param other map you want to move assign
  * @return this with the new state
@@ -828,7 +829,7 @@ LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP
     swap(*this, other);
     return *this;
 }
-#endif
+#    endif
 /**
  * @brief copy assign from initializer list
  * @param ilist initializer list
@@ -881,7 +882,7 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
     return std::pair<Iterator, bool>(it, true);
 }
 
-#if __cplusplus >= 201703L  // if C++17+
+#    if __cplusplus >= 201703L  // if C++17+
 /**
  *
  * @param kv std::pair<K,V> rvalue reference that needs to be inserted
@@ -930,8 +931,8 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
     return it;
 }
 
-#else
-#endif
+#    else
+#    endif
 /**
  * @param hint iterator where it should be inserted to. It may be ignored.
  * @param kv std::pair<K,V> lvalue reference that needs to be inserted
@@ -1018,7 +1019,7 @@ void LP3<K, V, Hash, Pred, Allocator>::insert(std::initializer_list<Pair_elem> i
 
 // --------------------- begin insert_or_assign_overloads
 
-#if __cplusplus >= 201703L
+#    if __cplusplus >= 201703L
 /**
  *
 
@@ -1108,17 +1109,17 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
 {
     return insert_or_assign(std::forward<K>(k), std::forward<M>(obj)).first;
 }
-#else
-#endif
+#    else
+#    endif
 
 // -------------------- end insert or assign overloads
 
 /**
  * @details
- * Inserts a new element into the container constructed in-place with the given args if there is no element with the key
- * in the container. The element may be constructed even if there already is an element with the key in the container,
- * in which case the newly constructed element will be destroyed immediately. Currently, it IS always constructed
- * regardless if it exists.
+ * Inserts a new element into the container constructed in-place with the given args if there is no element with the
+ * key in the container. The element may be constructed even if there already is an element with the key in the
+ * container, in which case the newly constructed element will be destroyed immediately. Currently, it IS always
+ * constructed regardless if it exists.
  * @return  pair(iter to inserted, bool inserted)
  *
  */
@@ -1157,7 +1158,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
 /**
  * @details swap 2 hashmaps with each other
  */
-#if __cplusplus >= 201703L
+#    if __cplusplus >= 201703L
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 void LP3<K, V, Hash, Pred, Allocator>::swap(LP3& other) noexcept
 {
@@ -1171,7 +1172,7 @@ void LP3<K, V, Hash, Pred, Allocator>::swap(LP3& other) noexcept
     std::swap(kv_store, other.kv_store);
     return;
 }
-#else
+#    else
 /**
  * @brief swaps LP3 instances
  */
@@ -1188,7 +1189,7 @@ void LP3<K, V, Hash, Pred, Allocator>::swap(LP3& other)
     std::swap(kv_store, other.kv_store);
     return;
 }
-#endif
+#    endif
 
 /**
  * @brief erase elements..
@@ -1241,7 +1242,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
     return Iterator(last.slave);
 }
 
-#if __cplusplus >= 201703L
+#    if __cplusplus >= 201703L
 /**
  * @param it iterator to element that will be deleted
  * @return it++
@@ -1253,8 +1254,8 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
 {
     return erase(ConstIterator{it});
 }
-#else
-#endif
+#    else
+#    endif
 
 // -------------- begin lookups
 
@@ -1380,7 +1381,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::ConstIterator LP3<K, V, Hash, Pred, A
     return kv_store.cend();
 }
 
-#if __cplusplus >= 202002L
+#    if __cplusplus >= 202002L
 /**
  * @brief checks if key exists
  * @param key
@@ -1401,8 +1402,8 @@ bool LP3<K, V, Hash, Pred, Allocator>::contains(const K& key) const
     }
     return true;
 }
-#else
-#endif
+#    else
+#    endif
 
 /**
  *
@@ -1467,7 +1468,8 @@ void LP3<K, V, Hash, Pred, Allocator>::max_load_factor(float ml)
  * rehash the hashmap.
  * get new modulohelper thing and new array, then loop over old array
  * insert elements that aren't empty or deleted.
- * @bug it actually doesn't respect loadfactor_max, so it will definitely rehash if you try to insert n=size elements
+ * @bug it actually doesn't respect loadfactor_max, so it will definitely rehash if you try to insert n=size
+ * elements
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
@@ -1586,7 +1588,7 @@ bool operator!=(const LP3<K_, V_, Hash_, Pred_, Allocator_>& lhs, const LP3<K_, 
     return not(lhs == rhs);
 }
 
-#if __cplusplus >= 201703L
+#    if __cplusplus >= 201703L
 /**
  *
  * @param lhs one LP3 map
@@ -1599,7 +1601,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
 {
     lhs.swap(rhs);
 }
-#else
+#    else
 /**
  *
  * @param lhs one LP3 map
@@ -1613,13 +1615,12 @@ void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
 {
     lhs.swap(rhs);
 }
-#endif
+#    endif
 
-#if __cplusplus >= 202002L
+#    if __cplusplus >= 202002L
 
-#else
-#endif
+#    else
+#    endif
 
-
-#endif // LP3_DEF_H
-#endif // LP3_H
+#endif  // LP3_DEF_H
+#endif  // LP3_H
