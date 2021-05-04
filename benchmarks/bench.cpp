@@ -20,9 +20,9 @@ string choicetext
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5,6,7};
-vector<int> hashmaps = {1, 3};
-int runs = 3;
-int maxsize = 2000000;
+vector<int> hashmaps = {3,1};
+int runs = 1;
+int maxsize = 20000000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps

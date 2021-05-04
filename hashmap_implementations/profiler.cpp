@@ -2,7 +2,9 @@
 // Created by MassiveAtoms on 5/3/21.
 //
 #include "LPmap3.h"
+#include <unordered_map>
 #include <iostream>
+
 using pair = std::pair<const int, int>;
 int main(){
     unsigned int size = 200000;

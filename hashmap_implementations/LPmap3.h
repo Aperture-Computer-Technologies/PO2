@@ -214,11 +214,11 @@ class LP3 {
     std::vector<int32_t> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator> kv_store;
 
-    int32_t hasher(const K& key) const;                       // hashes key
-    void hasher_state_gen();                                  // generates randomness for hashing function
+    int32_t hasher(const K& key) const;                      // hashes key
+    void hasher_state_gen();                                 // generates randomness for hashing function
     size_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
-    void rehash(size_t size);                                 // rehashes
-    LP::Result contains_key(const K& key) const;              // prober() with extended info
+    void rehash(size_t size);                                // rehashes
+    LP::Result contains_key(const K& key) const;             // prober() with extended info
     void rehash_if_needed();
 
   public:
@@ -573,21 +573,21 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 size_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
 {
-    unsigned long size = hash_store.size();
+    int32_t size = hash_store.size();
     size_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-        for (int i = 0; i < size; i++) {
-            if (hash_store[pos].hash != LP::EMPTY
-                && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
-                pos++;
-                if (pos >= size) {
-                    pos -= size;
-                }
-            }
-            else {
-                return pos;
+    for (int i = 0; i < size; i++) {
+        if (hash_store[pos].hash != LP::EMPTY
+            && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
+            pos++;
+            if (pos >= size) {
+                pos -= size;
             }
         }
-//        return pos;
+        else {
+            return pos;
+        }
+    }
+    return pos;
 }
 
 /**
@@ -870,11 +870,11 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
     const LP3::Pair_elem& kv)
 {
     if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
-        rehash();
+        [[unlikely]] rehash();
     }
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
-        return {hash_store[pos_info.pos].pair_iter.convert(), false};
+        [[unlikely]] return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
     auto it = kv_store.insert(kv);
     hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
@@ -895,11 +895,11 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
     LP3::Pair_elem&& kv)
 {
     if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
-        rehash();
+        [[unlikely]] rehash();
     }
     auto pos_info = contains_key(kv.first);
     if (pos_info.contains) {
-        return {hash_store[pos_info.pos].pair_iter.convert(), false};
+        [[unlikely]] return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
     auto it = kv_store.insert(std::forward<Pair_elem>(kv));
     hash_store[pos_info.pos] = Bucket{pos_info.hash, it};
@@ -1273,7 +1273,7 @@ V& LP3<K, V, Hash, Pred, Allocator>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
     if (pos_info.contains) {
-        return hash_store[pos_info.pos].pair_iter->second;
+        [[likely]] return hash_store[pos_info.pos].pair_iter->second;
     }
     auto it = kv_store.insert(Pair_elem{k, V{}});
     auto pos = pos_info.pos;
@@ -1296,7 +1296,7 @@ V& LP3<K, V, Hash, Pred, Allocator>::operator[](K&& k)
 {
     auto pos_info = contains_key(k);
     if (pos_info.contains) {
-        return hash_store[pos_info.pos].pair_iter->second;
+        [[likely]] return hash_store[pos_info.pos].pair_iter->second;
     }
     auto it = kv_store.insert(Pair_elem{k, V{}});  // change back to forward later
     auto pos = pos_info.pos;
@@ -1317,7 +1317,7 @@ V& LP3<K, V, Hash, Pred, Allocator>::at(const K& k)
 {
     auto pos_info = contains_key(k);
     if (pos_info.contains) {
-        return hash_store[pos_info.pos].pair_iter->second;
+        [[likely]] return hash_store[pos_info.pos].pair_iter->second;
     }
     else {
         throw std::out_of_range("key doesn't exist");
@@ -1336,7 +1336,7 @@ const V& LP3<K, V, Hash, Pred, Allocator>::at(const K& k) const
 {
     auto pos_info = contains_key(k);
     if (pos_info.contains) {
-        return hash_store[pos_info.pos].pair_iter->second;
+        [[likely]] return hash_store[pos_info.pos].pair_iter->second;
     }
     else {
         throw std::out_of_range("key doesn't exist");
