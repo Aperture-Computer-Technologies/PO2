@@ -129,4 +129,37 @@ void string_test_aggregate(T map, int runs, int maxsize = 20000000)
     }
 }
 
+template <class T>
+void bigtype_test_aggregate(T map, int runs, int maxsize = 20000000)
+{
+    std::ofstream output{"results.csv", std::ios_base::app};
+    for (int i = 0; i < runs; ++i) {
+        string insert = "\nbigtype_insert, \"";
+        string succ_lookup = "\nbigtype_succ_lookup, \"";
+        string nosucc_lookup = "\nbigtype_nosucc_lookup, \"";
+        string delet = "\nbigtype_delete, \"";
+        string iter = "\nbigtype_iter, \"";
+
+        insert += string{name(map)} + "\"";
+        succ_lookup += string{name(map)} + "\"";
+        nosucc_lookup += string{name(map)} + "\"";
+        delet += string{name(map)} + "\"";
+        iter += string{name(map)} + "\"";
+        for (auto size : sizes) {
+            if (size > maxsize) {
+                break;
+            }
+            vector<long int> results = int_test<T>(size);
+
+            insert += ", " + std::to_string(results[0]);
+            succ_lookup += ", " + std::to_string(results[1]);
+            nosucc_lookup += ", " + std::to_string(results[2]);
+            delet += ", " + std::to_string(results[3]);
+            iter += ", " + std::to_string(results[4]);
+        }
+        output << insert << succ_lookup << nosucc_lookup << delet << iter;
+        cout << insert << succ_lookup << nosucc_lookup << delet << iter;
+    }
+}
+
 #endif
