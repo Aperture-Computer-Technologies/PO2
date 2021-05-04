@@ -4,6 +4,7 @@
 #include "./../hashmap_implementations/Nodemap.h"
 #include "./includes/3thparty/CLI11.hpp"
 #include "./includes/aggregate_tests.h"
+#include "./includes/bigtype.h"
 // include your implementations
 
 string choicetext
@@ -20,9 +21,9 @@ string choicetext
 
 // default arguments
 // vector<int> hashmaps = {1, 2,3,4, 5,6,7};
-vector<int> hashmaps = {1, 3};
-int runs = 3;
-int maxsize = 2000000;
+vector<int> hashmaps = {3,1};
+int runs = 1;
+int maxsize = 20000000;
 
 /*
 int_test_aggregate and string_test_aggregate are called for different hashmaps
@@ -47,6 +48,7 @@ int main(int argc, char **argv)
             case 1: {
                 int_test_aggregate(std::unordered_map<int, int>{}, runs, maxsize);
                 string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize);  // TODO:
+                bigtype_test_aggregate(std::unordered_map<Big,Big>{}, runs, maxsize);
                 break;
             }
                 //            case 2: {
@@ -57,6 +59,8 @@ int main(int argc, char **argv)
             case 3: {
                 int_test_aggregate(LP3<int, int>{}, runs, maxsize);
                 string_test_aggregate(LP3<string, string>{}, runs, maxsize);
+                bigtype_test_aggregate(LP3<Big,Big>{}, runs, maxsize);
+
                 break;
             }
                 //            case 4: {

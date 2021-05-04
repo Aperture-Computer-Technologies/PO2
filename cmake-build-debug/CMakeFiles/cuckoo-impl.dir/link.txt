@@ -1,1 +1,0 @@
-/usr/bin/clang++  -o3  -march=native -g   CMakeFiles/cuckoo-impl.dir/hashmap_implement/cuckoo.cpp.o  -o cuckoo-impl 
