@@ -533,6 +533,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
 {
     int32_t hash = user_hash(key);
+    return hash;
     int32_t final_hash = 0;
     int32_t pos = 0;
     for (int i = 0; i < sizeof(hash); i++) {
@@ -869,11 +870,11 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
     const LP3::Pair_elem& kv)
 {
-    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) { [[unlikely]]
         rehash();
     }
     auto pos_info = contains_key(kv.first);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[unlikely]]
         return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
     auto it = kv_store.insert(kv);
@@ -894,11 +895,11 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(
     LP3::Pair_elem&& kv)
 {
-    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
+    if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) { [[unlikely]]
         rehash();
     }
     auto pos_info = contains_key(kv.first);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[unlikely]]
         return {hash_store[pos_info.pos].pair_iter.convert(), false};
     }
     auto it = kv_store.insert(std::forward<Pair_elem>(kv));
@@ -1272,7 +1273,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 V& LP3<K, V, Hash, Pred, Allocator>::operator[](const K& k)
 {
     auto pos_info = contains_key(k);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[likely]]
         return hash_store[pos_info.pos].pair_iter->second;
     }
     auto it = kv_store.insert(Pair_elem{k, V{}});
@@ -1295,7 +1296,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 V& LP3<K, V, Hash, Pred, Allocator>::operator[](K&& k)
 {
     auto pos_info = contains_key(k);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[likely]]
         return hash_store[pos_info.pos].pair_iter->second;
     }
     auto it = kv_store.insert(Pair_elem{k, V{}});  // change back to forward later
@@ -1316,7 +1317,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 V& LP3<K, V, Hash, Pred, Allocator>::at(const K& k)
 {
     auto pos_info = contains_key(k);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[likely]]
         return hash_store[pos_info.pos].pair_iter->second;
     }
     else {
@@ -1335,7 +1336,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 const V& LP3<K, V, Hash, Pred, Allocator>::at(const K& k) const
 {
     auto pos_info = contains_key(k);
-    if (pos_info.contains) {
+    if (pos_info.contains) { [[likely]]
         return hash_store[pos_info.pos].pair_iter->second;
     }
     else {
