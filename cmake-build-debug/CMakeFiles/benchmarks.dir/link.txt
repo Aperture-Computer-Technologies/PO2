@@ -1,1 +1,0 @@
-/usr/bin/clang++  -o3  -march=native -g   CMakeFiles/benchmarks.dir/benchmarks/generator.cpp.o CMakeFiles/benchmarks.dir/benchmarks/bench.cpp.o  -o benchmarks 
