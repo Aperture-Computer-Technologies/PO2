@@ -503,8 +503,8 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs);
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
+          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs);
 #endif
 
 #ifndef LP3_DEF_H
@@ -1610,8 +1610,8 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          std::unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs)
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
+          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs)
 {
     lhs.swap(rhs);
 }
