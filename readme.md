@@ -1,5 +1,20 @@
 # PO2 thing
 
+
+## Profiling
+with perf:
+```
+sudo perf record -e cache-misses,branch-misses ./LP-profiling
+sudo report
+```
+
+with gproftools:
+```
+don't forget to link profiling to the target
+env CPUPROFILE=LP-profiling.prof ./LP-profiling 
+pprof ./LP-profiling ./LP-profiling.prof 
+```
+
 Current sprint:
 - [ ] inplementeer een hashmap met de simple api die te zien is in ./simple_api
 - [ ] implementeer/vind benchmark suite voor hashmap performance test

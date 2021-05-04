@@ -16,7 +16,7 @@ using std::string;
 template <class T>
 void prepare(T &map, int size)
 {
-    map.reserve(size);
+    map.reserve(size+10000);
 }
 
 #endif /* TESTS_H */

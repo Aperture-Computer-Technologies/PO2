@@ -38,9 +38,9 @@ key that will mark a location as empty, etc.
 
 */
 template <class T>
-vector<int> int_test(T map, int size)
+vector<long int> int_test(int size)
 {
-    vector<int> results;      // insert, lookup, unsuccesful lookup, delete times
+    vector<long int> results;      // insert, lookup, unsuccesful lookup, delete times
     vector<int> sample_keys;  // get a sample of keys to lookup and later delete, will be filled later
 
     // unsuccesful lookup keys
@@ -104,7 +104,8 @@ vector<int> int_test(T map, int size)
     // unsuccesful lookup test
     time_point<steady_clock> unlookup_start = steady_clock::now();
     for (auto key : nonkeys) {
-        if (testmap[key] == -1) cout << "WTF";
+//        if (testmap[key] == -1) cout << "WTF";
+            if (testmap.count(key)) cout << "WTF";
     }
     time_point<steady_clock> unlookup_end = steady_clock::now();
     auto unlookup_time = (duration_cast<nanoseconds>(unlookup_end - unlookup_start) - vector_acces_time) / 10000;
@@ -139,9 +140,9 @@ vector<int> int_test(T map, int size)
 // the reason it's split up in 2 functions is because we need other functions to
 // generate the keys, and unfortunately we can't overload based on return type
 template <class T>
-vector<int> string_test(T map, int size)
+vector<long int> string_test(int size)
 {
-    vector<int> results;         // insert, lookup, unsuccesful lookup, delete times
+    vector<long int> results;         // insert, lookup, unsuccesful lookup, delete times
     vector<string> sample_keys;  // get a sample of keys to lookup and later delete
 
     // unsuccesful lookup keys
@@ -168,7 +169,7 @@ vector<int> string_test(T map, int size)
 
     // testing vector access times to subtract later
     time_point<steady_clock> vector_start = steady_clock::now();
-    for (auto i : sample_keys) {
+    for (const string& i : sample_keys) {
         if (i == "") cout << "WTF";  // should never run, is here so loop doesnt get optimized away
     }
     time_point<steady_clock> vector_end = steady_clock::now();
@@ -198,7 +199,8 @@ vector<int> string_test(T map, int size)
     // unsuccesful lookup test
     time_point<steady_clock> unlookup_start = steady_clock::now();
     for (auto key : nonkeys) {
-        if (testmap[key] == "a") cout << "WTF";
+//        if (testmap[key] == "a") cout << "WTF";
+        if (testmap.count(key)) cout << "huh";
     }
     time_point<steady_clock> unlookup_end = steady_clock::now();
     auto unlookup_time = (duration_cast<nanoseconds>(unlookup_end - unlookup_start) - vector_acces_time) / 10000;
