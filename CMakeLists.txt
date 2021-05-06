@@ -65,11 +65,6 @@ add_executable(better-test
 target_link_libraries(better-test PRIVATE Catch2::Catch2)
 
 
-#add_executable(rehash_bench
-#        test/rehash_bench.cpp
-#        )
-
-
 # hashmap benchmakrs
 add_executable(benchmarks
         ./benchmarks/includes/generator.h
@@ -79,9 +74,9 @@ add_executable(benchmarks
         ./benchmarks/bench.cpp
         )
 
-#add_executable(snippet-run
-#        ./hashmap_implementations/snippet-tester.cpp
-#        )
+add_executable(snippet-run
+        ./hashmap_implementations/snippet-tester.cpp
+        )
 
 # target_link_libraries(benchmarks
 #         pthread
