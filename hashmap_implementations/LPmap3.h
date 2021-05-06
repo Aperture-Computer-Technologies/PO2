@@ -214,12 +214,19 @@ class LP3 {
     std::vector<int32_t> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator> kv_store;
 
-    int32_t hasher(const K& key) const;                      // hashes key
-    void hasher_state_gen();                                 // generates randomness for hashing function
-    size_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
-    void rehash(size_t size);                                // rehashes
-    LP::Result contains_key(const K& key) const;             // prober() with extended info
-    void rehash_if_needed();
+    void hasher_state_gen();  // generates randomness for hashing function
+    // integral type has optimisations
+    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool> = true>
+    size_t prober(Integral key, const int32_t& hash) const;  // probes where key should be at
+    template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool> = true>
+    size_t prober(const NonIntegral& key, const int32_t& hash) const;  // probes where key should be at
+    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool> = true>
+    int32_t hasher(Integral key) const;  // hashes key
+    template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool> = true>
+    int32_t hasher(const NonIntegral& key) const;  // hashes key
+
+    void rehash(size_t size);                      // rehashes
+    LP::Result contains_key(const K& key) const;   // prober() with extended info
 
   public:
     // iterators
@@ -503,8 +510,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs);
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs);
 #endif
 
 #ifndef LP3_DEF_H
@@ -529,8 +535,10 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
  * Well, if i found a way to read any supplied key as an array of chars (that's fast and properly distributed),
  * i could totally ignore the user's hashing function
  */
+
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
+template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool>>
+int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const NonIntegral& key) const
 {
     int32_t hash = user_hash(key);
     int32_t final_hash = 0;
@@ -545,6 +553,14 @@ int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
     }
     return final_hash;
 }
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool>>
+int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(Integral key) const
+{
+    return (key == LP::DELETED || key == LP::EMPTY) ? ~key : key;
+}
+
 /**
  * @brief
  * generate random values so hasher can use them
@@ -571,13 +587,35 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-size_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
+template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool>>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(const NonIntegral& key, const int32_t& hash) const
 {
     int32_t size = hash_store.size();
     size_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
     for (int i = 0; i < size; i++) {
         if (hash_store[pos].hash != LP::EMPTY
             && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
+            pos++;
+            if (pos >= size) {
+                pos -= size;
+            }
+        }
+        else {
+            return pos;
+        }
+    }
+    return pos;
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool>>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(Integral key, const int32_t& hash) const
+{
+    int32_t size = hash_store.size();
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+    pos = (pos < 0)? ~pos: pos;
+    for (int i = 0; i < size; i++) {
+        if (hash_store[pos].hash != LP::EMPTY && hash_store[pos].hash != hash) {
             pos++;
             if (pos >= size) {
                 pos -= size;
@@ -1477,11 +1515,11 @@ void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
     std::vector<Bucket> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
     for (const auto& x : hash_store) {
-        if (x.hash < 0) {
+        if (x.hash == LP::EMPTY || x.hash == LP::DELETED) {
             continue;
         }
-        //        int32_t loc = x.hash % size;
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
+        loc = (loc < 0)? ~loc: loc;
         while (arr_new[loc].hash != LP::EMPTY) {
             loc++;
             if (loc >= size) {
@@ -1610,8 +1648,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs)
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs)
 {
     lhs.swap(rhs);
 }
