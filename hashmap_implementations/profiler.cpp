@@ -9,7 +9,7 @@ using pair = std::pair<const int, int>;
 int main(){
     LP3<long, long> testo;
     testo.insert({9223372036854775707, 9223372036854775707});
-    unsigned int size = 100000;
+    unsigned int size = 10000000;
     LP3<int,int> map{size};
     for (int i = 0; i < size; i++){
         map.insert({i,i});
