@@ -805,14 +805,14 @@ int main()
             bool works = true;
             for (int i = 0; i < 999; i++) {
                 auto it = testmap.find(i);
-                auto pair = std::pair{it, ++it};
+                auto pair = std::pair<typename TestType::iterator,typename TestType::iterator>{it, ++it};
                 if (testmap.equal_range(i) != pair) {
                     works = false;
                     break;
                 }
             }
             cout << (works == true);
-            auto pair = std::pair{testmap.end(), testmap.end()};
+            auto pair = std::pair<typename TestType::iterator,typename TestType::iterator>{testmap.end(), testmap.end()};
             cout << (pair == testmap.equal_range(9000));
         }
 

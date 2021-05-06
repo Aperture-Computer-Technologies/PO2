@@ -15,6 +15,12 @@
 namespace LP {
 
     /*
+     * alias to make SFINAE a bit less verbose
+     */
+    template <bool Condition, typename T = void>
+    using enable_if_t = typename std::enable_if<Condition, T>::type;
+
+    /*
      * Randomness generator.
      */
     static std::mt19937 gener(INT32_MAX - 2020);
@@ -214,12 +220,24 @@ class LP3 {
     std::vector<int32_t> random_state;  // random bits used for hashing
     plf::colony<Pair_elem, Allocator> kv_store;
 
-    int32_t hasher(const K& key) const;                      // hashes key
-    void hasher_state_gen();                                 // generates randomness for hashing function
-    size_t prober(const K& key, const int32_t& hash) const;  // probes where key should be at
-    void rehash(size_t size);                                // rehashes
-    LP::Result contains_key(const K& key) const;             // prober() with extended info
-    void rehash_if_needed();
+    void hasher_state_gen();  // generates randomness for hashing function
+    // prober and hasher function overloads, using SFINAE to distingguish between
+    // integral types smaller equal than 4 bytes, other integral types, and non integral types
+    template <typename ShortIntegral,
+              LP::enable_if_t<std::is_integral<ShortIntegral>{} && sizeof(ShortIntegral) <= 4, bool> = true>
+    size_t prober(ShortIntegral key, const int32_t& hash) const;  // <=4bit integral types
+    template <typename LongIntegral,
+              LP::enable_if_t<(std::is_integral<LongIntegral>{} && sizeof(LongIntegral) > 4), bool> = true>
+    size_t prober(LongIntegral key, const int32_t& hash) const;  // >4bit integral types
+    template <typename NonIntegral, LP::enable_if_t<!std::is_integral<NonIntegral>{}, bool> = true>
+    size_t prober(const NonIntegral& key, const int32_t& hash) const;  // other types
+    template <typename Integral, LP::enable_if_t<std::is_integral<Integral>{}, bool> = true>
+    int32_t hasher(Integral key) const;  // hashes key for integral type
+    template <typename NonIntegral, LP::enable_if_t<!std::is_integral<NonIntegral>{}, bool> = true>
+    int32_t hasher(const NonIntegral& key) const;  // hashes key for non integral type
+
+    void rehash(size_t size);                     // rehashes
+    LP::Result contains_key(const K& key) const;  // prober() with extended info
 
   public:
     // iterators
@@ -320,7 +338,7 @@ class LP3 {
     ConstIterator cbegin() const { return ConstIterator(kv_store.cbegin()); };
     ConstIterator cend() const { return ConstIterator(kv_store.cend()); };
 
-    // some required typedefs
+    // some required typedefs so STL can get additional info
     using value_type = Pair_elem;
     using reference = value_type&;
     using const_reference = const value_type&;
@@ -336,9 +354,9 @@ class LP3 {
     LP3(size_t size, const Allocator& alloc);
     LP3(size_t size, const Hash& hash, const Allocator& alloc);
     explicit LP3(const Allocator& alloc);
-    template <class InputIt>
+    template <class InputIt=Iterator>
     LP3(InputIt first, InputIt last);
-    template <class InputIt>
+    template <class InputIt=Iterator>
     LP3(InputIt first, InputIt last, size_t size);
     LP3(const LP3& other);  // copy constructor
     LP3(LP3&& other);       // move constructor
@@ -370,9 +388,11 @@ class LP3 {
     // insertion overloads.
     std::pair<Iterator, bool> insert(const Pair_elem& value);  // copy
     Iterator insert(ConstIterator hint, const Pair_elem& kv);  // copy
-    template <class P>
+    template <typename P,
+              LP::enable_if_t<(std::is_constructible<Pair_elem, P>{} && !std::is_same<P, Pair_elem>{}), bool> = true>
     std::pair<Iterator, bool> insert(P&& value);  // delegate to move insert
-    template <class P>
+    template <typename P,
+              LP::enable_if_t<(std::is_constructible<Pair_elem, P>{} && !std::is_same<P, Pair_elem>{}), bool> = true>
     Iterator insert(ConstIterator hint, P&& value);
     /* TODO: the above are meant to eliminate a move/copy. instead of convert, copy/move, it should do convert only
      * atm, they don't do that, but they do correctly insert
@@ -503,8 +523,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs);
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs);
 #endif
 
 #ifndef LP3_DEF_H
@@ -529,8 +548,10 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
  * Well, if i found a way to read any supplied key as an array of chars (that's fast and properly distributed),
  * i could totally ignore the user's hashing function
  */
+
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
+template <typename NonIntegral, LP::enable_if_t<!std::is_integral<NonIntegral>{}, bool>>
+int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const NonIntegral& key) const
 {
     int32_t hash = user_hash(key);
     int32_t final_hash = 0;
@@ -545,6 +566,14 @@ int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const K& key) const
     }
     return final_hash;
 }
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <typename Integral, LP::enable_if_t<std::is_integral<Integral>{}, bool>>
+int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(Integral key) const
+{
+    return (key == LP::DELETED || key == LP::EMPTY) ? ~key : key;
+}
+
 /**
  * @brief
  * generate random values so hasher can use them
@@ -569,15 +598,62 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * 1. hash = empty
  * 2. same key.
  * it returns the position where the element is, or should be inserted.
+ * uses SFINAE overloads for generi K type, short integral type, and long integral type
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-size_t LP3<K, V, Hash, Pred, Allocator>::prober(const K& key, const int32_t& hash) const
+template <typename NonIntegral, LP::enable_if_t<!std::is_integral<NonIntegral>{}, bool>>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(const NonIntegral& key, const int32_t& hash) const
 {
     int32_t size = hash_store.size();
     size_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
     for (int i = 0; i < size; i++) {
         if (hash_store[pos].hash != LP::EMPTY
             && (hash_store[pos].hash != hash || not is_equal(hash_store[pos].pair_iter->first, key))) {
+            pos++;
+            if (pos >= size) {
+                pos -= size;
+            }
+        }
+        else {
+            return pos;
+        }
+    }
+    return pos;
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+// template <typename Integral, LP::enable_if_t<std::is_integral<Integral>{}, bool>>
+template <typename ShortIntegral,
+          LP::enable_if_t<std::is_integral<ShortIntegral>{} && sizeof(ShortIntegral) <= 4, bool>>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(ShortIntegral key, const int32_t& hash) const
+{
+    int32_t size = hash_store.size();
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+    pos = (pos < 0) ? ~pos : pos;
+    for (int i = 0; i < size; i++) {
+        if (hash_store[pos].hash != LP::EMPTY && hash_store[pos].hash != hash) {
+            pos++;
+            if (pos >= size) {
+                pos -= size;
+            }
+        }
+        else {
+            return pos;
+        }
+    }
+    return pos;
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <typename LongIntegral, LP::enable_if_t<(std::is_integral<LongIntegral>{} && sizeof(LongIntegral) > 4), bool>>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(LongIntegral key, const int32_t& hash) const
+{
+    int32_t size = hash_store.size();
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+    pos = (pos < 0) ? ~pos : pos;
+    for (int i = 0; i < size; i++) {
+        if (hash_store[pos].hash != LP::EMPTY
+            && (hash_store[pos].hash != hash || hash_store[pos].pair_iter->first != key)) {
             pos++;
             if (pos >= size) {
                 pos -= size;
@@ -705,7 +781,7 @@ template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 template <class InputIt>
 LP3<K, V, Hash, Pred, Allocator>::LP3(InputIt first, InputIt last) : LP3{LP3<K, V>(std::distance(first, last))}
 {
-    static_assert(std::is_constructible<Pair_elem, typename std::iterator_traits<InputIt>::value_type>::value,
+    static_assert(std::is_constructible<Pair_elem, typename std::iterator_traits<InputIt>::value_type>{},
                   "Iterator's value_type must be able to construct a pair<const K, V>");
     while (first != last) {
         insert(*first++);
@@ -723,7 +799,7 @@ template <class InputIt>
 LP3<K, V, Hash, Pred, Allocator>::LP3(InputIt first, InputIt last, size_t size)
     : LP3{LP3<K, V>(std::max((size_t)std::distance(first, last), (size_t)size))}
 {
-    static_assert(std::is_constructible<Pair_elem, typename std::iterator_traits<InputIt>::value_type>::value,
+    static_assert(std::is_constructible<Pair_elem, typename std::iterator_traits<InputIt>::value_type>{},
                   "Iterator's value_type must be able to construct a pair<const K, V>");
     while (first != last) {
         insert(*first++);
@@ -826,7 +902,8 @@ LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP3&& other)
 {
-    swap(*this, other);
+    //    using namespace std;
+    swap(other);
     return *this;
 }
 #    endif
@@ -955,11 +1032,12 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
  * @return pair<iterator, bool is inserted>
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <class P>
+template <typename P,
+          LP::enable_if_t<
+              (std::is_constructible<std::pair<const K, V>, P>{} && !std::is_same<P, std::pair<const K, V>>{}), bool>>
 std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, Hash, Pred, Allocator>::insert(P&& value)
 {
-    static_assert(std::is_constructible<Pair_elem, P>::value);
-    return insert(std::forward<Pair_elem>(Pair_elem{value}));
+    return insert(Pair_elem{value});
 }
 
 /**
@@ -970,11 +1048,12 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
  * @return iterator to inserted or existing element
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <class P>
+template <typename P,
+          LP::enable_if_t<
+              (std::is_constructible<std::pair<const K, V>, P>{} && !std::is_same<P, std::pair<const K, V>>{}), bool>>
 typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Allocator>::insert(ConstIterator hint,
                                                                                              P&& value)
 {
-    static_assert(std::is_constructible<Pair_elem, P>::value);
     if (((inserted_n + 1) / (float)hash_store.size()) > lf_max) {
         rehash();
     }
@@ -1131,7 +1210,7 @@ std::pair<typename LP3<K, V, Hash, Pred, Allocator>::Iterator, bool> LP3<K, V, H
     //    TODO: remove the guaranteed instantiation, use
     //    http://ldionne.com/2015/11/29/efficient-parameter-pack-indexing/
     std::pair<Args...> temp{args...};
-    bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>::value;
+    bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>{};
     assert(constructible);
     return insert(std::forward<Pair_elem>(temp));
 }
@@ -1150,7 +1229,7 @@ typename LP3<K, V, Hash, Pred, Allocator>::Iterator LP3<K, V, Hash, Pred, Alloca
     //    TODO: remove the guaranteed instantiation, use
     //    http://ldionne.com/2015/11/29/efficient-parameter-pack-indexing/
     std::pair<Args...> temp{args...};
-    bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>::value;
+    bool constructible = std::is_constructible<Pair_elem, std::pair<Args...>>{};
     assert(constructible);
     return insert(std::forward<Pair_elem>(temp)).first;
 }
@@ -1477,11 +1556,11 @@ void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
     std::vector<Bucket> arr_new(size);
     uint64_t helper = fastmod::computeM_s32(size);
     for (const auto& x : hash_store) {
-        if (x.hash < 0) {
+        if (x.hash == LP::EMPTY || x.hash == LP::DELETED) {
             continue;
         }
-        //        int32_t loc = x.hash % size;
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
+        loc = (loc < 0) ? ~loc : loc;
         while (arr_new[loc].hash != LP::EMPTY) {
             loc++;
             if (loc >= size) {
@@ -1610,8 +1689,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  * swaps the maps by calling lhs.swap(rhs)
  */
 template <class Key, class T, class Hash, class KeyEqual, class Alloc>
-void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs,
-          LP3<Key, T, Hash, KeyEqual, Alloc>& rhs)
+void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, Alloc>& rhs)
 {
     lhs.swap(rhs);
 }
