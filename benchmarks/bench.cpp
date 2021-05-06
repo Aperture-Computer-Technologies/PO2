@@ -48,7 +48,7 @@ int main(int argc, char **argv)
             case 1: {
                 int_test_aggregate(std::unordered_map<int, int>{}, runs, maxsize);
                 string_test_aggregate(std::unordered_map<string, string>{}, runs, maxsize);  // TODO:
-                bigtype_test_aggregate(std::unordered_map<Big,Big>{}, runs, maxsize);
+//                bigtype_test_aggregate(std::unordered_map<Big,Big>{}, runs, maxsize);
                 break;
             }
                 //            case 2: {
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
             case 3: {
                 int_test_aggregate(LP3<int, int>{}, runs, maxsize);
                 string_test_aggregate(LP3<string, string>{}, runs, maxsize);
-                bigtype_test_aggregate(LP3<Big,Big>{}, runs, maxsize);
+//                bigtype_test_aggregate(LP3<Big,Big>{}, runs, maxsize);
 
                 break;
             }
