@@ -14,6 +14,18 @@
 
 namespace LP {
 
+//    /*
+//     * Custom type trait to check if short integral type
+//     */
+//    template <typename T, typename = void>
+//    struct is_small_integral : std::false_type {
+//    };
+//
+//    template <typename T>
+//    struct is_small_integral<T, typename std::enable_if<(sizeof(T) <= 4) && std::is_integral<T>::value>::type>
+//        : std::true_type {
+//    };
+
     /*
      * Randomness generator.
      */
@@ -216,17 +228,20 @@ class LP3 {
 
     void hasher_state_gen();  // generates randomness for hashing function
     // integral type has optimisations
-    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool> = true>
-    size_t prober(Integral key, const int32_t& hash) const;  // probes where key should be at
-    template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool> = true>
+    template <typename ShortIntegral, typename std::enable_if<std::is_integral<ShortIntegral>::value && sizeof(ShortIntegral)<= 4, bool>::type = true>
+    size_t prober(ShortIntegral key, const int32_t& hash) const;  // probes where key should be at
+    template <typename LongIntegral, typename std::enable_if<(std::is_integral<LongIntegral>::value && sizeof(LongIntegral) >4), bool>::type = true>
+    size_t prober(LongIntegral key, const int32_t& hash) const;  // probes where key should be at
+
+    template <typename NonIntegral, typename std::enable_if<!std::is_integral<NonIntegral>::value, bool>::type = true>
     size_t prober(const NonIntegral& key, const int32_t& hash) const;  // probes where key should be at
-    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool> = true>
+    template <typename Integral, typename std::enable_if<std::is_integral<Integral>::value, bool>::type = true>
     int32_t hasher(Integral key) const;  // hashes key
-    template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool> = true>
+    template <typename NonIntegral, typename std::enable_if<!std::is_integral<NonIntegral>::value, bool>::type = true>
     int32_t hasher(const NonIntegral& key) const;  // hashes key
 
-    void rehash(size_t size);                      // rehashes
-    LP::Result contains_key(const K& key) const;   // prober() with extended info
+    void rehash(size_t size);                     // rehashes
+    LP::Result contains_key(const K& key) const;  // prober() with extended info
 
   public:
     // iterators
@@ -537,7 +552,7 @@ void swap(LP3<Key, T, Hash, KeyEqual, Alloc>& lhs, LP3<Key, T, Hash, KeyEqual, A
  */
 
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool>>
+template <typename NonIntegral, typename std::enable_if<!std::is_integral<NonIntegral>::value, bool>::type>
 int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const NonIntegral& key) const
 {
     int32_t hash = user_hash(key);
@@ -555,7 +570,7 @@ int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(const NonIntegral& key) const
 }
 
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool>>
+template <typename Integral, typename std::enable_if<std::is_integral<Integral>::value, bool>::type>
 int32_t LP3<K, V, Hash, Pred, Allocator>::hasher(Integral key) const
 {
     return (key == LP::DELETED || key == LP::EMPTY) ? ~key : key;
@@ -587,7 +602,7 @@ void LP3<K, V, Hash, Pred, Allocator>::hasher_state_gen()
  * it returns the position where the element is, or should be inserted.
  */
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <typename NonIntegral, std::enable_if_t<!std::is_integral<NonIntegral>::value, bool>>
+template <typename NonIntegral, typename std::enable_if<!std::is_integral<NonIntegral>::value, bool>::type>
 size_t LP3<K, V, Hash, Pred, Allocator>::prober(const NonIntegral& key, const int32_t& hash) const
 {
     int32_t size = hash_store.size();
@@ -608,14 +623,36 @@ size_t LP3<K, V, Hash, Pred, Allocator>::prober(const NonIntegral& key, const in
 }
 
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
-template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, bool>>
-size_t LP3<K, V, Hash, Pred, Allocator>::prober(Integral key, const int32_t& hash) const
+//template <typename Integral, typename std::enable_if<std::is_integral<Integral>::value, bool>::type>
+template <typename ShortIntegral, typename std::enable_if<std::is_integral<ShortIntegral>::value && sizeof(ShortIntegral)<= 4, bool>::type>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(ShortIntegral key, const int32_t& hash) const
 {
     int32_t size = hash_store.size();
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
-    pos = (pos < 0)? ~pos: pos;
+    pos = (pos < 0) ? ~pos : pos;
     for (int i = 0; i < size; i++) {
         if (hash_store[pos].hash != LP::EMPTY && hash_store[pos].hash != hash) {
+            pos++;
+            if (pos >= size) {
+                pos -= size;
+            }
+        }
+        else {
+            return pos;
+        }
+    }
+    return pos;
+}
+
+template <typename K, typename V, typename Hash, typename Pred, class Allocator>
+template <typename LongIntegral, typename std::enable_if<(std::is_integral<LongIntegral>::value && sizeof(LongIntegral) >4), bool>::type>
+size_t LP3<K, V, Hash, Pred, Allocator>::prober(LongIntegral key, const int32_t& hash) const
+{
+    int32_t size = hash_store.size();
+    int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
+    pos = (pos < 0) ? ~pos : pos;
+    for (int i = 0; i < size; i++) {
+        if (hash_store[pos].hash != LP::EMPTY && (hash_store[pos].hash != hash || hash_store[pos].pair_iter->first != key)) {
             pos++;
             if (pos >= size) {
                 pos -= size;
@@ -864,7 +901,8 @@ LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
 LP3<K, V, Hash, Pred, Allocator>& LP3<K, V, Hash, Pred, Allocator>::operator=(LP3&& other)
 {
-    swap(*this, other);
+//    using namespace std;
+    swap( other);
     return *this;
 }
 #    endif
@@ -1519,7 +1557,7 @@ void LP3<K, V, Hash, Pred, Allocator>::rehash(size_t size)
             continue;
         }
         int32_t loc = fastmod::fastmod_s32(x.hash, helper, size);
-        loc = (loc < 0)? ~loc: loc;
+        loc = (loc < 0) ? ~loc : loc;
         while (arr_new[loc].hash != LP::EMPTY) {
             loc++;
             if (loc >= size) {
