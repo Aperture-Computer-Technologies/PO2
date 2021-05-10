@@ -354,9 +354,9 @@ class LP3 {
     LP3(size_t size, const Allocator& alloc);
     LP3(size_t size, const Hash& hash, const Allocator& alloc);
     explicit LP3(const Allocator& alloc);
-    template <class InputIt=Iterator>
+    template <class InputIt = Iterator>
     LP3(InputIt first, InputIt last);
-    template <class InputIt=Iterator>
+    template <class InputIt = Iterator>
     LP3(InputIt first, InputIt last, size_t size);
     LP3(const LP3& other);  // copy constructor
     LP3(LP3&& other);       // move constructor
@@ -630,6 +630,22 @@ size_t LP3<K, V, Hash, Pred, Allocator>::prober(ShortIntegral key, const int32_t
     int32_t size = hash_store.size();
     int32_t pos = fastmod::fastmod_s32(hash, modulo_help, size);
     pos = (pos < 0) ? ~pos : pos;
+    // hash = ~key if hash = deleted or empty, meaning that ~DEL or ~EMPTY hashes have a collision chance
+    if (hash == ~LP::DELETED || hash == ~LP::EMPTY) { [[unlikely]]
+        for (int i = 0; i < size; i++) {
+            if (hash_store[pos].hash != LP::EMPTY
+                && (hash_store[pos].hash != hash || hash_store[pos].pair_iter->first != key)) {
+                pos++;
+                if (pos >= size) {
+                    pos -= size;
+                }
+            }
+            else {
+                return pos;
+            }
+        }
+    }
+    // most cases
     for (int i = 0; i < size; i++) {
         if (hash_store[pos].hash != LP::EMPTY && hash_store[pos].hash != hash) {
             pos++;
@@ -641,7 +657,7 @@ size_t LP3<K, V, Hash, Pred, Allocator>::prober(ShortIntegral key, const int32_t
             return pos;
         }
     }
-    return pos;
+    return pos;  // will never hit, just removing compiler warning
 }
 
 template <typename K, typename V, typename Hash, typename Pred, class Allocator>
